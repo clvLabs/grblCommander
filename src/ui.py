@@ -91,6 +91,28 @@ def log(message,*pargs, **kargs):
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def logBlock(message,*pargs, **kargs):
+  verboseStr = 'BASIC'
+  caller = None
+  color = None
+
+  if( "verbose" in kargs ):   verboseStr = kargs.pop("verbose")
+  if( "v" in kargs ):         verboseStr = kargs.pop("v")
+
+  if( "caller" in kargs ):    caller = kargs.pop("caller")
+  if( "k" in kargs ):         caller = kargs.pop("k")
+
+  if( "color" in kargs ):     color = kargs.pop("color")
+  if( "c" in kargs ):         color = kargs.pop("c")
+
+  log("", k=caller, v=verboseStr, c=color)
+  log(gMSG_SEPARATOR, k=caller, v=verboseStr, c=color)
+  log(message, k=caller, v=verboseStr, c=color)
+  log(gMSG_SEPARATOR, k=caller, v=verboseStr, c=color)
+  log("", k=caller, v=verboseStr, c=color)
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showReadyMsg(caller=None):
   _k = 'ui.showReadyMsg()'
   # log("[ Entering ]", k=_k, v='DEBUG')

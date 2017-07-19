@@ -62,14 +62,11 @@ def showStatus():
   _k = 'mch.showStatus()'
   ui.log("[ Entering ]", k=_k, v='DEBUG')
 
-  ui.log("", k=_k, v='BASIC')
-  ui.log(ui.gMSG_SEPARATOR, k=_k, v='BASIC')
-  ui.log("", k=_k, v='BASIC')
-  ui.log("Current status:", k=_k, v='BASIC')
-  ui.log("", k=_k, v='BASIC')
+  ui.logBlock(
+"""
+Current status:
 
-  ui.log(
-"""  Software XYZ:
+  Software XYZ:
     [X=%.3f Y=%.3f Z=%.3f]
 
   Machine XYZ:
@@ -80,17 +77,14 @@ def showStatus():
     RapidIncrement_Z  = %.2f
     SafeHeight        = %.2f
     TableSize%%        = %d%%
-    VerboseLevel      = %d/%d (%s)"""
-        % (  tbl.getX(), tbl.getY(), tbl.getZ(),
-          getMachineStatus(),
-          tbl.getRI_XY(), tbl.getRI_Z(),
-          tbl.getSafeHeight(), tbl.getTableSizePercent(),
-          ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
-        , k=_k, v='BASIC' )
-
-  ui.log("", k=_k, v='BASIC')
-  ui.log(ui.gMSG_SEPARATOR, k=_k, v='BASIC')
-  ui.log("", k=_k, v='BASIC')
+    VerboseLevel      = %d/%d (%s)
+"""
+    % (  tbl.getX(), tbl.getY(), tbl.getZ(),
+      getMachineStatus(),
+      tbl.getRI_XY(), tbl.getRI_Z(),
+      tbl.getSafeHeight(), tbl.getTableSizePercent(),
+      ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
+    , k=_k, v='BASIC' )
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
