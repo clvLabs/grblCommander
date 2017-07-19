@@ -105,11 +105,13 @@ def logBlock(message,*pargs, **kargs):
   if( "color" in kargs ):     color = kargs.pop("color")
   if( "c" in kargs ):         color = kargs.pop("c")
 
-  log("", k=caller, v=verboseStr, c=color)
-  log(gMSG_SEPARATOR, k=caller, v=verboseStr, c=color)
-  log(message, k=caller, v=verboseStr, c=color)
-  log(gMSG_SEPARATOR, k=caller, v=verboseStr, c=color)
-  log("", k=caller, v=verboseStr, c=color)
+  log(
+"""
+{0}
+{1}
+{2}
+""".format(gMSG_SEPARATOR, message, gMSG_SEPARATOR)
+    , k=caller, v=verboseStr, c=color)
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -124,15 +126,16 @@ def showReadyMsg(caller=None):
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def keyPressMessage(msg, key, char):
+def keyPressMessage(message, key, char):
   _k = 'ui.keyPressMessage()'
   # log("[ Entering ]", k=_k, v='DEBUG')
 
-  log("", k=_k, v='WARNING')
-  log(gMSG_SEPARATOR, k=_k, v='WARNING')
-  log(msg, k=_k, v='WARNING')
-  log("", k=_k, v='WARNING')
-
+  log(
+"""
+{0}
+{1}
+""".format(gMSG_SEPARATOR, message)
+    , k=_k, v='WARNING')
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def clearScreen():
