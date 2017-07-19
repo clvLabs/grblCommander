@@ -108,7 +108,7 @@ def waitForMachineIdle(verbose='WARNING'):
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def feedAbsolute(x=None, y=None, z=None, speed=gDEFAULT_FEED_SPEED, v='WARNING'):
+def feedAbsolute(x=None, y=None, z=None, speed=gDEFAULT_FEED_SPEED, verbose='WARNING'):
   _k = 'mch.feedAbsolute()'
   ui.log("[ Entering ]", k=_k, v='DEBUG')
 
@@ -142,9 +142,9 @@ def feedAbsolute(x=None, y=None, z=None, speed=gDEFAULT_FEED_SPEED, v='WARNING')
   cmd = cmd.rstrip()
 
   ui.log("Sending command [%s]..." % repr(cmd), k=_k, v='DETAIL')
-  sp.sendSerialCommand(cmd, v=verbose)
-  waitForMachineIdle(v=verbose)
-  tbl.showCurrPos(v=verbose)
+  sp.sendSerialCommand(cmd, verbose=verbose)
+  waitForMachineIdle(verbose=verbose)
+  tbl.showCurrPos(verbose=verbose)
   return
 
 

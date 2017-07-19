@@ -164,7 +164,7 @@ def manualContactTest():
 
   while(not exit):
     z -= 0.1
-    ui.log("[%d] Seeking CONTACT point (Z=%.3f)\r" % (curIteration+1,z), end='', k=_k, v='BASIC')
+    ui.log("Seeking CONTACT point (Z=%.3f)\r" % (z,), end='', k=_k, v='BASIC')
 
     mch.feedAbsolute(z=z, verbose='NONE')
 
@@ -195,7 +195,7 @@ def manualContactTest():
 
     while(not exit):
       z += 0.025
-      ui.log("[%d] Seeking RELEASE point (Z=%.3f)\r" % (curIteration+1,z), end='', k=_k, v='BASIC')
+      ui.log("Seeking RELEASE point (Z=%.3f)\r" % (z,), end='', k=_k, v='BASIC')
 
       mch.feedAbsolute(z=z, verbose='NONE')
 
