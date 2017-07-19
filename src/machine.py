@@ -8,10 +8,10 @@ Machine (CNC) related code
 
 import time
 
-import utils as ut
-import interface as ui
-import serialport as sp
-import table as tbl
+from . import utils as ut
+from . import ui as ui
+from . import serialport as sp
+from . import table as tbl
 
 gDEFAULT_SEEK_SPEED = 2000
 gDEFAULT_FEED_SPEED = 50
@@ -53,6 +53,41 @@ def getMachineStatus():
 		ui.debugLog("TIMEOUT Waiting for machine status", caller='getMachineStatus()', verbose='WARNING')
 
 	return responseArray[0]
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def showStatus():
+	ui.debugLog("[ Entering showStatus() ]", caller='showStatus()', verbose='DEBUG')
+
+	ui.debugLog("", caller='showStatus()', verbose='BASIC')
+	ui.debugLog(ui.gMSG_SEPARATOR, caller='showStatus()', verbose='BASIC')
+	ui.debugLog("", caller='showStatus()', verbose='BASIC')
+	ui.debugLog("Current status:", caller='showStatus()', verbose='BASIC')
+	ui.debugLog("", caller='showStatus()', verbose='BASIC')
+
+	ui.debugLog(
+"""  Software XYZ:
+    [X=%.3f Y=%.3f Z=%.3f]
+
+  Machine XYZ:
+    %s
+
+  Software config:
+    RapidIncrement_XY = %.2f
+    RapidIncrement_Z  = %.2f
+    SafeHeight        = %.2f
+    TableSize%%        = %d%%
+    VerboseLevel      = %d/%d (%s)"""
+				% (	tbl.getX(), tbl.getY(), tbl.getZ(),
+					getMachineStatus(),
+					tbl.getRI_XY(), tbl.getRI_Z(),
+					tbl.getSafeHeight(), tbl.getTableSizePercent(),
+					ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
+				, caller='showStatus()', verbose='BASIC' )
+
+	ui.debugLog("", caller='showStatus()', verbose='BASIC')
+	ui.debugLog(ui.gMSG_SEPARATOR, caller='showStatus()', verbose='BASIC')
+	ui.debugLog("", caller='showStatus()', verbose='BASIC')
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

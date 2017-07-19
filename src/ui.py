@@ -6,11 +6,6 @@ User interface management
 """
 #print("***[IMPORTING]*** grblCommander - interface")
 
-import table as tbl
-import machine as mch
-import interface as ui
-
-
 # Verbose level
 gVerboseLevels = [ 'NONE', 'BASIC', 'ERROR', 'WARNING', 'DETAIL', 'SUPER', 'DEBUG' ]
 gMIN_VERBOSE_LEVEL = gVerboseLevels.index('BASIC')
@@ -93,44 +88,9 @@ def debugLog(message,*pargs, **kargs):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showReadyMsg(caller=None):
 	if(caller is None):
-		ui.debugLog(ui.gREADY_MSG, caller='showReadyMsg()', verbose='BASIC')
+		debugLog(gREADY_MSG, caller='showReadyMsg()', verbose='BASIC')
 	else:
-		ui.debugLog(ui.gREADY_MSG, caller=caller, verbose='BASIC')
-
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def showStatus():
-	debugLog("[ Entering showStatus() ]", caller='showStatus()', verbose='DEBUG')
-
-	debugLog("", caller='showStatus()', verbose='BASIC')
-	debugLog(gMSG_SEPARATOR, caller='showStatus()', verbose='BASIC')
-	debugLog("", caller='showStatus()', verbose='BASIC')
-	debugLog("Current status:", caller='showStatus()', verbose='BASIC')
-	debugLog("", caller='showStatus()', verbose='BASIC')
-
-	debugLog(
-"""  Software XYZ:
-    [X=%.3f Y=%.3f Z=%.3f]
-
-  Machine XYZ:
-    %s
-
-  Software config:
-    RapidIncrement_XY = %.2f
-    RapidIncrement_Z  = %.2f
-    SafeHeight        = %.2f
-    TableSize%%        = %d%%
-    VerboseLevel      = %d/%d (%s)"""
-				% (	tbl.getX(), tbl.getY(), tbl.getZ(),
-					mch.getMachineStatus(),
-					tbl.getRI_XY(), tbl.getRI_Z(),
-					tbl.getSafeHeight(), tbl.getTableSizePercent(),
-					getVerboseLevel(), gMAX_VERBOSE_LEVEL, getVerboseLevelStr())
-				, caller='showStatus()', verbose='BASIC' )
-
-	debugLog("", caller='showStatus()', verbose='BASIC')
-	debugLog(gMSG_SEPARATOR, caller='showStatus()', verbose='BASIC')
-	debugLog("", caller='showStatus()', verbose='BASIC')
+		debugLog(gREADY_MSG, caller=caller, verbose='BASIC')
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

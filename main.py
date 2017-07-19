@@ -15,13 +15,13 @@ PENDING
 import sys
 import time
 
-import utils as ut
-import interface as ui
-import keyboard as kb
-import serialport as sp
-import machine as mch
-import table as tbl
-import test as test
+import src.utils as ut
+import src.ui as ui
+import src.keyboard as kb
+import src.serialport as sp
+import src.machine as mch
+import src.table as tbl
+import src.test as test
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -119,7 +119,7 @@ def processUserInput():
 
 		elif(char in 'sS'):
 			ui.keyPressMessage("sS - Show current status", key, char)
-			ui.showStatus()
+			mch.showStatus()
 
 		elif(char in 'rR'):
 			ui.keyPressMessage("rR - Reset serial connection", key, char)
@@ -294,7 +294,7 @@ def main():
 
 	showHelp()
 
-	ui.showStatus()
+	mch.showStatus()
 
 	ui.showReadyMsg(caller='main()')
 

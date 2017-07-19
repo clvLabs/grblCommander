@@ -6,7 +6,7 @@ Table boundaries management
 """
 #print("***[IMPORTING]*** grblCommander - table")
 
-import interface as ui
+from . import ui as ui
 
 # Current coordinates
 gX = 0

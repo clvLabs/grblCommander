@@ -7,9 +7,8 @@ Keyboard management
 #print("***[IMPORTING]*** grblCommander - keyboard")
 
 import time
-import kbhit
-
-import utils as ut
+from . import kbhit
+from . import utils as ut
 
 if(ut.isWindows()):		import msvcrt
 if(not ut.isWindows()):	import getch

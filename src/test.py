@@ -9,15 +9,15 @@ Test code
 import sys
 import time
 
-import utils as ut
-import interface as ui
-import table as tbl
-import machine as mch
-import serialport as sp
-import keyboard as kb
+from . import utils as ut
+from . import ui as ui
+from . import table as tbl
+from . import machine as mch
+from . import serialport as sp
+from . import keyboard as kb
 
 if(not ut.isWindows()):
-	import rpigpio as gpio
+	from . import rpigpio as gpio
 	gpio.setup()
 
 

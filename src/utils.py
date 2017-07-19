@@ -7,13 +7,11 @@ Programming utilities
 #print("***[IMPORTING]*** grblCommander - utils")
 
 import sys
-
+from . import ui as ui
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def isWindows():
 	return( 'win' in sys.platform )
-
-import interface as ui
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def genericValueChanger(value, direction, min, max, loop=False, valueName="", valueFormatter=None):

@@ -9,9 +9,8 @@ Serial port management
 import time
 import serial
 
-import utils as ut
-import interface as ui
-import machine as mch
+from . import utils as ut
+from . import ui as ui
 
 # Serial port
 gSerial = serial.Serial()
