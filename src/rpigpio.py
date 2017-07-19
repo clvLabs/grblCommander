@@ -18,41 +18,41 @@ BTN = 12
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def setup():
-	#Setup the wiring
-	GPIO.setmode(GPIO.BOARD)
-	#Setup Ports
-	GPIO.setup(BTN,GPIO.IN,pull_up_down=GPIO.PUD_UP)
+  #Setup the wiring
+  GPIO.setmode(GPIO.BOARD)
+  #Setup Ports
+  GPIO.setup(BTN,GPIO.IN,pull_up_down=GPIO.PUD_UP)
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def isContactActive():
-	return(not GPIO.input(BTN))
+  return(not GPIO.input(BTN))
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if __name__ == '__main__':
 
-	def main():
-		setup()
-		count=0
-		btn_closed = True
-		while True:
-			btn_val = GPIO.input(BTN)
-			if btn_val and btn_closed:
-				print("OPEN")
-				btn_closed=False
-			elif btn_val==False and btn_closed==False:
-				count+=1
-				print("CLOSE %s" % count)
-				#os.system("flite -t '%s'" % count)
-				btn_closed=True
-			time.sleep(0.1)
+  def main():
+    setup()
+    count=0
+    btn_closed = True
+    while True:
+      btn_val = GPIO.input(BTN)
+      if btn_val and btn_closed:
+        print("OPEN")
+        btn_closed=False
+      elif btn_val==False and btn_closed==False:
+        count+=1
+        print("CLOSE %s" % count)
+        #os.system("flite -t '%s'" % count)
+        btn_closed=True
+      time.sleep(0.1)
 
-	try:
-		main()
-	finally:
-		GPIO.cleanup()
-		print("Closed Everything. END")
-	#End
+  try:
+    main()
+  finally:
+    GPIO.cleanup()
+    print("Closed Everything. END")
+  #End
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
