@@ -23,6 +23,8 @@ import src.machine as mch
 import src.table as tbl
 import src.test as test
 
+# Current version
+gVERSION = '0.2.0'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showHelp():
@@ -280,7 +282,7 @@ def main():
 
 	ui.debugLog("", caller='main()', verbose='BASIC')
 	ui.debugLog(ui.gMSG_SEPARATOR, caller='main()', verbose='BASIC')
-	ui.debugLog("    grblCommander v1.0b", caller='main()', verbose='BASIC')
+	ui.debugLog("    grblCommander v{0}".format(gVERSION), caller='main()', verbose='BASIC')
 	ui.debugLog(ui.gMSG_SEPARATOR, caller='main()', verbose='BASIC')
 	ui.debugLog("", caller='main()', verbose='BASIC')
 
