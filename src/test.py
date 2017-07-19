@@ -23,13 +23,14 @@ if(not ut.isWindows()):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def automaticContactTest(iterations = 3):
-  ui.debugLog("[ Entering automaticContactTest() ]", caller='automaticContactTest()', verbose='DEBUG')
+  _k = 'test.automaticContactTest()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   if(ut.isWindows()):
-    ui.debugLog("ERROR: Automatic contact test not available under Windows", caller='automaticContactTest()', verbose='BASIC')
+    ui.log("ERROR: Automatic contact test not available under Windows", k=_k, v='BASIC')
     return False
 
-  ui.debugLog("Saving original Z", caller='automaticContactTest()', verbose='DETAIL')
+  ui.log("Saving original Z", k=_k, v='DETAIL')
   savedZ = tbl.getZ()
 
   downStep = 0.1
@@ -38,24 +39,24 @@ def automaticContactTest(iterations = 3):
   nextStartPoint = 0
   touchZ = 0
 
-  ui.debugLog("Starting contact test (%d iterations)..." % iterations, caller='automaticContactTest()', verbose='BASIC')
+  ui.log("Starting contact test (%d iterations)..." % iterations, k=_k, v='BASIC')
 
   for curIteration in range(iterations):
 
     # Prepare Z position
-    ui.debugLog("Moving to Z to last known touch point +1 step to start test...", caller='automaticContactTest()', verbose='DETAIL')
-    mch.feedAbsolute(z=nextStartPoint, speed=mch.gDEFAULT_SEEK_SPEED, verbose='NONE')
+    ui.log("Moving to Z to last known touch point +1 step to start test...", k=_k, v='DETAIL')
+    mch.feedAbsolute(z=nextStartPoint, speed=mch.gDEFAULT_SEEK_SPEED, v='NONE')
 
     # Step down until contact
     exit = False
     testCancelled = False
     z = tbl.getZ()
 
-    ui.debugLog("---[Iteration %d]-----------------------" % (curIteration+1,), caller='automaticContactTest()', verbose='BASIC')
+    ui.log("---[Iteration %d]-----------------------" % (curIteration+1,), k=_k, v='BASIC')
     while(not exit):
-      ui.debugLog("Seeking CONTACT point (Z=%.3f)\r" % (z,), end='', caller='automaticContactTest()', verbose='BASIC')
+      ui.log("Seeking CONTACT point (Z=%.3f)\r" % (z,), end='', k=_k, v='BASIC')
 
-      mch.feedAbsolute(z=z, verbose='NONE')
+      mch.feedAbsolute(z=z, v='NONE')
 
       if(kb.keyPressed()):
         key=kb.readKey()
@@ -66,7 +67,7 @@ def automaticContactTest(iterations = 3):
           break
 
       if(gpio.isContactActive()):
-        ui.debugLog("", caller='automaticContactTest()', verbose='BASIC')
+        ui.log("", k=_k, v='BASIC')
         exit = True
         touchZ = z
         nextStartPoint = touchZ+downStep
@@ -83,9 +84,9 @@ def automaticContactTest(iterations = 3):
 
       while(not exit):
         z += upStep
-        ui.debugLog("Seeking RELEASE point (Z=%.3f)\r" % (z,), end='', caller='automaticContactTest()', verbose='BASIC')
+        ui.log("Seeking RELEASE point (Z=%.3f)\r" % (z,), end='', k=_k, v='BASIC')
 
-        mch.feedAbsolute(z=z, verbose='NONE')
+        mch.feedAbsolute(z=z, v='NONE')
 
         if(kb.keyPressed()):
           key=kb.readKey()
@@ -96,8 +97,8 @@ def automaticContactTest(iterations = 3):
             break
 
         if(not gpio.isContactActive()):
-          ui.debugLog("", caller='automaticContactTest()', verbose='BASIC')
-          ui.debugLog("*** TOUCH POINT at Z=%.3f ***" % (lastZ,), caller='automaticContactTest()', verbose='BASIC')
+          ui.log("", k=_k, v='BASIC')
+          ui.log("*** TOUCH POINT at Z=%.3f ***" % (lastZ,), k=_k, v='BASIC')
           exit = True
           touchZ = lastZ
           break
@@ -106,16 +107,16 @@ def automaticContactTest(iterations = 3):
 
       touchZList.append(touchZ)
 
-    ui.debugLog("---------------------------------------", caller='automaticContactTest()', verbose='BASIC')
+    ui.log("---------------------------------------", k=_k, v='BASIC')
 
   if(testCancelled):
-    ui.debugLog("", caller='automaticContactTest()', verbose='BASIC')
-    ui.debugLog("*"*40, caller='automaticContactTest()', verbose='BASIC')
-    ui.debugLog("POINT CONTACT TEST CANCELLED", caller='automaticContactTest()', verbose='BASIC')
-    ui.debugLog("*"*40, caller='automaticContactTest()', verbose='BASIC')
+    ui.log("", k=_k, v='BASIC')
+    ui.log("*"*40, k=_k, v='BASIC')
+    ui.log("POINT CONTACT TEST CANCELLED", k=_k, v='BASIC')
+    ui.log("*"*40, k=_k, v='BASIC')
 
-  ui.debugLog("Restoring original Z...", caller='automaticContactTest()', verbose='DETAIL')
-  mch.safeRapidAbsolute(z=savedZ, verbose='NONE')
+  ui.log("Restoring original Z...", k=_k, v='DETAIL')
+  mch.safeRapidAbsolute(z=savedZ, v='NONE')
 
   averageTouchZ = float(sum(touchZList))/len(touchZList) if len(touchZList) > 0 else 0
 
@@ -129,15 +130,15 @@ def automaticContactTest(iterations = 3):
 
   maxDevTouchZ = maxTouchZ - minTouchZ
 
-  ui.debugLog(  "RESULTS:", caller='automaticContactTest()', verbose='BASIC')
-  ui.debugLog(  "--------", caller='automaticContactTest()', verbose='BASIC')
-  ui.debugLog(  "- TOUCH POINTS at Z=%s" % (touchZList,), caller='automaticContactTest()', verbose='BASIC')
-  ui.debugLog(  "- Average=%.3f - Min=%.3f - Max=%.3f - MaxDev=%.3f"
+  ui.log(  "RESULTS:", k=_k, v='BASIC')
+  ui.log(  "--------", k=_k, v='BASIC')
+  ui.log(  "- TOUCH POINTS at Z=%s" % (touchZList,), k=_k, v='BASIC')
+  ui.log(  "- Average=%.3f - Min=%.3f - Max=%.3f - MaxDev=%.3f"
           % (  averageTouchZ
             , minTouchZ
             , maxTouchZ
             , maxDevTouchZ)
-          , caller='automaticContactTest()', verbose='BASIC')
+          , k=_k, v='BASIC')
 
   if(testCancelled):  return False
   else:        return { 'z':averageTouchZ, 'iter':iterations, 'max':maxTouchZ, 'min':minTouchZ, 'dev':maxDevTouchZ }
@@ -145,14 +146,15 @@ def automaticContactTest(iterations = 3):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def manualContactTest():
-  ui.debugLog("[ Entering manualContactTest() ]", caller='manualContactTest()', verbose='DEBUG')
+  _k = 'test.manualContactTest()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
-  ui.debugLog("Saving original Z", caller='manualContactTest()', verbose='DETAIL')
+  ui.log("Saving original Z", k=_k, v='DETAIL')
   savedZ = tbl.getZ()
-  ui.debugLog("Moving to Z0 to start test...", caller='manualContactTest()', verbose='DETAIL')
-  mch.safeRapidAbsolute(z=0, verbose='NONE')
+  ui.log("Moving to Z0 to start test...", k=_k, v='DETAIL')
+  mch.safeRapidAbsolute(z=0, v='NONE')
 
-  ui.debugLog("Starting contact test...", caller='manualContactTest()', verbose='BASIC')
+  ui.log("Starting contact test...", k=_k, v='BASIC')
 
   # 0.1 step down until contact
   exit = False
@@ -162,11 +164,11 @@ def manualContactTest():
 
   while(not exit):
     z -= 0.1
-    ui.debugLog("[%d] Seeking CONTACT point (Z=%.3f)\r" % (curIteration+1,z), end='', caller='manualContactTest()', verbose='BASIC')
+    ui.log("[%d] Seeking CONTACT point (Z=%.3f)\r" % (curIteration+1,z), end='', k=_k, v='BASIC')
 
-    mch.feedAbsolute(z=z, verbose='NONE')
+    mch.feedAbsolute(z=z, v='NONE')
 
-    ui.debugLog("<ENTER>:stop / <SPACE>:continue / <ESC>:exit ...", caller='manualContactTest()', verbose='BASIC')
+    ui.log("<ENTER>:stop / <SPACE>:continue / <ESC>:exit ...", k=_k, v='BASIC')
     key=0
     while( key != 13 and key != 10 and key != 32 and key != 27 ):
       key=kb.readKey()
@@ -176,7 +178,7 @@ def manualContactTest():
       testCancelled = True
       break
     elif( key == 13 or key == 10 ):  # <ENTER>
-      ui.debugLog("Stopping at Z=%.3f" % z, caller='manualContactTest()', verbose='BASIC')
+      ui.log("Stopping at Z=%.3f" % z, k=_k, v='BASIC')
       exit = True
       touchZ = z
       break
@@ -193,12 +195,12 @@ def manualContactTest():
 
     while(not exit):
       z += 0.025
-      ui.debugLog("[%d] Seeking RELEASE point (Z=%.3f)\r" % (curIteration+1,z), end='', caller='manualContactTest()', verbose='BASIC')
+      ui.log("[%d] Seeking RELEASE point (Z=%.3f)\r" % (curIteration+1,z), end='', k=_k, v='BASIC')
 
-      mch.feedAbsolute(z=z, verbose='NONE')
+      mch.feedAbsolute(z=z, v='NONE')
 
-      ui.debugLog("PHASE2 : Seeking RELEASE point", caller='manualContactTest()', verbose='BASIC')
-      ui.debugLog("<ENTER>:stop / <SPACE>:continue / <ESC>:exit ...", caller='manualContactTest()', verbose='BASIC')
+      ui.log("PHASE2 : Seeking RELEASE point", k=_k, v='BASIC')
+      ui.log("<ENTER>:stop / <SPACE>:continue / <ESC>:exit ...", k=_k, v='BASIC')
       key=0
       while( key != 13 and key != 10 and key != 32 and key != 27 ):
         key=kb.readKey()
@@ -208,7 +210,7 @@ def manualContactTest():
         testCancelled = True
         break
       elif( key == 13 or key == 10 ):  # <ENTER>
-        ui.debugLog("TOUCH POINT at Z=%.3f" % lastZ, caller='manualContactTest()', verbose='BASIC')
+        ui.log("TOUCH POINT at Z=%.3f" % lastZ, k=_k, v='BASIC')
         exit = True
         touchZ = lastZ
         break
@@ -221,11 +223,11 @@ def manualContactTest():
       lastZ = z
 
   if(testCancelled):
-    ui.debugLog("*"*40, caller='manualContactTest()', verbose='BASIC')
-    ui.debugLog("POINT CONTACT TEST CANCELLED", caller='manualContactTest()', verbose='BASIC')
-    ui.debugLog("*"*40, caller='manualContactTest()', verbose='BASIC')
+    ui.log("*"*40, k=_k, v='BASIC')
+    ui.log("POINT CONTACT TEST CANCELLED", k=_k, v='BASIC')
+    ui.log("*"*40, k=_k, v='BASIC')
 
-  ui.debugLog("Restoring original Z...", caller='manualContactTest()', verbose='DETAIL')
+  ui.log("Restoring original Z...", k=_k, v='DETAIL')
   mch.safeRapidAbsolute(z=savedZ)
 
   if(testCancelled):  return False
@@ -234,25 +236,26 @@ def manualContactTest():
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def gridContactTest():
-  ui.debugLog("[ Entering gridContactTest() ]", caller='gridContactTest()', verbose='DEBUG')
+  _k = 'test.gridContactTest()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
-  ui.debugLog("Enter number of (inner) lines...", caller='gridContactTest()', verbose='BASIC')
+  ui.log("Enter number of (inner) lines...", k=_k, v='BASIC')
   userLines=input("[0-n]\n")
 
   if(not userLines.isnumeric()):
-    ui.debugLog("Invalid number of lines", caller='gridContactTest()', verbose='BASIC')
+    ui.log("Invalid number of lines", k=_k, v='BASIC')
     return
 
   gridLines = int(userLines) + 2
 
   result = [[None for i in range(gridLines)] for j in range(gridLines)]
 
-  ui.debugLog("Saving original XYZ", caller='gridContactTest()', verbose='DETAIL')
+  ui.log("Saving original XYZ", k=_k, v='DETAIL')
   savedX, savedY, savedZ = tbl.getX(), tbl.getY(), tbl.getZ()
 
   if(tbl.getZ() < tbl.getSafeHeight()):
-    ui.debugLog("Temporarily moving to safe Z...", caller='gridContactTest()', verbose='DETAIL')
-    mch.rapidAbsolute(z=tbl.getSafeHeight(), verbose='NONE')
+    ui.log("Temporarily moving to safe Z...", k=_k, v='DETAIL')
+    mch.rapidAbsolute(z=tbl.getSafeHeight(), v='NONE')
 
   gridIncrementX = tbl.getMaxX() / (gridLines-1)
   gridIncrementY = tbl.getMaxY() / (gridLines-1)
@@ -260,18 +263,18 @@ def gridContactTest():
   gridX = [gridIncrementX * pos for pos in range(gridLines)]
   gridY = [gridIncrementY * pos for pos in range(gridLines)]
 
-  ui.debugLog("tbl.getMaxX() = [%.3f]" % (tbl.getMaxX(),), caller='gridContactTest()', verbose='DEBUG')
-  ui.debugLog("tbl.getMaxY() = [%.3f]" % (tbl.getMaxY(),), caller='gridContactTest()', verbose='DEBUG')
-  ui.debugLog("gridIncrementX = [%.3f]" % (gridIncrementX,), caller='gridContactTest()', verbose='DEBUG')
-  ui.debugLog("gridIncrementY = [%.3f]" % (gridIncrementY,), caller='gridContactTest()', verbose='DEBUG')
-  ui.debugLog("gridX = [%s]" % (repr(gridX),), caller='gridContactTest()', verbose='DEBUG')
-  ui.debugLog("gridY = [%s]" % (repr(gridY),), caller='gridContactTest()', verbose='DEBUG')
+  ui.log("tbl.getMaxX() = [%.3f]" % (tbl.getMaxX(),), k=_k, v='DEBUG')
+  ui.log("tbl.getMaxY() = [%.3f]" % (tbl.getMaxY(),), k=_k, v='DEBUG')
+  ui.log("gridIncrementX = [%.3f]" % (gridIncrementX,), k=_k, v='DEBUG')
+  ui.log("gridIncrementY = [%.3f]" % (gridIncrementY,), k=_k, v='DEBUG')
+  ui.log("gridX = [%s]" % (repr(gridX),), k=_k, v='DEBUG')
+  ui.log("gridY = [%s]" % (repr(gridY),), k=_k, v='DEBUG')
 
-  ui.debugLog(  "Starting test (%d*%d lines / %d points)..."
+  ui.log(  "Starting test (%d*%d lines / %d points)..."
         %  ( gridLines
           , gridLines
           , gridLines*gridLines )
-        , caller='gridContactTest()', verbose='BASIC')
+        , k=_k, v='BASIC')
 
   testCancelled = False
   curGridPoint = 0
@@ -283,19 +286,19 @@ def gridContactTest():
     else:          rangeX = range(len(gridX)-1,-1,-1)
 
     for indexX in rangeX:
-      ui.debugLog("*"*40, caller='gridContactTest()', verbose='BASIC')
-      ui.debugLog(  "Testing[%d][%d] Y=%.3f X=%.3f (%d/%d)..."
+      ui.log("*"*40, k=_k, v='BASIC')
+      ui.log(  "Testing[%d][%d] Y=%.3f X=%.3f (%d/%d)..."
             %  ( indexY
               , indexX
               , gridY[indexY]
               , gridX[indexX]
               , curGridPoint+1
               , gridLines*gridLines )
-            , caller='gridContactTest()', verbose='BASIC')
-      ui.debugLog("*"*40, caller='gridContactTest()', verbose='BASIC')
+            , k=_k, v='BASIC')
+      ui.log("*"*40, k=_k, v='BASIC')
 
-      ui.debugLog("mch.rapidAbsolute(Y=%.3f X=%.3f)..." % (gridY[indexY],gridX[indexX],), caller='gridContactTest()', verbose='DEBUG')
-      mch.rapidAbsolute(y=gridY[indexY], x=gridX[indexX], verbose='NONE')
+      ui.log("mch.rapidAbsolute(Y=%.3f X=%.3f)..." % (gridY[indexY],gridX[indexX],), k=_k, v='DEBUG')
+      mch.rapidAbsolute(y=gridY[indexY], x=gridX[indexX], v='NONE')
 
       if kb.keyPressed():
         if(kb.readKey() == 27):    # <ESC>
@@ -319,24 +322,24 @@ def gridContactTest():
     if(testCancelled): break
 
   if(testCancelled):
-    ui.debugLog("*"*40, caller='gridContactTest()', verbose='BASIC')
-    ui.debugLog("GRID CONTACT TEST CANCELLED", caller='gridContactTest()', verbose='BASIC')
-    ui.debugLog("*"*40, caller='gridContactTest()', verbose='BASIC')
+    ui.log("*"*40, k=_k, v='BASIC')
+    ui.log("GRID CONTACT TEST CANCELLED", k=_k, v='BASIC')
+    ui.log("*"*40, k=_k, v='BASIC')
     if(tbl.getZ() < tbl.getSafeHeight()):
-      ui.debugLog("Temporarily moving to safe Z...", caller='gridContactTest()', verbose='DETAIL')
-      mch.rapidAbsolute(z=tbl.getSafeHeight(), verbose='NONE')
-    ui.debugLog("Restoring original XYZ...", caller='gridContactTest()', verbose='DETAIL')
-    mch.safeRapidAbsolute(x=savedX, y=savedY, verbose='NONE')
-    mch.safeRapidAbsolute(z=savedZ, verbose='NONE')
+      ui.log("Temporarily moving to safe Z...", k=_k, v='DETAIL')
+      mch.rapidAbsolute(z=tbl.getSafeHeight(), v='NONE')
+    ui.log("Restoring original XYZ...", k=_k, v='DETAIL')
+    mch.safeRapidAbsolute(x=savedX, y=savedY, v='NONE')
+    mch.safeRapidAbsolute(z=savedZ, v='NONE')
     return
   else:
-    ui.debugLog("*"*40, caller='gridContactTest()', verbose='BASIC')
-    ui.debugLog("Test finished.", caller='gridContactTest()', verbose='BASIC')
-    ui.debugLog("*"*40, caller='gridContactTest()', verbose='BASIC')
+    ui.log("*"*40, k=_k, v='BASIC')
+    ui.log("Test finished.", k=_k, v='BASIC')
+    ui.log("*"*40, k=_k, v='BASIC')
 
   # Test results - normal
-  ui.debugLog("*"*40, caller='gridContactTest()', verbose='BASIC')
-  ui.debugLog("Test tesults (normalized) = ", caller='gridContactTest()', verbose='BASIC')
+  ui.log("*"*40, k=_k, v='BASIC')
+  ui.log("Test tesults (normalized) = ", k=_k, v='BASIC')
 
   rangeY = range(len(gridY))
   rangeX = range(len(gridX))
@@ -344,21 +347,21 @@ def gridContactTest():
   for indexY in rangeY:
     for indexX in rangeX:
       if(result[indexY][indexX] is None):
-        ui.debugLog(  "Y[%02d][%07.3f] X[%02d][%07.3f] Z[ERROR]"
+        ui.log(  "Y[%02d][%07.3f] X[%02d][%07.3f] Z[ERROR]"
               %  (  indexY
                 , 0.0
                 , indexX
                 , 0.0 )
-              , caller='gridContactTest()', verbose='BASIC')
+              , k=_k, v='BASIC')
       else:
-        ui.debugLog(  "Y[%02d][%07.3f] X[%02d][%07.3f] Z[%07.3f]-dev[%07.3f]"
+        ui.log(  "Y[%02d][%07.3f] X[%02d][%07.3f] Z[%07.3f]-dev[%07.3f]"
               % (  indexY
                 , result[indexY][indexX]['Y']
                 , indexX
                 , result[indexY][indexX]['X']
                 , (result[indexY][indexX]['Z'] - result[0][0]['Z'])
                 , result[indexY][indexX]['Zdev'] )
-              , caller='gridContactTest()', verbose='BASIC')
+              , k=_k, v='BASIC')
 
 
   # Test results - Excel formatted
@@ -465,13 +468,13 @@ def gridContactTest():
 
   outFile.close()
 
-  ui.debugLog("", caller='gridContactTest()', verbose='BASIC')
-  ui.debugLog("Excel version saved to %s" % fileName, caller='gridContactTest()', verbose='BASIC')
-  ui.debugLog("*"*40, caller='gridContactTest()', verbose='BASIC')
+  ui.log("", k=_k, v='BASIC')
+  ui.log("Excel version saved to %s" % fileName, k=_k, v='BASIC')
+  ui.log("*"*40, k=_k, v='BASIC')
 
-  ui.debugLog("Restoring original XYZ...", caller='gridContactTest()', verbose='BASIC')
-  mch.safeRapidAbsolute(x=savedX, y=savedY, verbose='NONE')
-  mch.safeRapidAbsolute(z=savedZ, verbose='NONE')
+  ui.log("Restoring original XYZ...", k=_k, v='BASIC')
+  mch.safeRapidAbsolute(x=savedX, y=savedY, v='NONE')
+  mch.safeRapidAbsolute(z=savedZ, v='NONE')
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

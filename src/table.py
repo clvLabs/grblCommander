@@ -94,7 +94,8 @@ def setSafeHeight(height):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def changeRI_XY(direction):
-  ui.debugLog("[ Entering changeRI_XY() ]", caller='changeRI_XY()', verbose='DEBUG')
+  _k = 'tbl.changeRI_XY()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   newRI = 0
   increment = 0
@@ -120,21 +121,22 @@ def changeRI_XY(direction):
   newRI = gRI_XY + increment
 
   if( newRI < gMIN_RI_XY ):
-    ui.debugLog( "ERROR: RI_XY below %.3f not allowed!" % gMIN_RI_XY , caller='changeRI_XY()', verbose='BASIC')
+    ui.log( "ERROR: RI_XY below %.3f not allowed!" % gMIN_RI_XY , k=_k, v='BASIC')
     return
 
   if( newRI > gMAX_RI_XY ):
-    ui.debugLog( "ERROR: RI_XY over %.3f not allowed!" % gMAX_RI_XY , caller='changeRI_XY()', verbose='BASIC')
+    ui.log( "ERROR: RI_XY over %.3f not allowed!" % gMAX_RI_XY , k=_k, v='BASIC')
     return
 
   setRI_XY(newRI)
-  ui.debugLog("New Rapid Increment (XY): %.3f" % newRI, caller='changeRI_XY()', verbose='BASIC')
+  ui.log("New Rapid Increment (XY): %.3f" % newRI, k=_k, v='BASIC')
   return
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def changeRI_Z(direction):
-  ui.debugLog("[ Entering changeRI_Z() ]", caller='changeRI_Z()', verbose='DEBUG')
+  _k = 'tbl.changeRI_Z()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   newRI = 0
   increment = 0
@@ -156,163 +158,172 @@ def changeRI_Z(direction):
   newRI = gRI_Z + increment
 
   if( newRI < gMIN_RI_Z ):
-    ui.debugLog( "ERROR: RI_Z below %.3f not allowed!" % gMIN_RI_Z , caller='changeRI_Z()', verbose='BASIC')
+    ui.log( "ERROR: RI_Z below %.3f not allowed!" % gMIN_RI_Z , k=_k, v='BASIC')
     return
 
   if( newRI > gMAX_RI_Z ):
-    ui.debugLog( "ERROR: RI_Z over %.3f not allowed!" % gMAX_RI_Z , caller='changeRI_Z()', verbose='BASIC')
+    ui.log( "ERROR: RI_Z over %.3f not allowed!" % gMAX_RI_Z , k=_k, v='BASIC')
     return
 
   setRI_Z(newRI)
-  ui.debugLog("New Rapid Increment (Z): %.3f" % newRI, caller='changeRI_Z()', verbose='BASIC')
+  ui.log("New Rapid Increment (Z): %.3f" % newRI, k=_k, v='BASIC')
   return
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showCurrPos(verbose='WARNING'):
-  ui.debugLog("[ Entering showCurrPos() ]", caller='showCurrPos()', verbose='DEBUG')
+  _k = 'tbl.showCurrPos()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
-  ui.debugLog("[X=%.3f Y=%.3f Z=%.3f]" % (getX(), getY(), getZ()), caller='showCurrPos()', verbose=verbose)
+  ui.log("[X=%.3f Y=%.3f Z=%.3f]" % (getX(), getY(), getZ()), k=_k, v=verbose)
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def checkAbsoluteXYZ(x=None, y=None, z=None):
-  ui.debugLog("[ Entering checkAbsoluteXYZ() ]", caller='checkAbsoluteXYZ()', verbose='DEBUG')
+  _k = 'tbl.checkAbsoluteXYZ()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
-  ui.debugLog("Calculating result...", caller='checkAbsoluteXYZ()', verbose='DEBUG')
+  ui.log("Calculating result...", k=_k, v='DEBUG')
   result = (checkAbsoluteX(x) and checkAbsoluteY(y) and checkAbsoluteZ(z))
 
-  ui.debugLog(  "checkAbsoluteXYZ() - Absolute coordinates are %s"
+  ui.log(  "checkAbsoluteXYZ() - Absolute coordinates are %s"
         % ("OK" if result else "WRONG")
-        , caller='checkAbsoluteXYZ()', verbose='DEBUG')
+        , k=_k, v='DEBUG')
   return(result)
 
 
 def checkAbsoluteX(x=None):
-  ui.debugLog("[ Entering checkAbsoluteX() ]", caller='checkAbsoluteX()', verbose='DEBUG')
+  _k = 'tbl.checkAbsoluteX()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   if(x is None):
-    ui.debugLog("Empty value", caller='checkAbsoluteX()', verbose='DEBUG')
+    ui.log("Empty value", k=_k, v='DEBUG')
     return True
   elif(x < getMinX()):
-    ui.debugLog("ERROR: X below %.3f not allowed!" % getMinX(), caller='checkAbsoluteX()', verbose='ERROR')
+    ui.log("ERROR: X below %.3f not allowed!" % getMinX(), k=_k, v='ERROR')
     return False
 
   elif(x > getMaxX()):
-    ui.debugLog("ERROR: X over %.3f not allowed!" % getMaxX(), caller='checkAbsoluteX()', verbose='ERROR')
+    ui.log("ERROR: X over %.3f not allowed!" % getMaxX(), k=_k, v='ERROR')
     return False
 
-  ui.debugLog("Absolute value is OK", caller='checkAbsoluteX()', verbose='DEBUG')
+  ui.log("Absolute value is OK", k=_k, v='DEBUG')
   return True
 
 
 def checkAbsoluteY(y=None):
-  ui.debugLog("[ Entering checkAbsoluteY() ]", caller='checkAbsoluteY()', verbose='DEBUG')
+  _k = 'tbl.checkAbsoluteY()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   if(y is None):
-    ui.debugLog("Empty value is OK", caller='checkAbsoluteY()', verbose='DEBUG')
+    ui.log("Empty value is OK", k=_k, v='DEBUG')
     return True
 
   elif(y < getMinY()):
-    ui.debugLog("ERROR: Y below %.3f not allowed!" % getMinY(), caller='checkAbsoluteY()', verbose='ERROR')
+    ui.log("ERROR: Y below %.3f not allowed!" % getMinY(), k=_k, v='ERROR')
     return False
 
   elif(y > getMaxY()):
-    ui.debugLog("ERROR: Y over %.3f not allowed!" % getMaxY(), caller='checkAbsoluteY()', verbose='ERROR')
+    ui.log("ERROR: Y over %.3f not allowed!" % getMaxY(), k=_k, v='ERROR')
     return False
 
-  ui.debugLog("Absolute value is OK", caller='checkAbsoluteY()', verbose='DEBUG')
+  ui.log("Absolute value is OK", k=_k, v='DEBUG')
   return True
 
 
 def checkAbsoluteZ(z=None):
-  ui.debugLog("[ Entering checkAbsoluteZ() ]", caller='checkAbsoluteZ()', verbose='DEBUG')
+  _k = 'tbl.checkAbsoluteZ()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   if(z is None):
-    ui.debugLog("Empty value is OK", caller='checkAbsoluteZ()', verbose='DEBUG')
+    ui.log("Empty value is OK", k=_k, v='DEBUG')
     return True
 
   elif(z < getMinZ()):
-    ui.debugLog("ERROR: Z below %.3f not allowed!" % getMinZ(), caller='checkAbsoluteZ()', verbose='ERROR')
+    ui.log("ERROR: Z below %.3f not allowed!" % getMinZ(), k=_k, v='ERROR')
     return False
 
   elif(z > getMaxZ()):
-    ui.debugLog("ERROR: Z over %.3f not allowed!" % getMaxZ(), caller='checkAbsoluteZ()', verbose='ERROR')
+    ui.log("ERROR: Z over %.3f not allowed!" % getMaxZ(), k=_k, v='ERROR')
     return False
 
-  ui.debugLog("Absolute value is OK", caller='checkAbsoluteZ()', verbose='DEBUG')
+  ui.log("Absolute value is OK", k=_k, v='DEBUG')
   return True
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def checkRelativeXYZ(x=None, y=None, z=None):
-  ui.debugLog("[ Entering checkRelativeXYZ() ]", caller='checkRelativeXYZ()', verbose='DEBUG')
+  _k = 'tbl.checkRelativeXYZ()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   result = (checkRelativeX(x) or checkRelativeY(y) or checkRelativeZ(z))
 
-  ui.debugLog(  "Relative coordinates are %s"
+  ui.log(  "Relative coordinates are %s"
 
         % ("OK" if result else "WRONG")
-        , caller='checkRelativeXYZ()', verbose='DEBUG')
+        , k=_k, v='DEBUG')
   return(result)
 
 
 def checkRelativeX(x=None):
-  ui.debugLog("[ Entering checkRelativeX() ]", caller='checkRelativeX()', verbose='DEBUG')
+  _k = 'tbl.checkRelativeX()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   if(not x):  # No X provided or X==0
-    ui.debugLog("Empty or 0 means no change", caller='checkRelativeX()', verbose='DEBUG')
+    ui.log("Empty or 0 means no change", k=_k, v='DEBUG')
     return False
 
   elif(x>0):  # Up
     if(getX()==getMaxX()):
-      ui.debugLog("X is already at MAX_X (%.3f)" % getMaxX(), caller='checkRelativeX()', verbose='ERROR')
+      ui.log("X is already at MAX_X (%.3f)" % getMaxX(), k=_k, v='ERROR')
       return False
   else:    # Down
     if(getX()==getMinX()):
-      ui.debugLog("X is already at MIN_X (%.3f)" % getMinX(), caller='checkRelativeX()', verbose='ERROR')
+      ui.log("X is already at MIN_X (%.3f)" % getMinX(), k=_k, v='ERROR')
       return False
 
-  ui.debugLog("Relative value means change", caller='checkRelativeX()', verbose='DEBUG')
+  ui.log("Relative value means change", k=_k, v='DEBUG')
   return True
 
 
 def checkRelativeY(y=None):
-  ui.debugLog("[ Entering checkRelativeY() ]", caller='checkRelativeY()', verbose='DEBUG')
+  _k = 'tbl.checkRelativeY()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   if(not y):  # No Y provided or Y==0
-    ui.debugLog("Empty or 0 means no change", caller='checkRelativeY()', verbose='DEBUG')
+    ui.log("Empty or 0 means no change", k=_k, v='DEBUG')
     return False
 
   elif(y>0):  # Up
     if(getY()==getMaxY()):
-      ui.debugLog("Y is already at MAX_Y (%.3f)" % getMaxY(), caller='checkRelativeY()', verbose='ERROR')
+      ui.log("Y is already at MAX_Y (%.3f)" % getMaxY(), k=_k, v='ERROR')
       return False
   else:    # Down
     if(getY()==getMinY()):
-      ui.debugLog("Y is already at MIN_Y (%.3f)" % getMinY(), caller='checkRelativeY()', verbose='ERROR')
+      ui.log("Y is already at MIN_Y (%.3f)" % getMinY(), k=_k, v='ERROR')
       return False
 
-  ui.debugLog("Relative value means change", caller='checkRelativeY()', verbose='DEBUG')
+  ui.log("Relative value means change", k=_k, v='DEBUG')
   return True
 
 
 def checkRelativeZ(z=None):
-  ui.debugLog("[ Entering checkRelativeZ() ]", caller='checkRelativeZ()', verbose='DEBUG')
+  _k = 'tbl.checkRelativeZ()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   if(not z):  # No Z provided or Z==0
-    ui.debugLog("Empty or 0 means no change", caller='checkRelativeZ()', verbose='DEBUG')
+    ui.log("Empty or 0 means no change", k=_k, v='DEBUG')
     return False
 
   elif(z>0):  # Up
     if(getZ()==getMaxZ()):
-      ui.debugLog("Z is already at MAX_Z (%.3f)" % getMaxZ(), caller='checkRelativeZ()', verbose='ERROR')
+      ui.log("Z is already at MAX_Z (%.3f)" % getMaxZ(), k=_k, v='ERROR')
       return False
   else:    # Down
     if(getZ()==getMinZ()):
-      ui.debugLog("Z is already at MIN_Z (%.3f)" % getMinZ(), caller='checkRelativeZ()', verbose='ERROR')
+      ui.log("Z is already at MIN_Z (%.3f)" % getMinZ(), k=_k, v='ERROR')
       return False
 
-  ui.debugLog("Relative value means change", caller='checkRelativeZ()', verbose='DEBUG')
+  ui.log("Relative value means change", k=_k, v='DEBUG')
   return True
 

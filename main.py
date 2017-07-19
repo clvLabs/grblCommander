@@ -28,42 +28,44 @@ gVERSION = '0.2.0'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showHelp():
-  ui.debugLog("[ Entering showHelp() ]", caller='showHelp()', verbose='DEBUG')
+  _k = 'main.showHelp()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
-  ui.debugLog(""                                                            , caller='showHelp()', verbose='BASIC')
-  ui.debugLog(ui.gMSG_SEPARATOR                                             , caller='showHelp()', verbose='BASIC')
-  ui.debugLog(""                                                            , caller='showHelp()', verbose='BASIC')
-  ui.debugLog("Available commands:"                                         , caller='showHelp()', verbose='BASIC')
-  ui.debugLog(""                                                            , caller='showHelp()', verbose='BASIC')
-  ui.debugLog("qQ             - Exit"                                       , caller='showHelp()', verbose='BASIC')
-  ui.debugLog("hH?            - Show this help text"                        , caller='showHelp()', verbose='BASIC')
-  ui.debugLog("sS             - Show current status"                        , caller='showHelp()', verbose='BASIC')
-  ui.debugLog("rR             - Reset serial connection"                    , caller='showHelp()', verbose='BASIC')
-  ui.debugLog(""                                                            , caller='showHelp()', verbose='BASIC')
-  ui.debugLog("gG             - Send raw GCode command"                     , caller='showHelp()', verbose='BASIC')
-  ui.debugLog("cC             - Clear screen"                               , caller='showHelp()', verbose='BASIC')
-  ui.debugLog(""                                                            , caller='showHelp()', verbose='BASIC')
-  ui.debugLog("<numpad>       - Safe relative rapid (including diagonals)"  , caller='showHelp()', verbose='BASIC')
-  ui.debugLog("<numpad>0      - Safe go to X0Y0Z0"                          , caller='showHelp()', verbose='BASIC')
-  ui.debugLog("*              - Safe absolute rapid to table corners"       , caller='showHelp()', verbose='BASIC')
-  ui.debugLog(""                                                            , caller='showHelp()', verbose='BASIC')
-  ui.debugLog(".              - POINT TEST"                                 , caller='showHelp()', verbose='BASIC')
-  ui.debugLog("tT             - TABLE TEST"                                 , caller='showHelp()', verbose='BASIC')
-  ui.debugLog(""                                                            , caller='showHelp()', verbose='BASIC')
-  ui.debugLog(""                                                            , caller='showHelp()', verbose='BASIC')
-  ui.debugLog("+/-            - Rapid Increment (XY) +/-"                   , caller='showHelp()', verbose='BASIC')
-  ui.debugLog("Z/z            - Rapid Increment (Z) +/-"                    , caller='showHelp()', verbose='BASIC')
-  ui.debugLog("A/a            - Safe Height (Z) +/-"                        , caller='showHelp()', verbose='BASIC')
-  ui.debugLog("%              - Table size percent (loop)"                  , caller='showHelp()', verbose='BASIC')
-  ui.debugLog("V/v            - Verbose level +/- (loop)"                   , caller='showHelp()', verbose='BASIC')
-  ui.debugLog(""                                                            , caller='showHelp()', verbose='BASIC')
-  ui.debugLog(ui.gMSG_SEPARATOR                                             , caller='showHelp()', verbose='BASIC')
-  ui.debugLog(""                                                            , caller='showHelp()', verbose='BASIC')
+  ui.log(""                                                            , k=_k, v='BASIC')
+  ui.log(ui.gMSG_SEPARATOR                                             , k=_k, v='BASIC')
+  ui.log(""                                                            , k=_k, v='BASIC')
+  ui.log("Available commands:"                                         , k=_k, v='BASIC')
+  ui.log(""                                                            , k=_k, v='BASIC')
+  ui.log("qQ             - Exit"                                       , k=_k, v='BASIC')
+  ui.log("hH?            - Show this help text"                        , k=_k, v='BASIC')
+  ui.log("sS             - Show current status"                        , k=_k, v='BASIC')
+  ui.log("rR             - Reset serial connection"                    , k=_k, v='BASIC')
+  ui.log(""                                                            , k=_k, v='BASIC')
+  ui.log("gG             - Send raw GCode command"                     , k=_k, v='BASIC')
+  ui.log("cC             - Clear screen"                               , k=_k, v='BASIC')
+  ui.log(""                                                            , k=_k, v='BASIC')
+  ui.log("<numpad>       - Safe relative rapid (including diagonals)"  , k=_k, v='BASIC')
+  ui.log("<numpad>0      - Safe go to X0Y0Z0"                          , k=_k, v='BASIC')
+  ui.log("*              - Safe absolute rapid to table corners"       , k=_k, v='BASIC')
+  ui.log(""                                                            , k=_k, v='BASIC')
+  ui.log(".              - POINT TEST"                                 , k=_k, v='BASIC')
+  ui.log("tT             - TABLE TEST"                                 , k=_k, v='BASIC')
+  ui.log(""                                                            , k=_k, v='BASIC')
+  ui.log(""                                                            , k=_k, v='BASIC')
+  ui.log("+/-            - Rapid Increment (XY) +/-"                   , k=_k, v='BASIC')
+  ui.log("Z/z            - Rapid Increment (Z) +/-"                    , k=_k, v='BASIC')
+  ui.log("A/a            - Safe Height (Z) +/-"                        , k=_k, v='BASIC')
+  ui.log("%              - Table size percent (loop)"                  , k=_k, v='BASIC')
+  ui.log("V/v            - Verbose level +/- (loop)"                   , k=_k, v='BASIC')
+  ui.log(""                                                            , k=_k, v='BASIC')
+  ui.log(ui.gMSG_SEPARATOR                                             , k=_k, v='BASIC')
+  ui.log(""                                                            , k=_k, v='BASIC')
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def processUserInput():
-#  ui.debugLog("[ Entering processUserInput() ]", caller='processUserInput()', verbose='DEBUG')
+  _k = 'main.processUserInput()'
+#  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   if not kb.keyPressed():
     return True
@@ -114,7 +116,7 @@ def processUserInput():
 
     elif(char in 'gG'):
       ui.keyPressMessage("gG - Send raw GCode command", key, char)
-      ui.debugLog("Enter command...", caller='processUserInput()', verbose='BASIC')
+      ui.log("Enter command...", k=_k, v='BASIC')
       userCommand=input()
       sp.sendSerialCommand(userCommand,  expectedResultLines=None, responseTimeout=2)
 
@@ -176,7 +178,7 @@ def processUserInput():
 
     elif(char == '*'):
       ui.keyPressMessage("* - Safe absolute rapid to table corners", key, char)
-      ui.debugLog("Use <numpad> to select corner...", caller='processUserInput()', verbose='BASIC')
+      ui.log("Use <numpad> to select corner...", k=_k, v='BASIC')
       key = kb.readKey()
       char=chr(key)
 
@@ -268,30 +270,31 @@ def processUserInput():
         #ui.keyPressMessage("Unknown command", key, char)
 
   if(processed):
-    ui.showReadyMsg(caller='processUserInput()')
+    ui.showReadyMsg(caller='main.processUserInput()')
 
   return True
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def main():
-  ui.debugLog("[ Entering main() ]", caller='main()', verbose='DEBUG')
+  _k = 'main()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   ui.clearScreen()
 
-  ui.debugLog("", caller='main()', verbose='BASIC')
-  ui.debugLog(ui.gMSG_SEPARATOR, caller='main()', verbose='BASIC')
-  ui.debugLog("    grblCommander v{0}".format(gVERSION), caller='main()', verbose='BASIC')
-  ui.debugLog(ui.gMSG_SEPARATOR, caller='main()', verbose='BASIC')
-  ui.debugLog("", caller='main()', verbose='BASIC')
+  ui.log("", k=_k, v='BASIC')
+  ui.log(ui.gMSG_SEPARATOR, k=_k, v='BASIC')
+  ui.log("    grblCommander v{0}".format(gVERSION), k=_k, v='BASIC')
+  ui.log(ui.gMSG_SEPARATOR, k=_k, v='BASIC')
+  ui.log("", k=_k, v='BASIC')
 
   sp.serialConnect()
 
   mch.sendGCodeInitSequence()
 
-  ui.debugLog("", caller='main()', verbose='BASIC')
-  ui.debugLog("System ready!", caller='main()', verbose='BASIC')
-  ui.debugLog("", caller='main()', verbose='BASIC')
+  ui.log("", k=_k, v='BASIC')
+  ui.log("System ready!", k=_k, v='BASIC')
+  ui.log("", k=_k, v='BASIC')
 
   showHelp()
 
@@ -303,22 +306,23 @@ def main():
 
     line = sp.gSerial.readline()
     if(line):
-      ui.debugLog("<<<<<",line, caller='main()', verbose='BASIC')
+      ui.log("<<<<<",line, k=_k, v='BASIC')
 
     if not processUserInput():
       break
 
-  ui.debugLog("Closing serial port...", caller='main()', verbose='BASIC')
+  ui.log("Closing serial port...", k=_k, v='BASIC')
   sp.gSerial.close()
 
-  ui.debugLog("Closing program...", caller='main()', verbose='BASIC')
+  ui.log("Closing program...", k=_k, v='BASIC')
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if __name__ == '__main__':
+  _k = '__main__'
   try:
     main()
   finally:
     pass
-#    ui.debugLog("Press any key to exit...", caller='main()', verbose='BASIC')
+#    ui.log("Press any key to exit...", k=_k, v='BASIC')
 #    readKey()

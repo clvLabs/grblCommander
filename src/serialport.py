@@ -32,7 +32,8 @@ gSERIAL_RESPONSE_TIMEOUT = 5
 def serialConnect():
   global gSerial, gSERIAL_PORTNUMBER
 
-  ui.debugLog("[ Entering serialConnect() ]", caller='serialConnect()', verbose='DEBUG')
+  _k = 'sp.serialConnect()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   if( ut.isWindows() ):
     gSERIAL_PORTNUMBER = gSERIAL_PORTNUMBER_WINDOWS
@@ -45,15 +46,15 @@ def serialConnect():
 
   if(gSerial.isOpen()):
     if(ut.isWindows()):
-      ui.debugLog("Closing serial port %s: ..." % gSerial.makeDeviceName(gSerial.port), caller='serialConnect()', verbose='BASIC')
+      ui.log("Closing serial port %s: ..." % gSerial.makeDeviceName(gSerial.port), k=_k, v='BASIC')
     else:
-      ui.debugLog("Closing serial port %s: ..." % gSerial.port, caller='serialConnect()', verbose='BASIC')
+      ui.log("Closing serial port %s: ..." % gSerial.port, k=_k, v='BASIC')
     gSerial.close()
 
   if(ut.isWindows()):
-    ui.debugLog("Opening serial port %s: ..." % gSerial.makeDeviceName(gSerial.port), caller='serialConnect()', verbose='BASIC')
+    ui.log("Opening serial port %s: ..." % gSerial.makeDeviceName(gSerial.port), k=_k, v='BASIC')
   else:
-    ui.debugLog("Opening serial port %s: ..." % gSerial.port, caller='serialConnect()', verbose='BASIC')
+    ui.log("Opening serial port %s: ..." % gSerial.port, k=_k, v='BASIC')
 
   try:
     gSerial.open()
@@ -61,27 +62,28 @@ def serialConnect():
     pass
 
   if(gSerial.isOpen()):
-    ui.debugLog("Serial port open, waiting for startup message...", caller='serialConnect()', verbose='BASIC')
-    ui.debugLog("", caller='serialConnect()', verbose='BASIC')
+    ui.log("Serial port open, waiting for startup message...", k=_k, v='BASIC')
+    ui.log("", k=_k, v='BASIC')
     response = readSerialResponse(2)
     if( len(response) == 2 ):
-      ui.debugLog("", caller='serialConnect()', verbose='BASIC')
-      ui.debugLog("Startup message received, machine ready", caller='serialConnect()', verbose='BASIC')
-      ui.debugLog("", caller='serialConnect()', verbose='BASIC')
+      ui.log("", k=_k, v='BASIC')
+      ui.log("Startup message received, machine ready", k=_k, v='BASIC')
+      ui.log("", k=_k, v='BASIC')
     else:
-      ui.debugLog("ERROR: startup message error, exiting program", caller='serialConnect()', verbose='BASIC')
+      ui.log("ERROR: startup message error, exiting program", k=_k, v='BASIC')
       quit()
   else:
-    ui.debugLog("ERROR opening serial port, exiting program", caller='serialConnect()', verbose='BASIC')
+    ui.log("ERROR opening serial port, exiting program", k=_k, v='BASIC')
     quit()
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def sendSerialCommand(command, responseTimeout=gSERIAL_RESPONSE_TIMEOUT, expectedResultLines=1, verbose='BASIC'):
-  ui.debugLog("[ Entering sendSerialCommand() ]", caller='sendSerialCommand()', verbose='DEBUG')
+  _k = 'sp.sendSerialCommand()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   command = command.rstrip()
-  ui.debugLog(">>>>> [%s]" % repr(command), color=ui.AnsiColors.aaa, caller='sendSerialCommand()' ,verbose=verbose)
+  ui.log(">>>>> [%s]" % repr(command), color=ui.AnsiColors.aaa, k=_k ,v=verbose)
   gSerial.write( bytes(command+"\n", 'UTF-8') )
 
   return readSerialResponse(expectedLines=expectedResultLines,responseTimeout=responseTimeout,verbose=verbose)
@@ -89,11 +91,12 @@ def sendSerialCommand(command, responseTimeout=gSERIAL_RESPONSE_TIMEOUT, expecte
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def readSerialResponse(expectedLines=1, responseTimeout=gSERIAL_RESPONSE_TIMEOUT, verbose='BASIC'):
-  ui.debugLog("[ Entering readSerialResponse() ]", caller='readSerialResponse()', verbose='DEBUG')
+  _k = 'sp.readSerialResponse()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
-  ui.debugLog(  "readSerialResponse() - Waiting for %s lines from serial..."
+  ui.log(  "readSerialResponse() - Waiting for %s lines from serial..."
         % (expectedLines if expectedLines != None else 'undefined',)
-        , caller='readSerialResponse()', verbose='SUPER')
+        , k=_k, v='SUPER')
 
   startTime = time.time()
   receivedLines = 0
@@ -102,17 +105,17 @@ def readSerialResponse(expectedLines=1, responseTimeout=gSERIAL_RESPONSE_TIMEOUT
   while( (time.time() - startTime) < responseTimeout ):
     line = gSerial.readline()
     if(line):
-      ui.debugLog("<<<<<",line, caller='readSerialResponse()', verbose=verbose)
+      ui.log("<<<<<",line, k=_k, v=verbose)
       receivedLines += 1
       responseArray.append(line)
       if((expectedLines != None) and (receivedLines == expectedLines)):
-        ui.debugLog(  "readSerialResponse() - Successfully received %d lines from serial" % expectedLines
-              , caller='readSerialResponse()', verbose='SUPER')
+        ui.log(  "readSerialResponse() - Successfully received %d lines from serial" % expectedLines
+              , k=_k, v='SUPER')
         break
   else:
     if(expectedLines != None):
-      ui.debugLog("readSerialResponse() - TIMEOUT Waiting for data from serial", caller='readSerialResponse()', verbose='WARNING')
+      ui.log("readSerialResponse() - TIMEOUT Waiting for data from serial", k=_k, v='WARNING')
     else:
-      ui.debugLog("readSerialResponse() - Finished waiting for undefined lines from serial", caller='readSerialResponse()', verbose='DEBUG')
+      ui.log("readSerialResponse() - Finished waiting for undefined lines from serial", k=_k, v='DEBUG')
 
   return responseArray

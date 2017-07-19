@@ -75,7 +75,7 @@ if __name__ == '__main__':
         print("KeyList is [%s]" % (key,))
   finally:
     pass
-#    debugLog("Press any key to exit...", caller='main()', verbose='BASIC')
+#    debugLog("Press any key to exit...", k='main()', v='BASIC')
 #    readKey()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -11,6 +11,7 @@ gVerboseLevels = [ 'NONE', 'BASIC', 'ERROR', 'WARNING', 'DETAIL', 'SUPER', 'DEBU
 gMIN_VERBOSE_LEVEL = gVerboseLevels.index('BASIC')
 gMAX_VERBOSE_LEVEL = len(gVerboseLevels) - 1
 gVerboseLevel = gVerboseLevels.index('WARNING')
+gCaller = ''
 
 def getVerboseLevel():    return(gVerboseLevel)
 def getVerboseLevelStr(level=None):
@@ -56,15 +57,19 @@ class AnsiColors:
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def debugLog(message,*pargs, **kargs):
-  if( "verbose" in kargs ):    verboseStr = kargs.pop("verbose")
-  else:              verboseStr = 'BASIC'
+def log(message,*pargs, **kargs):
+  verboseStr = 'BASIC'
+  caller = None
+  color = None
+
+  if( "verbose" in kargs ):   verboseStr = kargs.pop("verbose")
+  if( "v" in kargs ):         verboseStr = kargs.pop("v")
 
   if( "caller" in kargs ):    caller = kargs.pop("caller")
-  else:              caller = None
+  if( "k" in kargs ):         caller = kargs.pop("k")
 
-  if( "color" in kargs ):      color = kargs.pop("color")
-  else:              color = None
+  if( "color" in kargs ):     color = kargs.pop("color")
+  if( "c" in kargs ):         color = kargs.pop("c")
 
   verboseLevel = getVerboseLevelIndex(verboseStr)
 
@@ -87,25 +92,30 @@ def debugLog(message,*pargs, **kargs):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showReadyMsg(caller=None):
+  _k = 'ui.showReadyMsg()'
+  # log("[ Entering ]", k=_k, v='DEBUG')
+
   if(caller is None):
-    debugLog(gREADY_MSG, caller='showReadyMsg()', verbose='BASIC')
+    log(gREADY_MSG, k=_k, v='BASIC')
   else:
-    debugLog(gREADY_MSG, caller=caller, verbose='BASIC')
+    log(gREADY_MSG, k=caller, v='BASIC')
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def keyPressMessage(msg, key, char):
-#  debugLog("[ Entering keyPressMessage() ]", caller='keyPressMessage()', verbose='DEBUG')
+  _k = 'ui.keyPressMessage()'
+  # log("[ Entering ]", k=_k, v='DEBUG')
 
-  debugLog("", caller='keyPressMessage()', verbose='WARNING')
-  debugLog(gMSG_SEPARATOR, caller='keyPressMessage()', verbose='WARNING')
-  debugLog(msg, caller='keyPressMessage()', verbose='WARNING')
-  debugLog("", caller='keyPressMessage()', verbose='WARNING')
+  log("", k=_k, v='WARNING')
+  log(gMSG_SEPARATOR, k=_k, v='WARNING')
+  log(msg, k=_k, v='WARNING')
+  log("", k=_k, v='WARNING')
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def clearScreen():
-  debugLog("\n"*100, caller='processUserInput()', verbose='BASIC')
+  _k = 'ui.clearScreen()'
+  log("\n"*100, k=_k, v='BASIC')
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -18,23 +18,25 @@ gDEFAULT_FEED_SPEED = 50
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def sendGCodeInitSequence():
-  ui.debugLog("[ Entering sendGCodeInitSequence() ]", caller='sendGCodeInitSequence()', verbose='DEBUG')
+  _k = 'mch.sendGCodeInitSequence()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
-  ui.debugLog("Sending GCode init sequence...", caller='sendGCodeInitSequence()', verbose='BASIC')
-  ui.debugLog("", caller='sendGCodeInitSequence()', verbose='BASIC')
+  ui.log("Sending GCode init sequence...", k=_k, v='BASIC')
+  ui.log("", k=_k, v='BASIC')
 
-  ui.debugLog("Sending command [G21]: Programming in millimeters (mm)", caller='sendGCodeInitSequence()', verbose='WARNING')
+  ui.log("Sending command [G21]: Programming in millimeters (mm)", k=_k, v='WARNING')
   sp.sendSerialCommand("G21")
 
-  ui.debugLog("Sending command [G90]: Absolute programming", caller='sendGCodeInitSequence()', verbose='WARNING')
+  ui.log("Sending command [G90]: Absolute programming", k=_k, v='WARNING')
   sp.sendSerialCommand("G90")
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def getMachineStatus():
-  ui.debugLog("[ Entering getMachineStatus() ]", caller='getMachineStatus()', verbose='DEBUG')
+  _k = 'mch.getMachineStatus()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
-  ui.debugLog("Querying machine status...", caller='getMachineStatus()', verbose='DEBUG')
+  ui.log("Querying machine status...", k=_k, v='DEBUG')
   sp.gSerial.write( bytes("?\n", 'UTF-8') )
 
   startTime = time.time()
@@ -47,25 +49,26 @@ def getMachineStatus():
       receivedLines += 1
       responseArray.append(line)
       if(receivedLines == 2):
-        ui.debugLog("Successfully received machine status", caller='getMachineStatus()', verbose='DEBUG')
+        ui.log("Successfully received machine status", k=_k, v='DEBUG')
         break
   else:
-    ui.debugLog("TIMEOUT Waiting for machine status", caller='getMachineStatus()', verbose='WARNING')
+    ui.log("TIMEOUT Waiting for machine status", k=_k, v='WARNING')
 
   return responseArray[0]
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showStatus():
-  ui.debugLog("[ Entering showStatus() ]", caller='showStatus()', verbose='DEBUG')
+  _k = 'mch.showStatus()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
-  ui.debugLog("", caller='showStatus()', verbose='BASIC')
-  ui.debugLog(ui.gMSG_SEPARATOR, caller='showStatus()', verbose='BASIC')
-  ui.debugLog("", caller='showStatus()', verbose='BASIC')
-  ui.debugLog("Current status:", caller='showStatus()', verbose='BASIC')
-  ui.debugLog("", caller='showStatus()', verbose='BASIC')
+  ui.log("", k=_k, v='BASIC')
+  ui.log(ui.gMSG_SEPARATOR, k=_k, v='BASIC')
+  ui.log("", k=_k, v='BASIC')
+  ui.log("Current status:", k=_k, v='BASIC')
+  ui.log("", k=_k, v='BASIC')
 
-  ui.debugLog(
+  ui.log(
 """  Software XYZ:
     [X=%.3f Y=%.3f Z=%.3f]
 
@@ -83,18 +86,19 @@ def showStatus():
           tbl.getRI_XY(), tbl.getRI_Z(),
           tbl.getSafeHeight(), tbl.getTableSizePercent(),
           ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
-        , caller='showStatus()', verbose='BASIC' )
+        , k=_k, v='BASIC' )
 
-  ui.debugLog("", caller='showStatus()', verbose='BASIC')
-  ui.debugLog(ui.gMSG_SEPARATOR, caller='showStatus()', verbose='BASIC')
-  ui.debugLog("", caller='showStatus()', verbose='BASIC')
+  ui.log("", k=_k, v='BASIC')
+  ui.log(ui.gMSG_SEPARATOR, k=_k, v='BASIC')
+  ui.log("", k=_k, v='BASIC')
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def waitForMachineIdle(verbose='WARNING'):
-  ui.debugLog("[ Entering waitForMachineIdle() ]", caller='waitForMachineIdle()', verbose='DEBUG')
+  _k = 'mch.waitForMachineIdle()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
-  ui.debugLog("Waiting for machine operation to finish...", caller='waitForMachineIdle()', verbose='SUPER')
+  ui.log("Waiting for machine operation to finish...", k=_k, v='SUPER')
   status = getMachineStatus()
 
   while( b'Idle' not in status ):
@@ -106,22 +110,23 @@ def waitForMachineIdle(verbose='WARNING'):
   if((verbose != 'NONE') and (ui.getVerboseLevel() >= ui.getVerboseLevelIndex(verbose))):
     print("\r" + repr(status) + "\n", end="")
 
-  ui.debugLog("Machine operation finished", caller='waitForMachineIdle()', verbose='SUPER')
+  ui.log("Machine operation finished", k=_k, v='SUPER')
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def feedAbsolute(x=None, y=None, z=None, speed=gDEFAULT_FEED_SPEED, verbose='WARNING'):
-  ui.debugLog("[ Entering feedAbsolute() ]", caller='feedAbsolute()', verbose='DEBUG')
+def feedAbsolute(x=None, y=None, z=None, speed=gDEFAULT_FEED_SPEED, v='WARNING'):
+  _k = 'mch.feedAbsolute()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   if(  ( (x is None) or ( x == tbl.getX() ) )
   and  ( (y is None) or ( y == tbl.getY() ) )
   and  ( (z is None) or ( z == tbl.getZ() ) ) ):
-    ui.debugLog("Wouldn't move, doing nothing", caller='feedAbsolute()', verbose=verbose)
+    ui.log("Wouldn't move, doing nothing", k=_k, v=verbose)
     return
 
   if( tbl.getZ() < tbl.getSafeHeight() ):
     if( x != None or y != None ):
-      ui.debugLog("ERROR: Can't feed on X/Y while Z < %d (SAFE_HEIGHT)!" % tbl.getSafeHeight(), caller='feedAbsolute()', verbose='ERROR')
+      ui.log("ERROR: Can't feed on X/Y while Z < %d (SAFE_HEIGHT)!" % tbl.getSafeHeight(), k=_k, v='ERROR')
       return
 
   cmd = "G1 "
@@ -142,26 +147,27 @@ def feedAbsolute(x=None, y=None, z=None, speed=gDEFAULT_FEED_SPEED, verbose='WAR
 
   cmd = cmd.rstrip()
 
-  ui.debugLog("Sending command [%s]..." % repr(cmd), caller='feedAbsolute()', verbose='DETAIL')
-  sp.sendSerialCommand(cmd, verbose=verbose)
-  waitForMachineIdle(verbose=verbose)
-  tbl.showCurrPos(verbose=verbose)
+  ui.log("Sending command [%s]..." % repr(cmd), k=_k, v='DETAIL')
+  sp.sendSerialCommand(cmd, v=verbose)
+  waitForMachineIdle(v=verbose)
+  tbl.showCurrPos(v=verbose)
   return
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def rapidAbsolute(x=None, y=None, z=None, verbose='WARNING'):
-  ui.debugLog("[ Entering rapidAbsolute() ]", caller='rapidAbsolute()', verbose='DEBUG')
+  _k = 'mch.rapidAbsolute()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   if(  ( (x is None) or ( x == tbl.getX() ) )
   and  ( (y is None) or ( y == tbl.getY() ) )
   and  ( (z is None) or ( z == tbl.getZ() ) ) ):
-    ui.debugLog("Wouldn't move, doing nothing", caller='rapidAbsolute()', verbose=verbose)
+    ui.log("Wouldn't move, doing nothing", k=_k, v=verbose)
     return
 
   if( tbl.getZ() < tbl.getSafeHeight() ):
     if( x != None or y != None ):
-      ui.debugLog("ERROR: Can't rapid on X/Y while Z < %d (SAFE_HEIGHT)!" % tbl.getSafeHeight(), caller='rapidAbsolute()', verbose='ERROR')
+      ui.log("ERROR: Can't rapid on X/Y while Z < %d (SAFE_HEIGHT)!" % tbl.getSafeHeight(), k=_k, v='ERROR')
       return
 
   if(not tbl.checkAbsoluteXYZ(x, y, z)):
@@ -184,7 +190,7 @@ def rapidAbsolute(x=None, y=None, z=None, verbose='WARNING'):
 
   cmd = cmd.rstrip()
 
-  ui.debugLog("Sending command [%s]..." % repr(cmd), caller='rapidAbsolute()', verbose='DETAIL')
+  ui.log("Sending command [%s]..." % repr(cmd), k=_k, v='DETAIL')
   sp.sendSerialCommand(cmd, verbose=verbose)
   waitForMachineIdle(verbose=verbose)
   tbl.showCurrPos(verbose=verbose)
@@ -193,19 +199,20 @@ def rapidAbsolute(x=None, y=None, z=None, verbose='WARNING'):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def rapidRelative(x=None, y=None, z=None, verbose='WARNING'):
-  ui.debugLog("[ Entering rapidRelative() ]", caller='rapidRelative()', verbose='DEBUG')
+  _k = 'mch.rapidRelative()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   lastX = tbl.getX()
   lastY = tbl.getY()
   lastZ = tbl.getZ()
 
   if( x is None and y is None and z is None ):
-    ui.debugLog("No parameters provided, doing nothing", caller='rapidRelative()', verbose=verbose)
+    ui.log("No parameters provided, doing nothing", k=_k, v=verbose)
     return
 
   if( tbl.getZ() < tbl.getSafeHeight() ):
     if( x != None or y != None ):
-      ui.debugLog("ERROR: Can't rapid on X/Y while Z < %d (SAFE_HEIGHT)!" % tbl.getSafeHeight(), caller='rapidRelative()', verbose='ERROR')
+      ui.log("ERROR: Can't rapid on X/Y while Z < %d (SAFE_HEIGHT)!" % tbl.getSafeHeight(), k=_k, v='ERROR')
       return
 
   if(not tbl.checkRelativeXYZ(x, y, z)):
@@ -217,14 +224,14 @@ def rapidRelative(x=None, y=None, z=None, verbose='WARNING'):
   if(x):
     newX = tbl.getX() + x
     if(newX<tbl.getMinX()):
-      ui.debugLog("Adjusting X to MinX (%d)" % tbl.getMinX(), caller='rapidRelative()', verbose='DETAIL')
+      ui.log("Adjusting X to MinX (%d)" % tbl.getMinX(), k=_k, v='DETAIL')
       newX=tbl.getMinX()
     elif(newX>tbl.getMaxX()):
-      ui.debugLog("Adjusting X to MaxX (%d)" % tbl.getMaxX(), caller='rapidRelative()', verbose='DETAIL')
+      ui.log("Adjusting X to MaxX (%d)" % tbl.getMaxX(), k=_k, v='DETAIL')
       newX=tbl.getMaxX()
 
     if(newX == tbl.getX()):
-      ui.debugLog("X value unchanged, skipping", caller='rapidRelative()', verbose='DETAIL')
+      ui.log("X value unchanged, skipping", k=_k, v='DETAIL')
     else:
       tbl.setX(newX)
       cmd += "X" + "%.3f" % tbl.getX() + " "
@@ -232,14 +239,14 @@ def rapidRelative(x=None, y=None, z=None, verbose='WARNING'):
   if(y):
     newY = tbl.getY() + y
     if(newY<tbl.getMinY()):
-      ui.debugLog("Adjusting Y to MinY (%d)" % tbl.getMinY(), caller='rapidRelative()', verbose='DETAIL')
+      ui.log("Adjusting Y to MinY (%d)" % tbl.getMinY(), k=_k, v='DETAIL')
       newY=tbl.getMinY()
     elif(newY>tbl.getMaxY()):
-      ui.debugLog("Adjusting Y to MaxY (%d)" % tbl.getMaxY(), caller='rapidRelative()', verbose='DETAIL')
+      ui.log("Adjusting Y to MaxY (%d)" % tbl.getMaxY(), k=_k, v='DETAIL')
       newY=tbl.getMaxY()
 
     if(newY == tbl.getY()):
-      ui.debugLog("Y value unchanged, skipping", caller='rapidRelative()', verbose='DETAIL')
+      ui.log("Y value unchanged, skipping", k=_k, v='DETAIL')
     else:
       tbl.setY(newY)
       cmd += "Y" + "%.3f" % tbl.getY() + " "
@@ -247,26 +254,26 @@ def rapidRelative(x=None, y=None, z=None, verbose='WARNING'):
   if(z):
     newZ = tbl.getZ() + z
     if(newZ<tbl.gMIN_Z):
-      ui.debugLog("Adjusting Z to MinZ (%d)" % tbl.gMIN_Z, caller='rapidRelative()', verbose='DETAIL')
+      ui.log("Adjusting Z to MinZ (%d)" % tbl.gMIN_Z, k=_k, v='DETAIL')
       newZ=tbl.gMIN_Z
     elif(newZ>tbl.gMAX_Z):
-      ui.debugLog("Adjusting Z to MaxZ (%d)" % tbl.gMAX_Z, caller='rapidRelative()', verbose='DETAIL')
+      ui.log("Adjusting Z to MaxZ (%d)" % tbl.gMAX_Z, k=_k, v='DETAIL')
       newZ=tbl.gMAX_Z
 
     if(newZ == tbl.getZ()):
-      ui.debugLog("Z value unchanged, skipping", caller='rapidRelative()', verbose='DETAIL')
+      ui.log("Z value unchanged, skipping", k=_k, v='DETAIL')
     else:
       tbl.setZ(newZ)
       cmd += "Z" + "%.3f" % tbl.getZ() + " "
 
   # If nothing changed in the relative move, don't send command
   if( lastX == tbl.getX() and  lastY == tbl.getY() and  lastZ == tbl.getZ() ):
-    ui.debugLog("No position change, doing nothing", caller='rapidRelative()', verbose=verbose)
+    ui.log("No position change, doing nothing", k=_k, v=verbose)
     return
 
   cmd = cmd.rstrip()
 
-  ui.debugLog("Sending command [%s]..." % repr(cmd), caller='rapidRelative()', verbose='DETAIL')
+  ui.log("Sending command [%s]..." % repr(cmd), k=_k, v='DETAIL')
   sp.sendSerialCommand(cmd, verbose=verbose)
   waitForMachineIdle(verbose=verbose)
   tbl.showCurrPos(verbose=verbose)
@@ -275,9 +282,10 @@ def rapidRelative(x=None, y=None, z=None, verbose='WARNING'):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def safeRapidAbsolute(x=None, y=None, z=None, verbose='WARNING'):
-  ui.debugLog("[ Entering safeRapidAbsolute() ]", caller='safeRapidAbsolute()', verbose='DEBUG')
+  _k = 'mch.safeRapidAbsolute()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
-  ui.debugLog("checking XYZ coordinates...", caller='safeRapidAbsolute()', verbose='DEBUG')
+  ui.log("checking XYZ coordinates...", k=_k, v='DEBUG')
   if(not tbl.checkAbsoluteXYZ(x, y, z)):
     # Error already shown
     return
@@ -286,35 +294,36 @@ def safeRapidAbsolute(x=None, y=None, z=None, verbose='WARNING'):
   if(  ( (x is None) or ( x == tbl.getX() ) )
   and  ( (y is None) or ( y == tbl.getY() ) )
   and  ( (z is None) or ( z == tbl.getZ() ) ) ):
-    ui.debugLog("Wouldn't move, doing nothing", caller='safeRapidAbsolute()', verbose=verbose)
+    ui.log("Wouldn't move, doing nothing", k=_k, v=verbose)
     return
 
   if(  ( x is None or x == tbl.getX() )
   and  ( y is None or y == tbl.getY() ) ):
-    ui.debugLog("Skipping move to safe Z due to no XY movement", caller='safeRapidAbsolute()', verbose='SUPER')
+    ui.log("Skipping move to safe Z due to no XY movement", k=_k, v='SUPER')
   elif( tbl.getZ() < tbl.getSafeHeight() ):
-    ui.debugLog("Temporarily moving to safe Z...", caller='safeRapidAbsolute()', verbose='DETAIL')
+    ui.log("Temporarily moving to safe Z...", k=_k, v='DETAIL')
     rapidAbsolute(z=tbl.getSafeHeight(), verbose=verbose)
 
   if(  ( x != None and x != tbl.getX() )
   or  ( y != None and y != tbl.getY() ) ):
-    ui.debugLog("Applying rapid on XY...", caller='safeRapidAbsolute()', verbose='DETAIL')
+    ui.log("Applying rapid on XY...", k=_k, v='DETAIL')
     rapidAbsolute(x=x, y=y, verbose=verbose)
 
   if(z is None):
-    ui.debugLog("Skipping rapid on Z (none specified)", caller='safeRapidAbsolute()', verbose='SUPER')
+    ui.log("Skipping rapid on Z (none specified)", k=_k, v='SUPER')
   elif(z == tbl.getZ()):
-    ui.debugLog("Skipping rapid on Z (already at destination)", caller='safeRapidAbsolute()', verbose='SUPER')
+    ui.log("Skipping rapid on Z (already at destination)", k=_k, v='SUPER')
   else:
-    ui.debugLog("Applying rapid on Z...", caller='safeRapidAbsolute()', verbose='DETAIL')
+    ui.log("Applying rapid on Z...", k=_k, v='DETAIL')
     rapidAbsolute(z=z, verbose=verbose)
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def safeRapidRelative(x=None, y=None, z=None, verbose='WARNING'):
-  ui.debugLog("[ Entering safeRapidRelative() ]", caller='safeRapidRelative()', verbose='DEBUG')
+  _k = 'mch.safeRapidRelative()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
-  ui.debugLog("Checking XYZ offsets...", caller='safeRapidRelative()', verbose='DEBUG')
+  ui.log("Checking XYZ offsets...", k=_k, v='DEBUG')
   if(not tbl.checkRelativeXYZ(x, y, z)):
     # Error already shown
     return
@@ -322,24 +331,24 @@ def safeRapidRelative(x=None, y=None, z=None, verbose='WARNING'):
   savedZ = None
 
   if(  (not x) and (not y) ):
-    ui.debugLog("Skipping move to safe Z due to no XY movement", caller='safeRapidRelative()', verbose='SUPER')
+    ui.log("Skipping move to safe Z due to no XY movement", k=_k, v='SUPER')
   elif(tbl.getZ() < tbl.getSafeHeight()):
-    ui.debugLog("Temporarily moving to safe Z...", caller='safeRapidRelative()', verbose='DETAIL')
+    ui.log("Temporarily moving to safe Z...", k=_k, v='DETAIL')
     savedZ = tbl.getZ()
     rapidAbsolute(z=tbl.getSafeHeight(), verbose=verbose)
 
   if(x or y):
-    ui.debugLog("Applying rapid on XY...", caller='safeRapidRelative()', verbose='DETAIL')
+    ui.log("Applying rapid on XY...", k=_k, v='DETAIL')
     rapidRelative(x=x, y=y, verbose=verbose)
 
   if(savedZ != None):
-    ui.debugLog("Restoring original Z...", caller='safeRapidRelative()', verbose='DETAIL')
+    ui.log("Restoring original Z...", k=_k, v='DETAIL')
     rapidAbsolute(z=savedZ, verbose=verbose)
 
   if(not z):
-    ui.debugLog("Skipping rapid on Z (none specified)", caller='safeRapidRelative()', verbose='SUPER')
+    ui.log("Skipping rapid on Z (none specified)", k=_k, v='SUPER')
   else:
-    ui.debugLog("Applying rapid on Z...", caller='safeRapidRelative()', verbose='DETAIL')
+    ui.log("Applying rapid on Z...", k=_k, v='DETAIL')
     rapidRelative(z=z, verbose=verbose)
 
 
