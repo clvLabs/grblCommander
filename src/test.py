@@ -45,7 +45,7 @@ def automaticContactTest(iterations = 3):
 
     # Prepare Z position
     ui.log("Moving to Z to last known touch point +1 step to start test...", k=_k, v='DETAIL')
-    mch.feedAbsolute(z=nextStartPoint, speed=mch.gDEFAULT_SEEK_SPEED, v='NONE')
+    mch.feedAbsolute(z=nextStartPoint, speed=mch.gDEFAULT_SEEK_SPEED, verbose='NONE')
 
     # Step down until contact
     exit = False
@@ -56,7 +56,7 @@ def automaticContactTest(iterations = 3):
     while(not exit):
       ui.log("Seeking CONTACT point (Z=%.3f)\r" % (z,), end='', k=_k, v='BASIC')
 
-      mch.feedAbsolute(z=z, v='NONE')
+      mch.feedAbsolute(z=z, verbose='NONE')
 
       if(kb.keyPressed()):
         key=kb.readKey()
@@ -86,7 +86,7 @@ def automaticContactTest(iterations = 3):
         z += upStep
         ui.log("Seeking RELEASE point (Z=%.3f)\r" % (z,), end='', k=_k, v='BASIC')
 
-        mch.feedAbsolute(z=z, v='NONE')
+        mch.feedAbsolute(z=z, verbose='NONE')
 
         if(kb.keyPressed()):
           key=kb.readKey()
@@ -116,7 +116,7 @@ def automaticContactTest(iterations = 3):
     ui.log("*"*40, k=_k, v='BASIC')
 
   ui.log("Restoring original Z...", k=_k, v='DETAIL')
-  mch.safeRapidAbsolute(z=savedZ, v='NONE')
+  mch.safeRapidAbsolute(z=savedZ, verbose='NONE')
 
   averageTouchZ = float(sum(touchZList))/len(touchZList) if len(touchZList) > 0 else 0
 
@@ -152,7 +152,7 @@ def manualContactTest():
   ui.log("Saving original Z", k=_k, v='DETAIL')
   savedZ = tbl.getZ()
   ui.log("Moving to Z0 to start test...", k=_k, v='DETAIL')
-  mch.safeRapidAbsolute(z=0, v='NONE')
+  mch.safeRapidAbsolute(z=0, verbose='NONE')
 
   ui.log("Starting contact test...", k=_k, v='BASIC')
 
@@ -166,7 +166,7 @@ def manualContactTest():
     z -= 0.1
     ui.log("[%d] Seeking CONTACT point (Z=%.3f)\r" % (curIteration+1,z), end='', k=_k, v='BASIC')
 
-    mch.feedAbsolute(z=z, v='NONE')
+    mch.feedAbsolute(z=z, verbose='NONE')
 
     ui.log("<ENTER>:stop / <SPACE>:continue / <ESC>:exit ...", k=_k, v='BASIC')
     key=0
@@ -197,7 +197,7 @@ def manualContactTest():
       z += 0.025
       ui.log("[%d] Seeking RELEASE point (Z=%.3f)\r" % (curIteration+1,z), end='', k=_k, v='BASIC')
 
-      mch.feedAbsolute(z=z, v='NONE')
+      mch.feedAbsolute(z=z, verbose='NONE')
 
       ui.log("PHASE2 : Seeking RELEASE point", k=_k, v='BASIC')
       ui.log("<ENTER>:stop / <SPACE>:continue / <ESC>:exit ...", k=_k, v='BASIC')
@@ -255,7 +255,7 @@ def gridContactTest():
 
   if(tbl.getZ() < tbl.getSafeHeight()):
     ui.log("Temporarily moving to safe Z...", k=_k, v='DETAIL')
-    mch.rapidAbsolute(z=tbl.getSafeHeight(), v='NONE')
+    mch.rapidAbsolute(z=tbl.getSafeHeight(), verbose='NONE')
 
   gridIncrementX = tbl.getMaxX() / (gridLines-1)
   gridIncrementY = tbl.getMaxY() / (gridLines-1)
@@ -298,7 +298,7 @@ def gridContactTest():
       ui.log("*"*40, k=_k, v='BASIC')
 
       ui.log("mch.rapidAbsolute(Y=%.3f X=%.3f)..." % (gridY[indexY],gridX[indexX],), k=_k, v='DEBUG')
-      mch.rapidAbsolute(y=gridY[indexY], x=gridX[indexX], v='NONE')
+      mch.rapidAbsolute(y=gridY[indexY], x=gridX[indexX], verbose='NONE')
 
       if kb.keyPressed():
         if(kb.readKey() == 27):    # <ESC>
@@ -327,10 +327,10 @@ def gridContactTest():
     ui.log("*"*40, k=_k, v='BASIC')
     if(tbl.getZ() < tbl.getSafeHeight()):
       ui.log("Temporarily moving to safe Z...", k=_k, v='DETAIL')
-      mch.rapidAbsolute(z=tbl.getSafeHeight(), v='NONE')
+      mch.rapidAbsolute(z=tbl.getSafeHeight(), verbose='NONE')
     ui.log("Restoring original XYZ...", k=_k, v='DETAIL')
-    mch.safeRapidAbsolute(x=savedX, y=savedY, v='NONE')
-    mch.safeRapidAbsolute(z=savedZ, v='NONE')
+    mch.safeRapidAbsolute(x=savedX, y=savedY, verbose='NONE')
+    mch.safeRapidAbsolute(z=savedZ, verbose='NONE')
     return
   else:
     ui.log("*"*40, k=_k, v='BASIC')
@@ -473,8 +473,8 @@ def gridContactTest():
   ui.log("*"*40, k=_k, v='BASIC')
 
   ui.log("Restoring original XYZ...", k=_k, v='BASIC')
-  mch.safeRapidAbsolute(x=savedX, y=savedY, v='NONE')
-  mch.safeRapidAbsolute(z=savedZ, v='NONE')
+  mch.safeRapidAbsolute(x=savedX, y=savedY, verbose='NONE')
+  mch.safeRapidAbsolute(z=savedZ, verbose='NONE')
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
