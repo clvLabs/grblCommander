@@ -284,6 +284,8 @@ def safeRapidAbsolute(x=None, y=None, z=None, verbose='WARNING'):
     # Error already shown
     return
 
+  savedZ = None
+
   # Avoid moving Z to safe area if params means no change
   if(  ( (x is None) or ( x == tbl.getX() ) )
   and  ( (y is None) or ( y == tbl.getY() ) )
@@ -296,12 +298,16 @@ def safeRapidAbsolute(x=None, y=None, z=None, verbose='WARNING'):
     ui.log("Skipping move to safe Z due to no XY movement", k=_k, v='SUPER')
   elif( tbl.getZ() < tbl.getSafeHeight() ):
     ui.log("Temporarily moving to safe Z...", k=_k, v='DETAIL')
+    savedZ = tbl.getZ()
     rapidAbsolute(z=tbl.getSafeHeight(), verbose=verbose)
 
   if(  ( x != None and x != tbl.getX() )
   or  ( y != None and y != tbl.getY() ) ):
     ui.log("Applying rapid on XY...", k=_k, v='DETAIL')
     rapidAbsolute(x=x, y=y, verbose=verbose)
+
+  if(z is None):
+    z = savedZ
 
   if(z is None):
     ui.log("Skipping rapid on Z (none specified)", k=_k, v='SUPER')
