@@ -110,10 +110,7 @@ def automaticContactTest(iterations = 3):
     ui.log("---------------------------------------", k=_k, v='BASIC')
 
   if(testCancelled):
-    ui.log("", k=_k, v='BASIC')
-    ui.log("*"*40, k=_k, v='BASIC')
-    ui.log("POINT CONTACT TEST CANCELLED", k=_k, v='BASIC')
-    ui.log("*"*40, k=_k, v='BASIC')
+    ui.logBlock("POINT CONTACT TEST CANCELLED", s="*"*40, k=_k, v='BASIC')
 
   ui.log("Restoring original Z...", k=_k, v='DETAIL')
   mch.safeRapidAbsolute(z=savedZ, verbose='NONE')
@@ -223,9 +220,7 @@ def manualContactTest():
       lastZ = z
 
   if(testCancelled):
-    ui.log("*"*40, k=_k, v='BASIC')
-    ui.log("POINT CONTACT TEST CANCELLED", k=_k, v='BASIC')
-    ui.log("*"*40, k=_k, v='BASIC')
+    ui.logBlock("POINT CONTACT TEST CANCELLED", s="*"*40, k=_k, v='BASIC')
 
   ui.log("Restoring original Z...", k=_k, v='DETAIL')
   mch.safeRapidAbsolute(z=savedZ)
@@ -322,9 +317,7 @@ def gridContactTest():
     if(testCancelled): break
 
   if(testCancelled):
-    ui.log("*"*40, k=_k, v='BASIC')
-    ui.log("GRID CONTACT TEST CANCELLED", k=_k, v='BASIC')
-    ui.log("*"*40, k=_k, v='BASIC')
+    ui.logBlock("GRID CONTACT TEST CANCELLED", s="*"*40, k=_k, v='BASIC')
     if(tbl.getZ() < tbl.getSafeHeight()):
       ui.log("Temporarily moving to safe Z...", k=_k, v='DETAIL')
       mch.rapidAbsolute(z=tbl.getSafeHeight(), verbose='NONE')

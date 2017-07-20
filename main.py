@@ -48,6 +48,7 @@ cC             - Clear screen
 <numpad>       - Safe relative rapid (XY) (including diagonals)
 .              - Safe absolute rapid (XY) to table corners
                  - <numpad>1..9    - Absolute table positions
+                 - sS              - Table position scan
 
 pP             - POINT TEST
 tT             - TABLE TEST
@@ -61,6 +62,42 @@ Vv             - Set verbose level +/- (loop)
     , k=_k, v='BASIC')
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def tpsSingleStep(stepName, x, y):
+  _k = 'main.tpsSingleStep()'
+  ui.log("----------------------- Scan point: [{0}]".format(stepName), k=_k, v='WARNING')
+
+  mch.safeRapidAbsolute(x=x,y=y)
+
+  if kb.keyPressed() and (kb.readKey() == 27):  # <ESC>
+    ui.logBlock("TABLE POSITION SCAN CANCELLED", s="*"*40, k=_k, v='BASIC')
+    return True
+
+  return False
+
+
+def tablePositionScan():
+  _k = 'main.tablePositionScan()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
+
+  savedX = tbl.getX()
+  savedY = tbl.getY()
+  cancelled = False
+
+  if not cancelled: cancelled = tpsSingleStep('BL', x=0,y=0)
+  if not cancelled: cancelled = tpsSingleStep('BC', x=tbl.getMaxX()/2,y=0)
+  if not cancelled: cancelled = tpsSingleStep('BR', x=tbl.getMaxX(),y=0)
+  if not cancelled: cancelled = tpsSingleStep('CR', x=tbl.getMaxX(),y=tbl.getMaxY()/2)
+  if not cancelled: cancelled = tpsSingleStep('CC', x=tbl.getMaxX()/2,y=tbl.getMaxY()/2)
+  if not cancelled: cancelled = tpsSingleStep('CL', x=0,y=tbl.getMaxY()/2)
+  if not cancelled: cancelled = tpsSingleStep('UL', x=0,y=tbl.getMaxY())
+  if not cancelled: cancelled = tpsSingleStep('UC', x=tbl.getMaxX()/2,y=tbl.getMaxY())
+  if not cancelled: cancelled = tpsSingleStep('UR', x=tbl.getMaxX(),y=tbl.getMaxY())
+
+  tpsSingleStep('Return', x=savedX,y=savedY)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 def processUserInput():
   _k = 'main.processUserInput()'
 #  ui.log("[ Entering ]", k=_k, v='DEBUG')
@@ -215,6 +252,9 @@ def processUserInput():
       elif(char == '9'):
         ui.keyPressMessage("9 - Safe absolute rapid to table corners - UR", key, char)
         mch.safeRapidAbsolute(x=tbl.getMaxX(),y=tbl.getMaxY())
+      elif(char in 'sS'):
+        ui.keyPressMessage("sS - Safe absolute rapid to table corners - Table position scan", key, char)
+        tablePositionScan()
       else:
         ui.keyPressMessage("Unknown command", key, char)
 

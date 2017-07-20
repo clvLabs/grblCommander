@@ -92,6 +92,7 @@ def log(message,*pargs, **kargs):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def logBlock(message,*pargs, **kargs):
+  separator = gMSG_SEPARATOR
   verboseStr = 'BASIC'
   caller = None
   color = None
@@ -102,6 +103,10 @@ def logBlock(message,*pargs, **kargs):
   if( "caller" in kargs ):    caller = kargs.pop("caller")
   if( "k" in kargs ):         caller = kargs.pop("k")
 
+  if( "separator" in kargs ): separator = kargs.pop("separator")
+  if( "sep" in kargs ):       separator = kargs.pop("sep")
+  if( "s" in kargs ):         separator = kargs.pop("s")
+
   if( "color" in kargs ):     color = kargs.pop("color")
   if( "c" in kargs ):         color = kargs.pop("c")
 
@@ -110,7 +115,7 @@ def logBlock(message,*pargs, **kargs):
 {0}
 {1}
 {2}
-""".format(gMSG_SEPARATOR, message, gMSG_SEPARATOR)
+""".format(separator, message, separator)
     , k=caller, v=verboseStr, c=color)
 
 
