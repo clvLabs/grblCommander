@@ -47,15 +47,16 @@ cC             - Clear screen
 <numpad>0      - Safe go to X0Y0Z0
 <numpad>       - Safe relative rapid (XY) (including diagonals)
 .              - Safe absolute rapid (XY) to table corners
+                 - <numpad>1..9    - Absolute table positions
 
 pP             - POINT TEST
 tT             - TABLE TEST
 
-+-             - Rapid Increment (XY) +/-
-Zz             - Rapid Increment (Z) +/-
-Aa             - Safe Height (Z) +/-
-%              - Table size percent (loop)
-Vv             - Verbose level +/- (loop)
++-             - Set rapid Increment (XY) +/-
+Zz             - Set rapid Increment (Z) +/-
+Aa             - Set safe Height (Z) +/-
+%              - Set table size percent (loop)
+Vv             - Set verbose level +/- (loop)
 """
     , k=_k, v='BASIC')
 
@@ -218,50 +219,50 @@ def processUserInput():
         ui.keyPressMessage("Unknown command", key, char)
 
     elif(char == '+'):
-      ui.keyPressMessage("X - Rapid Increment (XY)+", key, char)
+      ui.keyPressMessage("X - Set rapid Increment (XY)+", key, char)
       tbl.changeRI_XY(+1)
 
     elif(char == '-'):
-      ui.keyPressMessage("x - Rapid Increment (XY)-", key, char)
+      ui.keyPressMessage("x - Set rapid Increment (XY)-", key, char)
       tbl.changeRI_XY(-1)
 
     elif(char == 'Z'):
-      ui.keyPressMessage("Z - Rapid Increment (Z)+", key, char)
+      ui.keyPressMessage("Z - Set rapid Increment (Z)+", key, char)
       tbl.changeRI_Z(+1)
 
     elif(char == 'z'):
-      ui.keyPressMessage("z - Rapid Increment (Z)-", key, char)
+      ui.keyPressMessage("z - Set rapid Increment (Z)-", key, char)
       tbl.changeRI_Z(-1)
 
     elif(char == '%'):
-      ui.keyPressMessage("% - Table size percent (loop)", key, char)
+      ui.keyPressMessage("% - Set table size percent (loop)", key, char)
       tmpTableSizePercent = ut.genericValueChanger(  tbl.getTableSizePercent(), +10, tbl.gMIN_TABLE_SIZE_PERCENT, tbl.gMAX_TABLE_SIZE_PERCENT,
                               loop=True, valueName="Table size percent")
 
       tbl.setTableSizePercent(tmpTableSizePercent)
 
     elif(char == 'V'):
-      ui.keyPressMessage("V - Verbose level+", key, char)
+      ui.keyPressMessage("V - Set verbose level+", key, char)
       tempVerboseLevel = ut.genericValueChanger(  ui.getVerboseLevel(), +1, ui.gMIN_VERBOSE_LEVEL, ui.gMAX_VERBOSE_LEVEL,
                             loop=True, valueName="Verbose level",
                             valueFormatter=lambda level : "%d (%s)" % (level,ui.getVerboseLevelStr(level)) )
       ui.setVerboseLevel(tempVerboseLevel)
 
     elif(char == 'v'):
-      ui.keyPressMessage("v - Verbose level-", key, char)
+      ui.keyPressMessage("v - Set verbose level-", key, char)
       tempVerboseLevel = ut.genericValueChanger(  ui.getVerboseLevel(), -1, ui.gMIN_VERBOSE_LEVEL, ui.gMAX_VERBOSE_LEVEL,
                           loop=True, valueName="Verbose level",
                           valueFormatter=lambda level : "%d (%s)" % (level,ui.getVerboseLevelStr(level)) )
       ui.setVerboseLevel(tempVerboseLevel)
 
     elif(char == 'A'):
-      ui.keyPressMessage("A - Safe Height+", key, char)
+      ui.keyPressMessage("A - Set safe Height+", key, char)
       tempSafeHeight = ut.genericValueChanger(  tbl.getSafeHeight(), +1, tbl.gMIN_SAFE_HEIGHT, tbl.gMAX_SAFE_HEIGHT,
                             loop=True, valueName="Safe Height" )
       tbl.setSafeHeight(tempSafeHeight)
 
     elif(char == 'a'):
-      ui.keyPressMessage("a - Safe Height-", key, char)
+      ui.keyPressMessage("a - Set safe Height-", key, char)
       tempSafeHeight = ut.genericValueChanger(  tbl.getSafeHeight(), -1, tbl.gMIN_SAFE_HEIGHT, tbl.gMAX_SAFE_HEIGHT,
                             loop=True, valueName="Safe Height" )
       tbl.setSafeHeight(tempSafeHeight)
