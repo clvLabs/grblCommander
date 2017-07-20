@@ -33,7 +33,7 @@ gMAX_RI_Z = 10
 
 # Safe Z height
 gSAFE_HEIGHT = 3
-gMIN_SAFE_HEIGHT = 1
+gMIN_SAFE_HEIGHT = 0
 gMAX_SAFE_HEIGHT = 10
 
 #Table size percent (divisor)
