@@ -247,12 +247,12 @@ def rapidRelative(x=None, y=None, z=None, verbose='WARNING'):
 
   if(z):
     newZ = tbl.getZ() + z
-    if(newZ<tbl.gMIN_Z):
-      ui.log("Adjusting Z to MinZ (%d)" % tbl.gMIN_Z, k=_k, v='DETAIL')
-      newZ=tbl.gMIN_Z
-    elif(newZ>tbl.gMAX_Z):
-      ui.log("Adjusting Z to MaxZ (%d)" % tbl.gMAX_Z, k=_k, v='DETAIL')
-      newZ=tbl.gMAX_Z
+    if(newZ<tbl.getMinZ()):
+      ui.log("Adjusting Z to MinZ (%d)" % tbl.getMinZ(), k=_k, v='DETAIL')
+      newZ=tbl.getMinZ()
+    elif(newZ>tbl.getMaxZ()):
+      ui.log("Adjusting Z to MaxZ (%d)" % tbl.getMaxZ(), k=_k, v='DETAIL')
+      newZ=tbl.getMaxZ()
 
     if(newZ == tbl.getZ()):
       ui.log("Z value unchanged, skipping", k=_k, v='DETAIL')

@@ -137,10 +137,6 @@ def processUserInput():
       ui.keyPressMessage("tT - TABLE TEST", key, char)
       test.gridContactTest()
 
-    elif(char == '0'):
-      ui.keyPressMessage("<numpad>0 - Safe go to X0Y0Z0", key, char)
-      mch.safeRapidAbsolute(x=0,y=0,z=0)
-
     elif(char == '/'):
       ui.keyPressMessage("/ - Relative rapid (Z)+", key, char)
       mch.safeRapidRelative(x=0,y=0,z=tbl.getRI_Z())
@@ -148,6 +144,10 @@ def processUserInput():
     elif(char == '*'):
       ui.keyPressMessage("* - Relative rapid (Z)-", key, char)
       mch.safeRapidRelative(x=0,y=0,z=tbl.getRI_Z()*-1)
+
+    elif(char == '0'):
+      ui.keyPressMessage("<numpad>0 - Safe go to X0Y0Z0", key, char)
+      mch.safeRapidAbsolute(x=0,y=0,z=0)
 
     elif(char == '1'):
       ui.keyPressMessage("<numpad>1 - Safe relative rapid - DL", key, char)
