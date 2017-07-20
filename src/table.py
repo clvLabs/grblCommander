@@ -19,7 +19,7 @@ gMAX_Y = 295
 
 gZ = 0
 gMIN_Z = 0
-gMAX_Z = 30
+gMAX_Z = 80
 
 # Rapid Increment (XY plane)
 gRI_XY = 25
@@ -27,14 +27,14 @@ gMIN_RI_XY = 0.1
 gMAX_RI_XY = 100
 
 # Rapid Increment (Z plane)
-gRI_Z = 5
+gRI_Z = 10
 gMIN_RI_Z = 0.1
-gMAX_RI_Z = 10
+gMAX_RI_Z = 20
 
 # Safe Z height
-gSAFE_HEIGHT = 3
+gSAFE_HEIGHT = 10
 gMIN_SAFE_HEIGHT = 0
-gMAX_SAFE_HEIGHT = 10
+gMAX_SAFE_HEIGHT = 30
 
 #Table size percent (divisor)
 gTableSizePercent=100
