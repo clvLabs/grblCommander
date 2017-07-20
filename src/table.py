@@ -27,7 +27,7 @@ gMIN_RI_XY = 0.1
 gMAX_RI_XY = 100
 
 # Rapid Increment (Z plane)
-gRI_Z = 1
+gRI_Z = 5
 gMIN_RI_Z = 0.1
 gMAX_RI_Z = 10
 
