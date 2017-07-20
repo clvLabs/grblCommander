@@ -53,9 +53,9 @@ cC             - Clear screen
 pP             - POINT TEST
 tT             - TABLE TEST
 
-+-             - Set rapid Increment (XY) +/-
-Zz             - Set rapid Increment (Z) +/-
-Aa             - Set safe Height (Z) +/-
++-             - Set rapid increment (XY) +/-
+Zz             - Set rapid increment (Z) +/-
+Aa             - Set safe height (Z) +/-
 %              - Set table size percent (loop)
 Vv             - Set verbose level +/- (loop)
 """
@@ -259,19 +259,19 @@ def processUserInput():
         ui.keyPressMessage("Unknown command", key, char)
 
     elif(char == '+'):
-      ui.keyPressMessage("X - Set rapid Increment (XY)+", key, char)
+      ui.keyPressMessage("+ - Set rapid increment (XY)+", key, char)
       tbl.changeRI_XY(+1)
 
     elif(char == '-'):
-      ui.keyPressMessage("x - Set rapid Increment (XY)-", key, char)
+      ui.keyPressMessage("- - Set rapid increment (XY)-", key, char)
       tbl.changeRI_XY(-1)
 
     elif(char == 'Z'):
-      ui.keyPressMessage("Z - Set rapid Increment (Z)+", key, char)
+      ui.keyPressMessage("Z - Set rapid increment (Z)+", key, char)
       tbl.changeRI_Z(+1)
 
     elif(char == 'z'):
-      ui.keyPressMessage("z - Set rapid Increment (Z)-", key, char)
+      ui.keyPressMessage("z - Set rapid increment (Z)-", key, char)
       tbl.changeRI_Z(-1)
 
     elif(char == '%'):
@@ -296,15 +296,15 @@ def processUserInput():
       ui.setVerboseLevel(tempVerboseLevel)
 
     elif(char == 'A'):
-      ui.keyPressMessage("A - Set safe Height+", key, char)
+      ui.keyPressMessage("A - Set safe height+", key, char)
       tempSafeHeight = ut.genericValueChanger(  tbl.getSafeHeight(), +1, tbl.gMIN_SAFE_HEIGHT, tbl.gMAX_SAFE_HEIGHT,
-                            loop=True, valueName="Safe Height" )
+                            loop=False, valueName="Safe Height" )
       tbl.setSafeHeight(tempSafeHeight)
 
     elif(char == 'a'):
-      ui.keyPressMessage("a - Set safe Height-", key, char)
+      ui.keyPressMessage("a - Set safe height-", key, char)
       tempSafeHeight = ut.genericValueChanger(  tbl.getSafeHeight(), -1, tbl.gMIN_SAFE_HEIGHT, tbl.gMAX_SAFE_HEIGHT,
-                            loop=True, valueName="Safe Height" )
+                            loop=False, valueName="Safe Height" )
       tbl.setSafeHeight(tempSafeHeight)
 
     else:  # Rest of keys
