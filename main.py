@@ -168,7 +168,7 @@ def processUserInput():
       ui.clearScreen()
 
     elif(char in 'pP'):
-      ui.keyPressMessage(". - POINT TEST", key, char)
+      ui.keyPressMessage("pP - POINT TEST", key, char)
       test.automaticContactTest(iterations=1)
 
     elif(char in 'tT'):
