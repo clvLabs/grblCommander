@@ -3,14 +3,7 @@
 grblCommander
 =============
 Allows to control a CNC driven by a grblShield
-
-PENDING
-========
-- Feed speed configuration ( always send G0 with F )
-- Parse machine status response
-- Parse general machine responses
 """
-
 
 import sys
 import time
