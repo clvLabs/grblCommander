@@ -43,7 +43,7 @@ def getMachineStatus():
   receivedLines = 0
   responseArray=[]
 
-  while( (time.time() - startTime) < sp.gSERIAL_RESPONSE_TIMEOUT ):
+  while( (time.time() - startTime) < sp.gRESPONSE_TIMEOUT ):
     line = sp.gSerial.readline()
     if(line):
       receivedLines += 1

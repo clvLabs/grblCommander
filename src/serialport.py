@@ -16,33 +16,31 @@ from . import ui as ui
 gSerial = serial.Serial()
 
 # Serial configuration
-gSERIAL_BAUDRATE = 9600
-gSERIAL_PORTNUMBER_WINDOWS = 5              # Change THIS to match your Arduino's COM port !!!
-#gSERIAL_PORTNUMBER_LINUX = '/dev/ttyUSB0'  # Change THIS to match your Arduino's COM port !!!
-#gSERIAL_PORTNUMBER_LINUX = '/dev/ttyAMA0'  # Change THIS to match your Arduino's COM port !!!
-gSERIAL_PORTNUMBER_LINUX = '/dev/ttyACM0'   # Change THIS to match your Arduino's COM port !!!
-gSERIAL_PORTNUMBER = gSERIAL_PORTNUMBER_WINDOWS
-gSERIAL_TIMEOUT = 0.1
+gBAUDRATE = 9600
+gPORTNUMBER_WINDOWS = 6              # Change THIS to match your Arduino's COM port !!!
+gPORTNUMBER_LINUX = '/dev/ttyACM0'   # Change THIS to match your Arduino's COM port !!!
+gPORTNUMBER = 0
+gTIMEOUT = 0.1
 
 # Serial response timeout (seconds)
-gSERIAL_RESPONSE_TIMEOUT = 5
+gRESPONSE_TIMEOUT = 5
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def serialConnect():
-  global gSerial, gSERIAL_PORTNUMBER
+  global gSerial, gPORTNUMBER
 
   _k = 'sp.serialConnect()'
   ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   if( ut.isWindows() ):
-    gSERIAL_PORTNUMBER = gSERIAL_PORTNUMBER_WINDOWS
+    gPORTNUMBER = gPORTNUMBER_WINDOWS - 1
   else:
-    gSERIAL_PORTNUMBER = gSERIAL_PORTNUMBER_LINUX
+    gPORTNUMBER = gPORTNUMBER_LINUX
 
-  gSerial.baudrate = gSERIAL_BAUDRATE
-  gSerial.port = gSERIAL_PORTNUMBER
-  gSerial.timeout = gSERIAL_TIMEOUT
+  gSerial.baudrate = gBAUDRATE
+  gSerial.port = gPORTNUMBER
+  gSerial.timeout = gTIMEOUT
 
   if(gSerial.isOpen()):
     if(ut.isWindows()):
@@ -78,7 +76,7 @@ def serialConnect():
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def sendSerialCommand(command, responseTimeout=gSERIAL_RESPONSE_TIMEOUT, expectedResultLines=1, verbose='BASIC'):
+def sendSerialCommand(command, responseTimeout=gRESPONSE_TIMEOUT, expectedResultLines=1, verbose='BASIC'):
   _k = 'sp.sendSerialCommand()'
   ui.log("[ Entering ]", k=_k, v='DEBUG')
 
@@ -90,7 +88,7 @@ def sendSerialCommand(command, responseTimeout=gSERIAL_RESPONSE_TIMEOUT, expecte
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def readSerialResponse(expectedLines=1, responseTimeout=gSERIAL_RESPONSE_TIMEOUT, verbose='BASIC'):
+def readSerialResponse(expectedLines=1, responseTimeout=gRESPONSE_TIMEOUT, verbose='BASIC'):
   _k = 'sp.readSerialResponse()'
   ui.log("[ Entering ]", k=_k, v='DEBUG')
 
