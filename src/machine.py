@@ -97,11 +97,13 @@ def waitForMachineIdle(verbose='WARNING'):
 
   while( b'Idle' not in status ):
     if((verbose != 'NONE') and (ui.getVerboseLevel() >= ui.getVerboseLevelIndex(verbose))):
+      print("\r" + (" " * 80), end="")
       print("\r" + repr(status), end="")
     time.sleep(0.1)
     status = getMachineStatus()
 
   if((verbose != 'NONE') and (ui.getVerboseLevel() >= ui.getVerboseLevelIndex(verbose))):
+    print("\r" + (" " * 80), end="")
     print("\r" + repr(status) + "\n", end="")
 
   ui.log("Machine operation finished", k=_k, v='SUPER')
