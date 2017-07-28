@@ -32,7 +32,7 @@ gMIN_RI_Z = 0.1
 gMAX_RI_Z = 20
 
 # Safe Z height
-gSAFE_HEIGHT = 10
+gSAFE_HEIGHT = 0 # 10
 gMIN_SAFE_HEIGHT = 0
 gMAX_SAFE_HEIGHT = 30
 
