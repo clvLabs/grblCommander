@@ -16,7 +16,7 @@ from . import ui as ui
 gSerial = serial.Serial()
 
 # Serial configuration
-gBAUDRATE = 9600
+gBAUDRATE = 115200
 gPORTNUMBER_WINDOWS = 6              # Change THIS to match your Arduino's COM port !!!
 gPORTNUMBER_LINUX = '/dev/ttyACM0'   # Change THIS to match your Arduino's COM port !!!
 gPORTNUMBER = 0
