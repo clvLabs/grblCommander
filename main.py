@@ -42,6 +42,8 @@ cC             - Clear screen
 .              - Safe absolute rapid (XY) to table corners
                  - <numpad>1..9    - Absolute table positions
                  - sS              - Table position scan
+                 - .               - One axis only
+                   - <numpad>2468    - Absolute table positions
 
 pP             - POINT TEST
 tT             - TABLE TEST
@@ -218,7 +220,27 @@ def processUserInput():
       key = kb.readKey()
       char=chr(key)
 
-      if(char == '1'):
+      if(char == '.'):
+        ui.keyPressMessage("* - ONE AXIS ONLY", key, char)
+        ui.log("Use <numpad> to select corner...", k=_k, v='BASIC')
+        key = kb.readKey()
+        char=chr(key)
+
+        if(char == '2'):
+          ui.keyPressMessage("2 - ONE AXIS ONLY - Safe absolute rapid to table corners - BC", key, char)
+          mch.safeRapidAbsolute(y=0)
+        elif(char == '4'):
+          ui.keyPressMessage("4 - ONE AXIS ONLY - Safe absolute rapid to table corners - CL", key, char)
+          mch.safeRapidAbsolute(x=0)
+        elif(char == '6'):
+          ui.keyPressMessage("6 - ONE AXIS ONLY - Safe absolute rapid to table corners - CR", key, char)
+          mch.safeRapidAbsolute(x=tbl.getMaxX())
+        elif(char == '8'):
+          ui.keyPressMessage("8 - ONE AXIS ONLY - Safe absolute rapid to table corners - UC", key, char)
+          mch.safeRapidAbsolute(y=tbl.getMaxY())
+
+
+      elif(char == '1'):
         ui.keyPressMessage("1 - Safe absolute rapid to table corners - BL", key, char)
         mch.safeRapidAbsolute(x=0,y=0)
       elif(char == '2'):
