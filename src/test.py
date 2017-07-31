@@ -21,10 +21,14 @@ if(not ut.isWindows()):
   gpio.setup()
 
 
+testCancelled = False
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def automaticContactTest(iterations = 3):
   _k = 'test.automaticContactTest()'
   ui.log("[ Entering ]", k=_k, v='DEBUG')
+
+  global testCancelled
 
   if(ut.isWindows()):
     ui.log("ERROR: Automatic contact test not available under Windows", k=_k, v='BASIC')
@@ -146,6 +150,8 @@ def manualContactTest():
   _k = 'test.manualContactTest()'
   ui.log("[ Entering ]", k=_k, v='DEBUG')
 
+  global testCancelled
+
   ui.log("Saving original Z", k=_k, v='DETAIL')
   savedZ = tbl.getZ()
   ui.log("Moving to Z0 to start test...", k=_k, v='DETAIL')
@@ -233,6 +239,8 @@ def manualContactTest():
 def gridContactTest():
   _k = 'test.gridContactTest()'
   ui.log("[ Entering ]", k=_k, v='DEBUG')
+
+  global testCancelled
 
   ui.log("Enter number of (inner) lines...", k=_k, v='BASIC')
   userLines=input("[0-n]\n")
