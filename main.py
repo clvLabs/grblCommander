@@ -165,13 +165,23 @@ def processUserInput():
       ui.keyPressMessage("cC - Clear screen", key, char)
       ui.clearScreen()
 
-    elif(char in 'pP'):
-      ui.keyPressMessage("pP - POINT TEST", key, char)
-      test.automaticContactTest(iterations=1)
-
     elif(char in 'tT'):
-      ui.keyPressMessage("tT - TABLE TEST", key, char)
-      test.gridContactTest()
+      ui.keyPressMessage("tT - Tests", key, char)
+      ui.log("Select test to run...", k=_k, v='BASIC')
+      key = kb.readKey()
+      char=chr(key)
+
+      if(char in 'pP'):
+        ui.keyPressMessage("pP - Point test", key, char)
+        test.automaticContactTest(iterations=1)
+
+      elif(char in 'tT'):
+        ui.keyPressMessage("tT - Table test", key, char)
+        test.gridContactTest()
+
+      elif(char in 'lL'):
+        ui.keyPressMessage("lL - Base levelling holes", key, char)
+        test.baseLevelingHoles()
 
     elif(char == '/'):
       ui.keyPressMessage("/ - Relative rapid (Z)+", key, char)

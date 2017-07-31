@@ -479,3 +479,85 @@ def gridContactTest():
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def baseLevelingHoles():
+  _k = 'test.baseLevelingHoles()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
+
+  global testCancelled
+
+  ui.log("""
+  WARNING !!!!!
+  =============
+
+  This test understands your 0,0 is set to the upper right corner
+  of your machine, so it will send NEGATIVE COORDINATES.
+
+  Please read the code thoroughly before proceeding.
+
+  Are you sure you want to continue?
+  (please write IAmSure if you want to go on)
+  """ , k=_k, v='BASIC')
+
+  password=input()
+  if password != 'IAmSure':
+    ui.log("Test CANCELLED" , k=_k, v='BASIC')
+    return
+
+  # - [X/Y steps]- - - - - - - - - - - - - - - - - -
+  XSteps = [0, -30, -60, -80, -100, -120, -140, -150, -170, -200, -220, -240, -260, -280]
+  YSteps = [0, -20, -40, -60, -80, -100, -130, -150, -170, -210, -230, -250, -280]
+
+  # - [Internal helpers]- - - - - - - - - - - - - - - - - -
+  def sendCmd(cmd):
+    global testCancelled
+
+    if testCancelled:
+      ui.log("IGNORING command [{0}] (Test CANCELLED)".format(cmd) , k=_k, v='BASIC')
+      return
+
+    sp.sendSerialCommand(cmd)
+    mch.waitForMachineIdle()
+
+    if(kb.keyPressed()):
+      key=kb.readKey()
+
+      if( key == 27 ):  # <ESC>
+        testCancelled = True
+
+  def goTo(x, y):
+    sendCmd('G0 X{0} Y{1}'.format(x, y))
+
+  def goToSafeZ():
+    sendCmd("G0 Z3")
+
+  def drill():
+    sendCmd("G0 Z1.5")
+    sendCmd("G1 Z0")
+    goToSafeZ()
+
+  # - [Main process]- - - - - - - - - - - - - - - - - -
+  ui.log("Raising Z to safe height..." , k=_k, v='BASIC')
+  goToSafeZ()
+
+  ui.log("Starting drill pattern..." , k=_k, v='BASIC')
+  for yIndex, y in enumerate(YSteps):
+    xRange = XSteps if (yIndex % 2) == 0 else XSteps[::-1]
+    for x in xRange:
+      goTo(x, y)
+      drill()
+
+  ui.log("" , k=_k, v='BASIC')
+  ui.log("**********************" , k=_k, v='BASIC')
+  ui.log("DRILL PATTERN FINISHED" , k=_k, v='BASIC')
+  ui.log("**********************" , k=_k, v='BASIC')
+  ui.log("" , k=_k, v='BASIC')
+
+  if testCancelled:
+    testCancelled = False   # Make sure we always get back home
+
+  ui.log("Back home..." , k=_k, v='BASIC')
+  sendCmd("G0 X0 Y0")
+  sendCmd("G0 Z1.5")
+  sendCmd("G1 Z0")
+
+
