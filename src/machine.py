@@ -30,6 +30,9 @@ def sendGCodeInitSequence():
   ui.log("Sending command [G90]: Absolute programming", k=_k, v='WARNING')
   sp.sendSerialCommand("G90")
 
+  ui.log("Sending command [F100]: Feed rate", k=_k, v='WARNING')
+  sp.sendSerialCommand("F100")
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def getMachineStatus():
