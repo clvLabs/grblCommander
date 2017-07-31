@@ -369,11 +369,11 @@ def gridContactTest():
   outFile.write("TimeStamp: %d/%02d/%02d %02d:%02d:%02d\n" % (t.tm_year,t.tm_mon,t.tm_mday,t.tm_hour,t.tm_min,t.tm_sec) )
   outFile.write("\n")
   outFile.write(
-"""  Software config:
+  """  Software config:
     RapidIncrement_XY = %.2f
     RapidIncrement_Z  = %.2f
     TableSize%%        = %d%%
-"""
+  """
     % (  tbl.getRI_XY(), tbl.getRI_Z(), tbl.getTableSizePercent() ) )
   outFile.write("\n")
 

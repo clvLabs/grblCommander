@@ -25,35 +25,38 @@ def showHelp():
   ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   ui.logBlock(
-"""
-Available commands:
+  """
+  Available commands:
 
-qQ             - Exit
-hH?            - Show this help text
-sS             - Show current status
-rR             - Reset serial connection
+  qQ             - Exit
+  hH?            - Show this help text
+  sS             - Show current status
+  rR             - Reset serial connection
 
-gG             - Send raw GCode command
-cC             - Clear screen
+  gG             - Send raw GCode command
+  cC             - Clear screen
 
-/*             - Relative rapid (Z) +/-
-<numpad>0      - Safe go to X0Y0Z0
-<numpad>       - Safe relative rapid (XY) (including diagonals)
-.              - Safe absolute rapid (XY) to table corners
-                 - <numpad>1..9    - Absolute table positions
-                 - sS              - Table position scan
-                 - .               - One axis only
-                   - <numpad>2468    - Absolute table positions
+  /*             - Relative rapid (Z) +/-
+  <numpad>0      - Safe go to X0Y0Z0
+  <numpad>       - Safe relative rapid (XY) (including diagonals)
+  .              - Safe absolute rapid (XY) to table corners:
+                   - <numpad>1..9   - Absolute table positions
+                   - sS             - Table position scan
+                   - .              - One axis only:
+                     - <numpad>2468   - Absolute table positions
 
-pP             - POINT TEST
-tT             - TABLE TEST
+  tT             - Tests:
+                   - pP             - Point test
+                   - tT             - Table test
+                   - lL             - Base levelling holes
+                   - zZ             - Zig-zag pattern
 
-+-             - Set rapid increment (XY) +/-
-Zz             - Set rapid increment (Z) +/-
-Aa             - Set safe height (Z) +/-
-%              - Set table size percent (loop)
-Vv             - Set verbose level +/- (loop)
-"""
+  +-             - Set rapid increment (XY) +/-
+  Zz             - Set rapid increment (Z) +/-
+  Aa             - Set safe height (Z) +/-
+  %              - Set table size percent (loop)
+  Vv             - Set verbose level +/- (loop)
+  """
     , k=_k, v='BASIC')
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

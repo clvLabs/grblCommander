@@ -82,10 +82,10 @@ def log(message,*pargs, **kargs):
     if((caller is not None) and (getVerboseLevelStr() == 'DEBUG')):
       print("%s - " % caller, end="")
 
-#    if( color != None ):
-#      print(color + message + AnsiColors._END, *pargs, **kargs)
-#    else:
-#      print(message, *pargs, **kargs)
+   # if( color != None ):
+   #   print(color + message + AnsiColors._END, *pargs, **kargs)
+   # else:
+   #   print(message, *pargs, **kargs)
 
     print(message, *pargs, **kargs)
 
