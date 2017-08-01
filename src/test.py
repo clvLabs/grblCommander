@@ -622,6 +622,24 @@ def zigZagPattern():
         zzTotalHeight,
         ), k=_k, v='BASIC')
 
+  def checkTestCancelled():
+    global testCancelled
+    if(kb.keyPressed()):
+      key=kb.readKey()
+
+      if( key == 27 ):  # <ESC>
+        testCancelled = True
+
+  def feed(x=None, y=None, z=None, speed=None):
+    if not testCancelled:
+      mch.feedAbsolute(x=x, y=y, z=z, speed=speed)
+      checkTestCancelled()
+
+  def rapid(x=None, y=None, z=None):
+    if not testCancelled:
+      mch.rapidAbsolute(x=x, y=y, z=z)
+      checkTestCancelled()
+
   bitDiameter=getUserInput('bit diameter (mm)', float)
   if bitDiameter == None:
     ui.log("Test CANCELLED", k=_k, v='BASIC')
@@ -702,7 +720,7 @@ def zigZagPattern():
     ui.log("Test CANCELLED", k=_k, v='BASIC')
     return
 
-  mch.rapidAbsolute(z=zSafeHeight)
+  rapid(z=zSafeHeight)
 
   currX = 0
   currY = 0
@@ -713,29 +731,29 @@ def zigZagPattern():
     currIterY = currY
 
     # "Draw" the zig-zag pattern
-    mch.feedAbsolute(z=zzPlunge*-1, speed=zzPlungeSpeed)
+    feed(z=zzPlunge*-1, speed=zzPlungeSpeed)
 
     for zigZag in range(zzZigZagPerIteration):
       # Up right
       currY += zzRise
       currX += zzRun
-      mch.feedAbsolute(x=currX, y=currY, speed=currSpeed)
+      feed(x=currX, y=currY, speed=currSpeed)
 
       # If run==0, we'll switch the zig-zag pattern for a straight line
       if zzRun:
         # Up left
         currY += zzRise
         currX -= zzRun
-        mch.feedAbsolute(x=currX, y=currY, speed=currSpeed)
+        feed(x=currX, y=currY, speed=currSpeed)
 
     # Raise the spindle
-    mch.rapidAbsolute(z=zSafeHeight)
+    rapid(z=zSafeHeight)
 
     # Move to the next start point
     if currIteration < (zzIterations-1):
       currX = currIterX + zzRun + zzSpacing
       currY = currIterY
-      mch.rapidAbsolute(x=currX, y=currY)
+      rapid(x=currX, y=currY)
 
     # Increase feed speed
     currSpeed += zzDeltaFeed
@@ -751,6 +769,6 @@ def zigZagPattern():
     testCancelled = False   # Make sure we always get back home
 
   ui.log("Back home..." , k=_k, v='BASIC')
-  mch.rapidAbsolute(x=0, y=0)
-  mch.rapidAbsolute(z=0)
+  rapid(x=0, y=0)
+  rapid(z=0)
 
