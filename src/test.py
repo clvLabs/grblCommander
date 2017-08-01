@@ -622,7 +622,7 @@ def zigZagPattern():
         zzTotalHeight,
         ), k=_k, v='BASIC')
 
-  bitDiameter=getUserInput('bit diameter (mm)', int)
+  bitDiameter=getUserInput('bit diameter (mm)', float)
   if not bitDiameter:
     ui.log("Test CANCELLED", k=_k, v='BASIC')
     return
@@ -637,7 +637,7 @@ def zigZagPattern():
     ui.log("Test CANCELLED", k=_k, v='BASIC')
     return
 
-  zSafeHeight=getUserInput('Z safe height (mm)', int)
+  zSafeHeight=getUserInput('Z safe height (mm)', float)
   if not zSafeHeight:
     ui.log("Test CANCELLED", k=_k, v='BASIC')
     return
