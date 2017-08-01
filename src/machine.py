@@ -123,10 +123,10 @@ def feedAbsolute(x=None, y=None, z=None, speed=gDEFAULT_FEED_SPEED, verbose='WAR
     ui.log("Wouldn't move, doing nothing", k=_k, v=verbose)
     return
 
-  if( tbl.getZ() < tbl.getSafeHeight() ):
-    if( x != None or y != None ):
-      ui.log("ERROR: Can't feed on X/Y while Z < %d (SAFE_HEIGHT)!" % tbl.getSafeHeight(), k=_k, v='ERROR')
-      return
+  # if( tbl.getZ() < tbl.getSafeHeight() ):
+  #   if( x != None or y != None ):
+  #     ui.log("ERROR: Can't feed on X/Y while Z < %d (SAFE_HEIGHT)!" % tbl.getSafeHeight(), k=_k, v='ERROR')
+  #     return
 
   cmd = "G1 "
 
