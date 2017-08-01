@@ -721,10 +721,12 @@ def zigZagPattern():
       currX += zzRun
       mch.feedAbsolute(x=currX, y=currY, speed=currSpeed)
 
-      # Up left
-      currY += zzRise
-      currX -= zzRun
-      mch.feedAbsolute(x=currX, y=currY, speed=currSpeed)
+      # If run==0, we'll switch the zig-zag pattern for a straight line
+      if zzRun:
+        # Up left
+        currY += zzRise
+        currX -= zzRun
+        mch.feedAbsolute(x=currX, y=currY, speed=currSpeed)
 
     # Raise the spindle
     mch.rapidAbsolute(z=zSafeHeight)
