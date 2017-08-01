@@ -758,7 +758,6 @@ def zigZagPattern():
     # Increase feed speed
     currSpeed += zzDeltaFeed
 
-
   ui.log("" , k=_k, v='BASIC')
   ui.log("************************" , k=_k, v='BASIC')
   ui.log("ZIG-ZAG PATTERN FINISHED", k=_k, v='BASIC')
@@ -767,6 +766,9 @@ def zigZagPattern():
 
   if testCancelled:
     testCancelled = False   # Make sure we always get back home
+
+  # Raise the spindle
+  rapid(z=zSafeHeight)
 
   ui.log("Back home..." , k=_k, v='BASIC')
   rapid(x=0, y=0)
