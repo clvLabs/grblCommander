@@ -500,7 +500,7 @@ def baseLevelingHoles():
 
   password=input()
   if password != 'IAmSure':
-    ui.log("Test CANCELLED" , k=_k, v='BASIC')
+    ui.log("Test CANCELLED", k=_k, v='BASIC')
     return
 
   # - [X/Y steps]- - - - - - - - - - - - - - - - - -
@@ -548,7 +548,7 @@ def baseLevelingHoles():
 
   ui.log("" , k=_k, v='BASIC')
   ui.log("**********************" , k=_k, v='BASIC')
-  ui.log("DRILL PATTERN FINISHED" , k=_k, v='BASIC')
+  ui.log("DRILL PATTERN FINISHED", k=_k, v='BASIC')
   ui.log("**********************" , k=_k, v='BASIC')
   ui.log("" , k=_k, v='BASIC')
 
