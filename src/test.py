@@ -623,22 +623,22 @@ def zigZagPattern():
         ), k=_k, v='BASIC')
 
   bitDiameter=getUserInput('bit diameter (mm)', float)
-  if not bitDiameter:
+  if bitDiameter == None:
     ui.log("Test CANCELLED", k=_k, v='BASIC')
     return
 
   bitFlutes=getUserInput('number of flutes', int)
-  if not bitFlutes:
+  if bitFlutes == None:
     ui.log("Test CANCELLED", k=_k, v='BASIC')
     return
 
   bitRPM=getUserInput('spindle RPM', int)
-  if not bitRPM:
+  if bitRPM == None:
     ui.log("Test CANCELLED", k=_k, v='BASIC')
     return
 
   zSafeHeight=getUserInput('Z safe height (mm)', float)
-  if not zSafeHeight:
+  if zSafeHeight == None:
     ui.log("Test CANCELLED", k=_k, v='BASIC')
     return
 
@@ -661,31 +661,31 @@ def zigZagPattern():
   showZZParameters('Calculated parameters')
 
   zzTmpRun=getUserInput('Run (default {:f})'.format(zzRun), float)
-  if zzTmpRun: zzRun = zzTmpRun
+  if zzTmpRun is not None: zzRun = zzTmpRun
 
   zzTmpRise=getUserInput('Rise (default {:f})'.format(zzRise), float)
-  if zzTmpRise: zzRise = zzTmpRise
+  if zzTmpRise is not None: zzRise = zzTmpRise
 
   zzTmpPlunge=getUserInput('Plunge (default {:f})'.format(zzPlunge), float)
-  if zzTmpPlunge: zzPlunge = zzTmpPlunge
+  if zzTmpPlunge is not None: zzPlunge = zzTmpPlunge
 
   zzTmpPlungeSpeed=getUserInput('PlungeSpeed (default {:f})'.format(zzPlungeSpeed), float)
-  if zzTmpPlungeSpeed: zzPlungeSpeed = zzTmpPlungeSpeed
+  if zzTmpPlungeSpeed is not None: zzPlungeSpeed = zzTmpPlungeSpeed
 
   zzTmpInitialFeed=getUserInput('InitialFeed (default {:f})'.format(zzInitialFeed), float)
-  if zzTmpInitialFeed: zzInitialFeed = zzTmpInitialFeed
+  if zzTmpInitialFeed is not None: zzInitialFeed = zzTmpInitialFeed
 
   zzTmpDeltaFeed=getUserInput('DeltaFeed (default {:d})'.format(zzDeltaFeed), int)
-  if zzTmpDeltaFeed: zzDeltaFeed = zzTmpDeltaFeed
+  if zzTmpDeltaFeed is not None: zzDeltaFeed = zzTmpDeltaFeed
 
   zzTmpZigZagPerIteration=getUserInput('ZigZagPerIteration (default {:d})'.format(zzZigZagPerIteration), int)
-  if zzTmpZigZagPerIteration: zzZigZagPerIteration = zzTmpZigZagPerIteration
+  if zzTmpZigZagPerIteration is not None: zzZigZagPerIteration = zzTmpZigZagPerIteration
 
   zzTmpIterations=getUserInput('Iterations (default {:d})'.format(zzIterations), int)
-  if zzTmpIterations: zzIterations = zzTmpIterations
+  if zzTmpIterations is not None: zzIterations = zzTmpIterations
 
   zzTmpSpacing=getUserInput('Spacing (default {:f})'.format(zzSpacing), float)
-  if zzTmpSpacing: zzSpacing = zzTmpSpacing
+  if zzTmpSpacing is not None: zzSpacing = zzTmpSpacing
 
   zzTotalWidth = ((zzRun + zzSpacing) * zzIterations) - zzSpacing + bitDiameter
   zzTotalHeight = (zzRise * zzZigZagPerIteration * 2) + bitDiameter
