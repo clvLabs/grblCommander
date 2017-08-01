@@ -561,3 +561,194 @@ def baseLevelingHoles():
   sendCmd("G1 Z0")
 
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def zigZagPattern():
+  _k = 'test.zigZagPattern()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
+
+  global testCancelled
+
+  ui.log("""
+  WARNING !!!!!
+  =============
+
+  This test will start a series of zig-zag patterns
+  using incremental feed speeds to determine
+  optimal speed-feed for a given material.
+
+  Based on:
+  http://www.precisebits.com/tutorials/calibrating_feeds_n_speeds.htm
+
+  Please read the code thoroughly before proceeding.
+  """ , k=_k, v='BASIC')
+
+  def getUserInput(description, dataType):
+    ui.log('Enter {0}:'.format(description).ljust(45), k=_k, v='BASIC', end='')
+    userInput=input()
+    try:
+      userInput=dataType(userInput)
+      return userInput
+    except:
+      return None
+
+  def showZZParameters(title):
+    ui.log("""
+    {:s}:
+      Run                   {:f}
+      Rise                  {:f}
+      Plunge                {:f}
+      PlungeSpeed           {:f}
+      InitialFeed           {:f}
+      DeltaFeed             {:d}
+      ZigZagPerIteration    {:d}
+      Iterations            {:d}
+      Spacing               {:f}
+
+      TOTAL
+        Width               {:f}
+        Height              {:f}
+      """.format(
+        title,
+        zzRun,
+        zzRise,
+        zzPlunge,
+        zzPlungeSpeed,
+        zzInitialFeed,
+        zzDeltaFeed,
+        zzZigZagPerIteration,
+        zzIterations,
+        zzSpacing,
+        zzTotalWidth,
+        zzTotalHeight,
+        ), k=_k, v='BASIC')
+
+  bitDiameter=getUserInput('bit diameter (mm)', int)
+  if not bitDiameter:
+    ui.log("Test CANCELLED", k=_k, v='BASIC')
+    return
+
+  bitFlutes=getUserInput('number of flutes', int)
+  if not bitFlutes:
+    ui.log("Test CANCELLED", k=_k, v='BASIC')
+    return
+
+  bitRPM=getUserInput('spindle RPM', int)
+  if not bitRPM:
+    ui.log("Test CANCELLED", k=_k, v='BASIC')
+    return
+
+  zSafeHeight=getUserInput('Z safe height (mm)', int)
+  if not zSafeHeight:
+    ui.log("Test CANCELLED", k=_k, v='BASIC')
+    return
+
+  # zig-zag default parameter calculations
+  # NOTE: Using parameters for softwoods!!
+  # Check before trying with other materials!!
+
+  zzRun = 25 if bitDiameter < 3.18 else 50
+  zzRise = bitDiameter * 2
+  zzPlunge = bitDiameter
+  zzPlungeSpeed = 100
+  zzInitialFeed = 0.02 * bitDiameter * bitFlutes * bitRPM
+  zzDeltaFeed = 125 if bitDiameter < 0.8 else 200 if bitDiameter < 3.0 else 250
+  zzZigZagPerIteration = 4
+  zzIterations = 4
+  zzSpacing = bitDiameter * 2
+  zzTotalWidth = ((zzRun + zzSpacing) * zzIterations) - zzSpacing + bitDiameter
+  zzTotalHeight = (zzRise * zzZigZagPerIteration * 2) + bitDiameter
+
+  showZZParameters('Calculated parameters')
+
+  zzTmpRun=getUserInput('Run (default {:f})'.format(zzRun), float)
+  if zzTmpRun: zzRun = zzTmpRun
+
+  zzTmpRise=getUserInput('Rise (default {:f})'.format(zzRise), float)
+  if zzTmpRise: zzRise = zzTmpRise
+
+  zzTmpPlunge=getUserInput('Plunge (default {:f})'.format(zzPlunge), float)
+  if zzTmpPlunge: zzPlunge = zzTmpPlunge
+
+  zzTmpPlungeSpeed=getUserInput('PlungeSpeed (default {:f})'.format(zzPlungeSpeed), float)
+  if zzTmpPlungeSpeed: zzPlungeSpeed = zzTmpPlungeSpeed
+
+  zzTmpInitialFeed=getUserInput('InitialFeed (default {:f})'.format(zzInitialFeed), float)
+  if zzTmpInitialFeed: zzInitialFeed = zzTmpInitialFeed
+
+  zzTmpDeltaFeed=getUserInput('DeltaFeed (default {:d})'.format(zzDeltaFeed), int)
+  if zzTmpDeltaFeed: zzDeltaFeed = zzTmpDeltaFeed
+
+  zzTmpZigZagPerIteration=getUserInput('ZigZagPerIteration (default {:d})'.format(zzZigZagPerIteration), int)
+  if zzTmpZigZagPerIteration: zzZigZagPerIteration = zzTmpZigZagPerIteration
+
+  zzTmpIterations=getUserInput('Iterations (default {:d})'.format(zzIterations), int)
+  if zzTmpIterations: zzIterations = zzTmpIterations
+
+  zzTmpSpacing=getUserInput('Spacing (default {:f})'.format(zzSpacing), float)
+  if zzTmpSpacing: zzSpacing = zzTmpSpacing
+
+  zzTotalWidth = ((zzRun + zzSpacing) * zzIterations) - zzSpacing + bitDiameter
+  zzTotalHeight = (zzRise * zzZigZagPerIteration * 2) + bitDiameter
+
+  showZZParameters('FINAL parameters')
+
+  ui.log("""
+  Are you sure you want to start?
+  (please write IAmSure if you want to go on)
+  """ , k=_k, v='BASIC')
+
+  password=input()
+  if password != 'IAmSure':
+    ui.log("Test CANCELLED", k=_k, v='BASIC')
+    return
+
+  mch.rapidAbsolute(z=zSafeHeight)
+
+  currX = 0
+  currY = 0
+  currSpeed = zzInitialFeed
+
+  for currIteration in range(zzIterations):
+    currIterX = currX
+    currIterY = currY
+
+    # "Draw" the zig-zag pattern
+    mch.feedAbsolute(z=zzPlunge*-1, speed=zzPlungeSpeed)
+
+    for zigZag in range(zzZigZagPerIteration):
+      # Up right
+      currY += zzRise
+      currX += zzRun
+      mch.feedAbsolute(x=currX, y=currY, speed=currSpeed)
+
+      # Up left
+      currY += zzRise
+      currX -= zzRun
+      mch.feedAbsolute(x=currX, y=currY, speed=currSpeed)
+
+    # Raise the spindle
+    mch.rapidAbsolute(z=zSafeHeight)
+
+    # Move to the next start point
+    if currIteration < (zzIterations-1):
+      currX = currIterX + zzRun + zzSpacing
+      currY = currIterY
+      mch.rapidAbsolute(x=currX, y=currY)
+
+    # Increase feed speed
+    currSpeed += zzDeltaFeed
+
+
+  ui.log("" , k=_k, v='BASIC')
+  ui.log("************************" , k=_k, v='BASIC')
+  ui.log("ZIG-ZAG PATTERN FINISHED", k=_k, v='BASIC')
+  ui.log("************************" , k=_k, v='BASIC')
+  ui.log("" , k=_k, v='BASIC')
+
+  if testCancelled:
+    testCancelled = False   # Make sure we always get back home
+
+  ui.log("Back home..." , k=_k, v='BASIC')
+  mch.rapidAbsolute(x=0, y=0)
+  mch.rapidAbsolute(z=0)
+

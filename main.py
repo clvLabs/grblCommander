@@ -183,6 +183,10 @@ def processUserInput():
         ui.keyPressMessage("lL - Base levelling holes", key, char)
         test.baseLevelingHoles()
 
+      elif(char in 'zZ'):
+        ui.keyPressMessage("zZ - Zig-zag pattern", key, char)
+        test.zigZagPattern()
+
     elif(char == '/'):
       ui.keyPressMessage("/ - Relative rapid (Z)+", key, char)
       mch.safeRapidRelative(x=0,y=0,z=tbl.getRI_Z())
