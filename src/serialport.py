@@ -17,7 +17,7 @@ gSerial = serial.Serial()
 
 # Serial configuration
 gBAUDRATE = 115200
-gPORTNUMBER_WINDOWS = 6              # Change THIS to match your Arduino's COM port !!!
+gPORTNUMBER_WINDOWS = 3              # Change THIS to match your Arduino's COM port !!!
 gPORTNUMBER_LINUX = '/dev/ttyACM0'   # Change THIS to match your Arduino's COM port !!!
 gPORTNUMBER = 0
 gTIMEOUT = 0.1
