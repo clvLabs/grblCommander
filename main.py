@@ -50,6 +50,7 @@ def showHelp():
                    - tT             - Table test
                    - lL             - Base levelling holes
                    - zZ             - Zig-zag pattern
+                   - *              - DUMMY Test
 
   +-             - Set rapid increment (XY) +/-
   Zz             - Set rapid increment (Z) +/-
@@ -186,6 +187,10 @@ def processUserInput():
       elif(char in 'zZ'):
         ui.keyPressMessage("zZ - Zig-zag pattern", key, char)
         test.zigZagPattern()
+
+      elif(char == '*'):
+        ui.keyPressMessage("* - DUMMY Test", key, char)
+        test.dummy()
 
     elif(char == '/'):
       ui.keyPressMessage("/ - Relative rapid (Z)+", key, char)

@@ -774,3 +774,159 @@ def zigZagPattern():
   rapid(x=0, y=0)
   rapid(z=0)
 
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def dummy():
+  _k = 'test.dummy()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
+
+  global testCancelled
+
+  ui.log("""
+  WARNING !!!!!
+  =============
+
+  This is a DUMMY test, it can contain ANYTHING.
+  Please read the code thoroughly before proceeding.
+  """ , k=_k, v='BASIC')
+
+  def getUserInput(description, dataType):
+    ui.log('Enter {0}:'.format(description).ljust(45), k=_k, v='BASIC', end='')
+    userInput=input()
+    try:
+      userInput=dataType(userInput)
+      return userInput
+    except:
+      return None
+
+  def showZZParameters(title):
+    ui.log("""
+    {:s}:
+      MaterialZ             {:d}
+      PocketWidth           {:f}
+      PocketHeight          {:f}
+      TargetZ               {:f}
+      SafeHeight            {:d}
+      Plunge                {:f}
+      PlungeSpeed           {:d}
+      Feed                  {:d}
+      """.format(
+        title,
+        zzMaterialZ,
+        zzPocketWidth,
+        zzPocketHeight,
+        zzTargetZ,
+        zzSafeHeight,
+        zzPlunge,
+        zzPlungeSpeed,
+        zzFeed,
+        ), k=_k, v='BASIC')
+
+  def checkTestCancelled():
+    global testCancelled
+    if(kb.keyPressed()):
+      key=kb.readKey()
+
+      if( key == 27 ):  # <ESC>
+        testCancelled = True
+
+  def feed(x=None, y=None, z=None, speed=None):
+    if not testCancelled:
+      mch.feedAbsolute(x=x, y=y, z=z, speed=speed)
+      checkTestCancelled()
+
+  def rapid(x=None, y=None, z=None):
+    if not testCancelled:
+      mch.rapidAbsolute(x=x, y=y, z=z)
+      checkTestCancelled()
+
+  # Check before trying with other materials!!
+
+  zzMaterialZ = 13
+  zzPocketWidth = 50.0
+  zzPocketHeight = 4.5
+  zzTargetZ = 0.1
+  zzSafeHeight = zzMaterialZ + 2
+  zzPlunge = 1.5
+  zzPlungeSpeed = 100
+  zzFeed = 600
+
+  showZZParameters('Calculated parameters')
+
+  zzTmpMaterialZ=getUserInput('MaterialZ (default {:d})'.format(zzMaterialZ), int)
+  if zzTmpMaterialZ is not None: zzMaterialZ = zzTmpMaterialZ
+
+  zzTmpPocketWidth=getUserInput('PocketWidth (default {:f})'.format(zzPocketWidth), float)
+  if zzTmpPocketWidth is not None: zzPocketWidth = zzTmpPocketWidth
+
+  zzTmpPocketHeight=getUserInput('PocketHeight (default {:f})'.format(zzPocketHeight), float)
+  if zzTmpPocketHeight is not None: zzPocketHeight = zzTmpPocketHeight
+
+  zzTmpTargetZ=getUserInput('TargetZ (default {:f})'.format(zzTargetZ), float)
+  if zzTmpTargetZ is not None: zzTargetZ = zzTmpTargetZ
+
+  zzTmpSafeHeight=getUserInput('SafeHeight (default {:d})'.format(zzSafeHeight), int)
+  if zzTmpSafeHeight is not None: zzSafeHeight = zzTmpSafeHeight
+
+  zzTmpPlunge=getUserInput('Plunge (default {:f})'.format(zzPlunge), float)
+  if zzTmpPlunge is not None: zzPlunge = zzTmpPlunge
+
+  zzTmpPlungeSpeed=getUserInput('PlungeSpeed (default {:d})'.format(zzPlungeSpeed), int)
+  if zzTmpPlungeSpeed is not None: zzPlungeSpeed = zzTmpPlungeSpeed
+
+  zzTmpFeed=getUserInput('Feed (default {:d})'.format(zzFeed), int)
+  if zzTmpFeed is not None: zzFeed = zzTmpFeed
+
+  showZZParameters('FINAL parameters')
+
+  ui.log("""
+  Are you sure you want to start?
+  (please write IAmSure if you want to go on)
+  """ , k=_k, v='BASIC')
+
+  password=input()
+  if password != 'IAmSure':
+    ui.log("Test CANCELLED", k=_k, v='BASIC')
+    return
+
+  rapid(z=zzSafeHeight)
+  rapid(x=0, y=0)
+
+  currX = 0
+  currY = 0
+  currZ = zzMaterialZ - zzPlunge
+  if (currZ - zzPlunge) < zzTargetZ:
+    currZ = zzTargetZ
+
+  finished = False
+  while not finished:
+    feed(z=currZ, speed=zzPlungeSpeed)
+    feed(x=zzPocketWidth, speed=zzFeed)
+    feed(y=zzPocketHeight, speed=zzFeed)
+    feed(x=0, speed=zzFeed)
+    feed(y=0, speed=zzFeed)
+
+    if currZ == zzTargetZ:
+      finished = True
+    else:
+      if (currZ - zzPlunge) < zzTargetZ:
+        currZ = zzTargetZ
+      else:
+        currZ -= zzPlunge
+
+  ui.log("" , k=_k, v='BASIC')
+  ui.log("************************" , k=_k, v='BASIC')
+  ui.log("DUMMY TEST FINISHED", k=_k, v='BASIC')
+  ui.log("************************" , k=_k, v='BASIC')
+  ui.log("" , k=_k, v='BASIC')
+
+  if testCancelled:
+    testCancelled = False   # Make sure we always get back home
+
+  # Raise the spindle
+  rapid(z=zzSafeHeight)
+
+  ui.log("Back home..." , k=_k, v='BASIC')
+  rapid(x=0, y=0)
+  # rapid(z=0)
+
