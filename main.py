@@ -53,7 +53,9 @@ def showHelp():
                    - *              - DUMMY Test
 
   +-             - Set rapid increment (XY) +/-
+  <CTRL>x/y      - Set rapid increment (XY)
   Zz             - Set rapid increment (Z) +/-
+  <CTRL>z        - Set rapid increment (Z)
   Aa             - Set safe height (Z) +/-
   %              - Set table size percent (loop)
   Vv             - Set verbose level +/- (loop)
@@ -303,6 +305,11 @@ def processUserInput():
       ui.keyPressMessage("- - Set rapid increment (XY)-", key, char)
       tbl.changeRI_XY(-1)
 
+    elif(key in [24, 25]):  # <CTRL>x/y
+      ui.keyPressMessage("<CTRL>x/y - Set rapid increment (XY)", key, char)
+      tmpRI_XY=ui.getUserInput('Increment (current {:f})'.format(tbl.getRI_XY()), float)
+      tbl.setRI_XY(tmpRI_XY)
+
     elif(char == 'Z'):
       ui.keyPressMessage("Z - Set rapid increment (Z)+", key, char)
       tbl.changeRI_Z(+1)
@@ -310,6 +317,11 @@ def processUserInput():
     elif(char == 'z'):
       ui.keyPressMessage("z - Set rapid increment (Z)-", key, char)
       tbl.changeRI_Z(-1)
+
+    elif(key == 26):  # <CTRL>z
+      ui.keyPressMessage("<CTRL>z - Set rapid increment (Z)", key, char)
+      tmpRI_Z=ui.getUserInput('Increment (current {:f})'.format(tbl.getRI_Z()), float)
+      tbl.setRI_Z(tmpRI_Z)
 
     elif(char == '%'):
       ui.keyPressMessage("% - Set table size percent (loop)", key, char)
