@@ -22,6 +22,8 @@ Custom tests are currently stored on `src/test.py`:
 * Zig-zag pattern
     * A couple tests to calculate feed and speed
     * Based on [this article](http://www.precisebits.com/tutorials/calibrating_feeds_n_speeds.htm)
+* DUMMY
+    * A test meant to be used as a sandbox
 
 **PLEASE read the test code thoroughly before executing ANY of the tests**
 
