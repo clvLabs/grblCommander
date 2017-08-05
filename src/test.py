@@ -779,9 +779,13 @@ def dummy():
 
   This is a DUMMY test, it can contain ANYTHING.
   Please read the code thoroughly before proceeding.
+
+  Currently this test will:
+
+  - Mill a configurable horizontal pocket (designed for making my holding clamps)
   """ , k=_k, v='BASIC')
 
-  def showZZParameters(title):
+  def showParams(title):
     ui.log("""
     {:s}:
       MaterialZ             {:d}
@@ -794,14 +798,14 @@ def dummy():
       Feed                  {:d}
       """.format(
         title,
-        zzMaterialZ,
-        zzPocketWidth,
-        zzPocketHeight,
-        zzTargetZ,
-        zzSafeHeight,
-        zzPlunge,
-        zzPlungeSpeed,
-        zzFeed,
+        materialZ,
+        pocketWidth,
+        pocketHeight,
+        targetZ,
+        safeHeight,
+        plunge,
+        plungeSpeed,
+        feed,
         ), k=_k, v='BASIC')
 
   def checkTestCancelled():
@@ -824,42 +828,42 @@ def dummy():
 
   # Check before trying with other materials!!
 
-  zzMaterialZ = 13
-  zzPocketWidth = 50.0
-  zzPocketHeight = 4.5
-  zzTargetZ = 0.1
-  zzSafeHeight = zzMaterialZ + 2
-  zzPlunge = 1.5
-  zzPlungeSpeed = 100
-  zzFeed = 600
+  materialZ = 13
+  pocketWidth = 50.0
+  pocketHeight = 4.5
+  targetZ = 0.1
+  safeHeight = materialZ + 2
+  plunge = 1.5
+  plungeSpeed = 100
+  feed = 600
 
-  showZZParameters('Calculated parameters')
+  showParams('Default parameters')
 
-  zzTmpMaterialZ=ui.getUserInput('MaterialZ (default {:d})'.format(zzMaterialZ), int)
-  if zzTmpMaterialZ is not None: zzMaterialZ = zzTmpMaterialZ
+  tmpMaterialZ=ui.getUserInput('MaterialZ (default {:d})'.format(materialZ), int)
+  if tmpMaterialZ is not None: materialZ = tmpMaterialZ
 
-  zzTmpPocketWidth=ui.getUserInput('PocketWidth (default {:f})'.format(zzPocketWidth), float)
-  if zzTmpPocketWidth is not None: zzPocketWidth = zzTmpPocketWidth
+  tmpPocketWidth=ui.getUserInput('PocketWidth (default {:f})'.format(pocketWidth), float)
+  if tmpPocketWidth is not None: pocketWidth = tmpPocketWidth
 
-  zzTmpPocketHeight=ui.getUserInput('PocketHeight (default {:f})'.format(zzPocketHeight), float)
-  if zzTmpPocketHeight is not None: zzPocketHeight = zzTmpPocketHeight
+  tmpPocketHeight=ui.getUserInput('PocketHeight (default {:f})'.format(pocketHeight), float)
+  if tmpPocketHeight is not None: pocketHeight = tmpPocketHeight
 
-  zzTmpTargetZ=ui.getUserInput('TargetZ (default {:f})'.format(zzTargetZ), float)
-  if zzTmpTargetZ is not None: zzTargetZ = zzTmpTargetZ
+  tmpTargetZ=ui.getUserInput('TargetZ (default {:f})'.format(targetZ), float)
+  if tmpTargetZ is not None: targetZ = tmpTargetZ
 
-  zzTmpSafeHeight=ui.getUserInput('SafeHeight (default {:d})'.format(zzSafeHeight), int)
-  if zzTmpSafeHeight is not None: zzSafeHeight = zzTmpSafeHeight
+  tmpSafeHeight=ui.getUserInput('SafeHeight (default {:d})'.format(safeHeight), int)
+  if tmpSafeHeight is not None: safeHeight = tmpSafeHeight
 
-  zzTmpPlunge=ui.getUserInput('Plunge (default {:f})'.format(zzPlunge), float)
-  if zzTmpPlunge is not None: zzPlunge = zzTmpPlunge
+  tmpPlunge=ui.getUserInput('Plunge (default {:f})'.format(plunge), float)
+  if tmpPlunge is not None: plunge = tmpPlunge
 
-  zzTmpPlungeSpeed=ui.getUserInput('PlungeSpeed (default {:d})'.format(zzPlungeSpeed), int)
-  if zzTmpPlungeSpeed is not None: zzPlungeSpeed = zzTmpPlungeSpeed
+  tmpPlungeSpeed=ui.getUserInput('PlungeSpeed (default {:d})'.format(plungeSpeed), int)
+  if tmpPlungeSpeed is not None: plungeSpeed = tmpPlungeSpeed
 
-  zzTmpFeed=ui.getUserInput('Feed (default {:d})'.format(zzFeed), int)
-  if zzTmpFeed is not None: zzFeed = zzTmpFeed
+  tmpFeed=ui.getUserInput('Feed (default {:d})'.format(feed), int)
+  if tmpFeed is not None: feed = tmpFeed
 
-  showZZParameters('FINAL parameters')
+  showParams('FINAL parameters')
 
   ui.log("""
   Are you sure you want to start?
@@ -871,30 +875,30 @@ def dummy():
     ui.log("Test CANCELLED", k=_k, v='BASIC')
     return
 
-  rapid(z=zzSafeHeight)
+  rapid(z=safeHeight)
   rapid(x=0, y=0)
 
   currX = 0
   currY = 0
-  currZ = zzMaterialZ - zzPlunge
-  if (currZ - zzPlunge) < zzTargetZ:
-    currZ = zzTargetZ
+  currZ = materialZ - plunge
+  if (currZ - plunge) < targetZ:
+    currZ = targetZ
 
   finished = False
   while not finished:
-    feed(z=currZ, speed=zzPlungeSpeed)
-    feed(x=zzPocketWidth, speed=zzFeed)
-    feed(y=zzPocketHeight, speed=zzFeed)
-    feed(x=0, speed=zzFeed)
-    feed(y=0, speed=zzFeed)
+    feed(z=currZ, speed=plungeSpeed)
+    feed(x=pocketWidth, speed=feed)
+    feed(y=pocketHeight, speed=feed)
+    feed(x=0, speed=feed)
+    feed(y=0, speed=feed)
 
-    if currZ == zzTargetZ:
+    if currZ == targetZ:
       finished = True
     else:
-      if (currZ - zzPlunge) < zzTargetZ:
-        currZ = zzTargetZ
+      if (currZ - plunge) < targetZ:
+        currZ = targetZ
       else:
-        currZ -= zzPlunge
+        currZ -= plunge
 
   ui.log("" , k=_k, v='BASIC')
   ui.log("************************" , k=_k, v='BASIC')
@@ -906,7 +910,7 @@ def dummy():
     testCancelled = False   # Make sure we always get back home
 
   # Raise the spindle
-  rapid(z=zzSafeHeight)
+  rapid(z=safeHeight)
 
   ui.log("Back home..." , k=_k, v='BASIC')
   rapid(x=0, y=0)
