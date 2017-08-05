@@ -582,15 +582,6 @@ def zigZagPattern():
   Please read the code thoroughly before proceeding.
   """ , k=_k, v='BASIC')
 
-  def getUserInput(description, dataType):
-    ui.log('Enter {0}:'.format(description).ljust(45), k=_k, v='BASIC', end='')
-    userInput=input()
-    try:
-      userInput=dataType(userInput)
-      return userInput
-    except:
-      return None
-
   def showZZParameters(title):
     ui.log("""
     {:s}:
@@ -640,22 +631,22 @@ def zigZagPattern():
       mch.rapidAbsolute(x=x, y=y, z=z)
       checkTestCancelled()
 
-  bitDiameter=getUserInput('bit diameter (mm)', float)
+  bitDiameter=ui.getUserInput('bit diameter (mm)', float)
   if bitDiameter == None:
     ui.log("Test CANCELLED", k=_k, v='BASIC')
     return
 
-  bitFlutes=getUserInput('number of flutes', int)
+  bitFlutes=ui.getUserInput('number of flutes', int)
   if bitFlutes == None:
     ui.log("Test CANCELLED", k=_k, v='BASIC')
     return
 
-  bitRPM=getUserInput('spindle RPM', int)
+  bitRPM=ui.getUserInput('spindle RPM', int)
   if bitRPM == None:
     ui.log("Test CANCELLED", k=_k, v='BASIC')
     return
 
-  zSafeHeight=getUserInput('Z safe height (mm)', float)
+  zSafeHeight=ui.getUserInput('Z safe height (mm)', float)
   if zSafeHeight == None:
     ui.log("Test CANCELLED", k=_k, v='BASIC')
     return
@@ -678,31 +669,31 @@ def zigZagPattern():
 
   showZZParameters('Calculated parameters')
 
-  zzTmpRun=getUserInput('Run (default {:f})'.format(zzRun), float)
+  zzTmpRun=ui.getUserInput('Run (default {:f})'.format(zzRun), float)
   if zzTmpRun is not None: zzRun = zzTmpRun
 
-  zzTmpRise=getUserInput('Rise (default {:f})'.format(zzRise), float)
+  zzTmpRise=ui.getUserInput('Rise (default {:f})'.format(zzRise), float)
   if zzTmpRise is not None: zzRise = zzTmpRise
 
-  zzTmpPlunge=getUserInput('Plunge (default {:f})'.format(zzPlunge), float)
+  zzTmpPlunge=ui.getUserInput('Plunge (default {:f})'.format(zzPlunge), float)
   if zzTmpPlunge is not None: zzPlunge = zzTmpPlunge
 
-  zzTmpPlungeSpeed=getUserInput('PlungeSpeed (default {:f})'.format(zzPlungeSpeed), float)
+  zzTmpPlungeSpeed=ui.getUserInput('PlungeSpeed (default {:f})'.format(zzPlungeSpeed), float)
   if zzTmpPlungeSpeed is not None: zzPlungeSpeed = zzTmpPlungeSpeed
 
-  zzTmpInitialFeed=getUserInput('InitialFeed (default {:f})'.format(zzInitialFeed), float)
+  zzTmpInitialFeed=ui.getUserInput('InitialFeed (default {:f})'.format(zzInitialFeed), float)
   if zzTmpInitialFeed is not None: zzInitialFeed = zzTmpInitialFeed
 
-  zzTmpDeltaFeed=getUserInput('DeltaFeed (default {:d})'.format(zzDeltaFeed), int)
+  zzTmpDeltaFeed=ui.getUserInput('DeltaFeed (default {:d})'.format(zzDeltaFeed), int)
   if zzTmpDeltaFeed is not None: zzDeltaFeed = zzTmpDeltaFeed
 
-  zzTmpZigZagPerIteration=getUserInput('ZigZagPerIteration (default {:d})'.format(zzZigZagPerIteration), int)
+  zzTmpZigZagPerIteration=ui.getUserInput('ZigZagPerIteration (default {:d})'.format(zzZigZagPerIteration), int)
   if zzTmpZigZagPerIteration is not None: zzZigZagPerIteration = zzTmpZigZagPerIteration
 
-  zzTmpIterations=getUserInput('Iterations (default {:d})'.format(zzIterations), int)
+  zzTmpIterations=ui.getUserInput('Iterations (default {:d})'.format(zzIterations), int)
   if zzTmpIterations is not None: zzIterations = zzTmpIterations
 
-  zzTmpSpacing=getUserInput('Spacing (default {:f})'.format(zzSpacing), float)
+  zzTmpSpacing=ui.getUserInput('Spacing (default {:f})'.format(zzSpacing), float)
   if zzTmpSpacing is not None: zzSpacing = zzTmpSpacing
 
   zzTotalWidth = ((zzRun + zzSpacing) * zzIterations) - zzSpacing + bitDiameter
@@ -790,15 +781,6 @@ def dummy():
   Please read the code thoroughly before proceeding.
   """ , k=_k, v='BASIC')
 
-  def getUserInput(description, dataType):
-    ui.log('Enter {0}:'.format(description).ljust(45), k=_k, v='BASIC', end='')
-    userInput=input()
-    try:
-      userInput=dataType(userInput)
-      return userInput
-    except:
-      return None
-
   def showZZParameters(title):
     ui.log("""
     {:s}:
@@ -853,28 +835,28 @@ def dummy():
 
   showZZParameters('Calculated parameters')
 
-  zzTmpMaterialZ=getUserInput('MaterialZ (default {:d})'.format(zzMaterialZ), int)
+  zzTmpMaterialZ=ui.getUserInput('MaterialZ (default {:d})'.format(zzMaterialZ), int)
   if zzTmpMaterialZ is not None: zzMaterialZ = zzTmpMaterialZ
 
-  zzTmpPocketWidth=getUserInput('PocketWidth (default {:f})'.format(zzPocketWidth), float)
+  zzTmpPocketWidth=ui.getUserInput('PocketWidth (default {:f})'.format(zzPocketWidth), float)
   if zzTmpPocketWidth is not None: zzPocketWidth = zzTmpPocketWidth
 
-  zzTmpPocketHeight=getUserInput('PocketHeight (default {:f})'.format(zzPocketHeight), float)
+  zzTmpPocketHeight=ui.getUserInput('PocketHeight (default {:f})'.format(zzPocketHeight), float)
   if zzTmpPocketHeight is not None: zzPocketHeight = zzTmpPocketHeight
 
-  zzTmpTargetZ=getUserInput('TargetZ (default {:f})'.format(zzTargetZ), float)
+  zzTmpTargetZ=ui.getUserInput('TargetZ (default {:f})'.format(zzTargetZ), float)
   if zzTmpTargetZ is not None: zzTargetZ = zzTmpTargetZ
 
-  zzTmpSafeHeight=getUserInput('SafeHeight (default {:d})'.format(zzSafeHeight), int)
+  zzTmpSafeHeight=ui.getUserInput('SafeHeight (default {:d})'.format(zzSafeHeight), int)
   if zzTmpSafeHeight is not None: zzSafeHeight = zzTmpSafeHeight
 
-  zzTmpPlunge=getUserInput('Plunge (default {:f})'.format(zzPlunge), float)
+  zzTmpPlunge=ui.getUserInput('Plunge (default {:f})'.format(zzPlunge), float)
   if zzTmpPlunge is not None: zzPlunge = zzTmpPlunge
 
-  zzTmpPlungeSpeed=getUserInput('PlungeSpeed (default {:d})'.format(zzPlungeSpeed), int)
+  zzTmpPlungeSpeed=ui.getUserInput('PlungeSpeed (default {:d})'.format(zzPlungeSpeed), int)
   if zzTmpPlungeSpeed is not None: zzPlungeSpeed = zzTmpPlungeSpeed
 
-  zzTmpFeed=getUserInput('Feed (default {:d})'.format(zzFeed), int)
+  zzTmpFeed=ui.getUserInput('Feed (default {:d})'.format(zzFeed), int)
   if zzTmpFeed is not None: zzFeed = zzTmpFeed
 
   showZZParameters('FINAL parameters')

@@ -150,4 +150,16 @@ def clearScreen():
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+def getUserInput(description, dataType='str'):
+  _k = 'ui.getUserInput()'
+  log('Enter {0}:'.format(description).ljust(45), k=_k, v='BASIC', end='')
+  userInput=input()
+  try:
+    userInput=dataType(userInput)
+    return userInput
+  except:
+    return None
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 
