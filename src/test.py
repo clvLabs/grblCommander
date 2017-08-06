@@ -669,31 +669,31 @@ def zigZagPattern():
 
   showZZParameters('Calculated parameters')
 
-  zzTmpRun=ui.getUserInput('Run (default {:f})'.format(zzRun), float)
+  zzTmpRun=ui.getUserInput('Run ({:f})'.format(zzRun), float)
   if zzTmpRun is not None: zzRun = zzTmpRun
 
-  zzTmpRise=ui.getUserInput('Rise (default {:f})'.format(zzRise), float)
+  zzTmpRise=ui.getUserInput('Rise ({:f})'.format(zzRise), float)
   if zzTmpRise is not None: zzRise = zzTmpRise
 
-  zzTmpPlunge=ui.getUserInput('Plunge (default {:f})'.format(zzPlunge), float)
+  zzTmpPlunge=ui.getUserInput('Plunge ({:f})'.format(zzPlunge), float)
   if zzTmpPlunge is not None: zzPlunge = zzTmpPlunge
 
-  zzTmpPlungeSpeed=ui.getUserInput('PlungeSpeed (default {:f})'.format(zzPlungeSpeed), float)
+  zzTmpPlungeSpeed=ui.getUserInput('PlungeSpeed ({:f})'.format(zzPlungeSpeed), float)
   if zzTmpPlungeSpeed is not None: zzPlungeSpeed = zzTmpPlungeSpeed
 
-  zzTmpInitialFeed=ui.getUserInput('InitialFeed (default {:f})'.format(zzInitialFeed), float)
+  zzTmpInitialFeed=ui.getUserInput('InitialFeed ({:f})'.format(zzInitialFeed), float)
   if zzTmpInitialFeed is not None: zzInitialFeed = zzTmpInitialFeed
 
-  zzTmpDeltaFeed=ui.getUserInput('DeltaFeed (default {:d})'.format(zzDeltaFeed), int)
+  zzTmpDeltaFeed=ui.getUserInput('DeltaFeed ({:d})'.format(zzDeltaFeed), int)
   if zzTmpDeltaFeed is not None: zzDeltaFeed = zzTmpDeltaFeed
 
-  zzTmpZigZagPerIteration=ui.getUserInput('ZigZagPerIteration (default {:d})'.format(zzZigZagPerIteration), int)
+  zzTmpZigZagPerIteration=ui.getUserInput('ZigZagPerIteration ({:d})'.format(zzZigZagPerIteration), int)
   if zzTmpZigZagPerIteration is not None: zzZigZagPerIteration = zzTmpZigZagPerIteration
 
-  zzTmpIterations=ui.getUserInput('Iterations (default {:d})'.format(zzIterations), int)
+  zzTmpIterations=ui.getUserInput('Iterations ({:d})'.format(zzIterations), int)
   if zzTmpIterations is not None: zzIterations = zzTmpIterations
 
-  zzTmpSpacing=ui.getUserInput('Spacing (default {:f})'.format(zzSpacing), float)
+  zzTmpSpacing=ui.getUserInput('Spacing ({:f})'.format(zzSpacing), float)
   if zzTmpSpacing is not None: zzSpacing = zzTmpSpacing
 
   zzTotalWidth = ((zzRun + zzSpacing) * zzIterations) - zzSpacing + bitDiameter
@@ -783,6 +783,7 @@ def dummy():
   Currently this test will:
 
   - Mill a configurable horizontal pocket (designed for making my holding clamps)
+  - Add a tab in the center of each horizontal cut
   """ , k=_k, v='BASIC')
 
   def showParams(title):
@@ -791,6 +792,8 @@ def dummy():
       MaterialZ             {:d}
       PocketWidth           {:f}
       PocketHeight          {:f}
+      TabWidth              {:f}
+      TabHeight             {:f}
       TargetZ               {:f}
       SafeHeight            {:d}
       Plunge                {:f}
@@ -801,6 +804,8 @@ def dummy():
         materialZ,
         pocketWidth,
         pocketHeight,
+        tabWidth,
+        tabHeight,
         targetZ,
         safeHeight,
         plunge,
@@ -816,51 +821,60 @@ def dummy():
       if( key == 27 ):  # <ESC>
         testCancelled = True
 
-  def feed(x=None, y=None, z=None, speed=None):
+  def mchFeed(x=None, y=None, z=None, speed=None):
     if not testCancelled:
       mch.feedAbsolute(x=x, y=y, z=z, speed=speed)
       checkTestCancelled()
 
-  def rapid(x=None, y=None, z=None):
+  def mchRapid(x=None, y=None, z=None):
     if not testCancelled:
       mch.rapidAbsolute(x=x, y=y, z=z)
       checkTestCancelled()
 
   # Check before trying with other materials!!
 
-  materialZ = 13
+  materialZ = 10.5
   pocketWidth = 50.0
-  pocketHeight = 4.5
-  targetZ = 0.1
-  safeHeight = materialZ + 2
-  plunge = 1.5
+  pocketHeight = 6.5
+  tabWidth = 6.0
+  tabHeight = 0.5
+  targetZ = 7.0
+  safeHeight = materialZ + 5
+  plunge = 1.0
   plungeSpeed = 100
-  feed = 600
+  feed = 500
 
   showParams('Default parameters')
 
-  tmpMaterialZ=ui.getUserInput('MaterialZ (default {:d})'.format(materialZ), int)
+  tmpMaterialZ=ui.getUserInput('MaterialZ ({:d})'.format(materialZ), int)
   if tmpMaterialZ is not None: materialZ = tmpMaterialZ
 
-  tmpPocketWidth=ui.getUserInput('PocketWidth (default {:f})'.format(pocketWidth), float)
+  tmpPocketWidth=ui.getUserInput('PocketWidth ({:f})'.format(pocketWidth), float)
   if tmpPocketWidth is not None: pocketWidth = tmpPocketWidth
 
-  tmpPocketHeight=ui.getUserInput('PocketHeight (default {:f})'.format(pocketHeight), float)
+  tmpPocketHeight=ui.getUserInput('PocketHeight ({:f})'.format(pocketHeight), float)
   if tmpPocketHeight is not None: pocketHeight = tmpPocketHeight
 
-  tmpTargetZ=ui.getUserInput('TargetZ (default {:f})'.format(targetZ), float)
+  tmpTabWidth=ui.getUserInput('TabWidth ({:f})'.format(tabWidth), float)
+  if tmpTabWidth is not None: tabWidth = tmpTabWidth
+
+  tmpTabHeight=ui.getUserInput('TabHeight ({:f})'.format(tabHeight), float)
+  if tmpTabHeight is not None: tabHeight = tmpTabHeight
+
+  tmpTargetZ=ui.getUserInput('TargetZ ({:f})'.format(targetZ), float)
   if tmpTargetZ is not None: targetZ = tmpTargetZ
 
-  tmpSafeHeight=ui.getUserInput('SafeHeight (default {:d})'.format(safeHeight), int)
+  safeHeight = materialZ + 5
+  tmpSafeHeight=ui.getUserInput('SafeHeight ({:d})'.format(safeHeight), int)
   if tmpSafeHeight is not None: safeHeight = tmpSafeHeight
 
-  tmpPlunge=ui.getUserInput('Plunge (default {:f})'.format(plunge), float)
+  tmpPlunge=ui.getUserInput('Plunge ({:f})'.format(plunge), float)
   if tmpPlunge is not None: plunge = tmpPlunge
 
-  tmpPlungeSpeed=ui.getUserInput('PlungeSpeed (default {:d})'.format(plungeSpeed), int)
+  tmpPlungeSpeed=ui.getUserInput('PlungeSpeed ({:d})'.format(plungeSpeed), int)
   if tmpPlungeSpeed is not None: plungeSpeed = tmpPlungeSpeed
 
-  tmpFeed=ui.getUserInput('Feed (default {:d})'.format(feed), int)
+  tmpFeed=ui.getUserInput('Feed ({:d})'.format(feed), int)
   if tmpFeed is not None: feed = tmpFeed
 
   showParams('FINAL parameters')
@@ -875,8 +889,13 @@ def dummy():
     ui.log("Test CANCELLED", k=_k, v='BASIC')
     return
 
-  rapid(z=safeHeight)
-  rapid(x=0, y=0)
+  ui.log('---------------------------------[Safe initial position]', k=_k, v='BASIC')
+  mchRapid(z=safeHeight)
+  mchRapid(x=0, y=0)
+
+  ui.log('', k=_k, v='BASIC')
+  ui.log('Please start spindle and press <ENTER>...', k=_k, v='BASIC')
+  input()
 
   currX = 0
   currY = 0
@@ -884,14 +903,51 @@ def dummy():
   if (currZ - plunge) < targetZ:
     currZ = targetZ
 
+  tabStartX = (pocketWidth / 2) - (tabWidth / 2)
+  tabEndX = tabStartX + tabWidth
+  tabZ = targetZ + tabHeight
+
   finished = False
   while not finished:
-    feed(z=currZ, speed=plungeSpeed)
-    feed(x=pocketWidth, speed=feed)
-    feed(y=pocketHeight, speed=feed)
-    feed(x=0, speed=feed)
-    feed(y=0, speed=feed)
+    # Plunge
+    ui.log('---------------------------------[Plunge][z={0}]'.format(currZ), k=_k, v='BASIC')
+    mchFeed(z=currZ, speed=plungeSpeed)
 
+    # Horizontal line DL-DR
+    ui.log('---------------------------------[Horizontal line DL-DR][z={0}]'.format(currZ), k=_k, v='BASIC')
+    if currZ == targetZ:
+      mchFeed(x=tabStartX, speed=feed)
+      ui.log('------------------------------------[tab:start]', k=_k, v='BASIC')
+      mchFeed(z=tabZ, speed=plungeSpeed)
+      mchFeed(x=tabEndX, speed=feed)
+      mchFeed(z=currZ, speed=plungeSpeed)
+      ui.log('------------------------------------[tab:end]', k=_k, v='BASIC')
+      mchFeed(x=pocketWidth, speed=feed)
+    else:
+      mchFeed(x=pocketWidth, speed=feed)
+
+    # Vertical line DR-UR
+    ui.log('---------------------------------[Vertical line DR-UR][z={0}]'.format(currZ), k=_k, v='BASIC')
+    mchFeed(y=pocketHeight, speed=feed)
+
+    # Horizontal line UR-UL
+    ui.log('---------------------------------[Horizontal line UR-UL][z={0}]'.format(currZ), k=_k, v='BASIC')
+    if currZ == targetZ:
+      mchFeed(x=tabEndX, speed=feed)
+      ui.log('------------------------------------[tab:start]', k=_k, v='BASIC')
+      mchFeed(z=tabZ, speed=plungeSpeed)
+      mchFeed(x=tabStartX, speed=feed)
+      mchFeed(z=currZ, speed=plungeSpeed)
+      ui.log('------------------------------------[tab:end]', k=_k, v='BASIC')
+      mchFeed(x=0, speed=feed)
+    else:
+      mchFeed(x=0, speed=feed)
+
+    # Vertical line UL-DL
+    ui.log('---------------------------------[Vertical line UL-DL][z={0}]'.format(currZ), k=_k, v='BASIC')
+    mchFeed(y=0, speed=feed)
+
+    # Next plunge calculation/check
     if currZ == targetZ:
       finished = True
     else:
@@ -909,10 +965,11 @@ def dummy():
   if testCancelled:
     testCancelled = False   # Make sure we always get back home
 
-  # Raise the spindle
-  rapid(z=safeHeight)
+  ui.log('---------------------------------[Back home]', k=_k, v='BASIC')
 
-  ui.log("Back home..." , k=_k, v='BASIC')
-  rapid(x=0, y=0)
-  # rapid(z=0)
+  # Raise the spindle
+  mchRapid(z=safeHeight)
+
+  mchRapid(x=0, y=0)
+  # mchRapid(z=0)
 
