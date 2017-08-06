@@ -23,7 +23,7 @@ gPORTNUMBER = 0
 gTIMEOUT = 0.1
 
 # Serial response timeout (seconds)
-gRESPONSE_TIMEOUT = 5
+gRESPONSE_TIMEOUT = 2
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
