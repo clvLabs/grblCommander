@@ -27,10 +27,10 @@ gRESPONSE_TIMEOUT = 2
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def serialConnect():
+def connect():
   global gSerial, gPORTNUMBER
 
-  _k = 'sp.serialConnect()'
+  _k = 'sp.connect()'
   ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   if( ut.isWindows() ):
@@ -62,7 +62,7 @@ def serialConnect():
   if(gSerial.isOpen()):
     ui.log("Serial port open, waiting for startup message...", k=_k, v='BASIC')
     ui.log("", k=_k, v='BASIC')
-    response = readSerialResponse(expectedLines=None)
+    response = readResponse(expectedLines=None)
     if( len(response) >= 2 ):
       ui.log("", k=_k, v='BASIC')
       ui.log("Startup message received, machine ready", k=_k, v='BASIC')
@@ -74,25 +74,28 @@ def serialConnect():
     ui.log("ERROR opening serial port, exiting program", k=_k, v='BASIC')
     quit()
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def close():
+  return gSerial.close()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def sendSerialCommand(command, responseTimeout=gRESPONSE_TIMEOUT, expectedResultLines=1, verbose='BASIC'):
-  _k = 'sp.sendSerialCommand()'
+def sendCommand(command, responseTimeout=gRESPONSE_TIMEOUT, expectedResultLines=1, verbose='BASIC'):
+  _k = 'sp.sendCommand()'
   ui.log("[ Entering ]", k=_k, v='DEBUG')
 
   command = command.rstrip()
   ui.log(">>>>> [%s]" % repr(command), color=ui.AnsiColors.aaa, k=_k ,v=verbose)
   gSerial.write( bytes(command+"\n", 'UTF-8') )
 
-  return readSerialResponse(expectedLines=expectedResultLines,responseTimeout=responseTimeout,verbose=verbose)
+  return readResponse(expectedLines=expectedResultLines,responseTimeout=responseTimeout,verbose=verbose)
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def readSerialResponse(expectedLines=1, responseTimeout=gRESPONSE_TIMEOUT, verbose='BASIC'):
-  _k = 'sp.readSerialResponse()'
+def readResponse(expectedLines=1, responseTimeout=gRESPONSE_TIMEOUT, verbose='BASIC'):
+  _k = 'sp.readResponse()'
   ui.log("[ Entering ]", k=_k, v='DEBUG')
 
-  ui.log(  "readSerialResponse() - Waiting for %s lines from serial..."
+  ui.log(  "readResponse() - Waiting for %s lines from serial..."
         % (expectedLines if expectedLines != None else 'undefined',)
         , k=_k, v='SUPER')
 
@@ -107,13 +110,28 @@ def readSerialResponse(expectedLines=1, responseTimeout=gRESPONSE_TIMEOUT, verbo
       receivedLines += 1
       responseArray.append(line)
       if((expectedLines != None) and (receivedLines == expectedLines)):
-        ui.log(  "readSerialResponse() - Successfully received %d lines from serial" % expectedLines
+        ui.log(  "readResponse() - Successfully received %d lines from serial" % expectedLines
               , k=_k, v='SUPER')
         break
   else:
     if(expectedLines != None):
-      ui.log("readSerialResponse() - TIMEOUT Waiting for data from serial", k=_k, v='WARNING')
+      ui.log("readResponse() - TIMEOUT Waiting for data from serial", k=_k, v='WARNING')
     else:
-      ui.log("readSerialResponse() - Finished waiting for undefined lines from serial", k=_k, v='DEBUG')
+      ui.log("readResponse() - Finished waiting for undefined lines from serial", k=_k, v='DEBUG')
 
   return responseArray
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def readline():
+    line = gSerial.readline()
+
+    if(line):
+      line = line.decode('utf-8')
+      line = line.strip('\r')
+      line = line.strip('\n')
+
+    return line
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def write(data):
+  return gSerial.write(bytes(data, 'UTF-8'))

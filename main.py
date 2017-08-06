@@ -154,7 +154,7 @@ def processUserInput():
       ui.keyPressMessage("gG - Send raw GCode command", key, char)
       ui.log("Enter command...", k=_k, v='BASIC')
       userCommand=input()
-      sp.sendSerialCommand(userCommand,  expectedResultLines=None, responseTimeout=2)
+      sp.sendCommand(userCommand,  expectedResultLines=None, responseTimeout=2)
 
     elif(char in 'sS'):
       ui.keyPressMessage("sS - Show current status", key, char)
@@ -162,7 +162,7 @@ def processUserInput():
 
     elif(char in 'rR'):
       ui.keyPressMessage("rR - Reset serial connection", key, char)
-      sp.serialConnect()
+      sp.connect()
 
     elif(char in 'cC'):
       ui.keyPressMessage("cC - Clear screen", key, char)
@@ -379,7 +379,7 @@ def main():
 
   ui.logBlock("    grblCommander v{0}".format(gVERSION), k=_k, v='BASIC')
 
-  sp.serialConnect()
+  sp.connect()
   mch.sendGCodeInitSequence()
   mch.viewGCodeParameters()
 
@@ -394,7 +394,7 @@ def main():
 
   while(True):
 
-    line = sp.gSerial.readline()
+    line = sp.readline()
     if(line):
       ui.log("<<<<<",line, k=_k, v='BASIC')
 
@@ -402,7 +402,7 @@ def main():
       break
 
   ui.log("Closing serial port...", k=_k, v='BASIC')
-  sp.gSerial.close()
+  sp.close()
 
   ui.log("Closing program...", k=_k, v='BASIC')
 

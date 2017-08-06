@@ -515,7 +515,7 @@ def baseLevelingHoles():
       ui.log("IGNORING command [{0}] (Test CANCELLED)".format(cmd) , k=_k, v='BASIC')
       return
 
-    sp.sendSerialCommand(cmd)
+    sp.sendCommand(cmd)
     mch.waitForMachineIdle()
 
     if(kb.keyPressed()):

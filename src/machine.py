@@ -35,7 +35,7 @@ def sendGCodeInitSequence():
 
   for command in initSeq:
     ui.log('Sending command [{0}]: {1}'.format(command[0], command[1]), k=_k, v='WARNING')
-    sp.sendSerialCommand(command[0])
+    sp.sendCommand(command[0])
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def viewGCodeParameters():
@@ -47,30 +47,30 @@ def viewGCodeParameters():
   ui.log('', k=_k, v='BASIC')
 
   ui.log('Sending command [$G]...', k=_k, v='WARNING')
-  sp.sendSerialCommand('$G')
+  sp.sendCommand('$G', expectedResultLines=2)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def getMachineStatus():
   _k = 'mch.getMachineStatus()'
   ui.log("[ Entering ]", k=_k, v='DEBUG')
 
-  ui.log("Querying machine status...", k=_k, v='DEBUG')
-  sp.gSerial.write( bytes("?\n", 'UTF-8') )
+  ui.log('Querying machine status...', k=_k, v='DEBUG')
+  sp.write('?\n')
 
   startTime = time.time()
   receivedLines = 0
   responseArray=[]
 
   while( (time.time() - startTime) < sp.gRESPONSE_TIMEOUT ):
-    line = sp.gSerial.readline()
+    line = sp.readline()
     if(line):
       receivedLines += 1
       responseArray.append(line)
       if(receivedLines == 2):
-        ui.log("Successfully received machine status", k=_k, v='DEBUG')
+        ui.log('Successfully received machine status', k=_k, v='DEBUG')
         break
   else:
-    ui.log("TIMEOUT Waiting for machine status", k=_k, v='WARNING')
+    ui.log('TIMEOUT Waiting for machine status', k=_k, v='WARNING')
 
   return responseArray[0]
 
@@ -113,7 +113,7 @@ def waitForMachineIdle(verbose='WARNING'):
   ui.log("Waiting for machine operation to finish...", k=_k, v='SUPER')
   status = getMachineStatus()
 
-  while( b'Idle' not in status ):
+  while( 'Idle' not in status ):
     if((verbose != 'NONE') and (ui.getVerboseLevel() >= ui.getVerboseLevelIndex(verbose))):
       print("\r" + (" " * 80), end="")
       print("\r" + repr(status), end="")
@@ -162,7 +162,7 @@ def feedAbsolute(x=None, y=None, z=None, speed=gDEFAULT_FEED_SPEED, verbose='WAR
   cmd = cmd.rstrip()
 
   ui.log("Sending command [%s]..." % repr(cmd), k=_k, v='DETAIL')
-  sp.sendSerialCommand(cmd, verbose=verbose)
+  sp.sendCommand(cmd, verbose=verbose)
   waitForMachineIdle(verbose=verbose)
   tbl.showCurrPos(verbose=verbose)
   return
@@ -205,7 +205,7 @@ def rapidAbsolute(x=None, y=None, z=None, verbose='WARNING'):
   cmd = cmd.rstrip()
 
   ui.log("Sending command [%s]..." % repr(cmd), k=_k, v='DETAIL')
-  sp.sendSerialCommand(cmd, verbose=verbose)
+  sp.sendCommand(cmd, verbose=verbose)
   waitForMachineIdle(verbose=verbose)
   tbl.showCurrPos(verbose=verbose)
   return
@@ -288,7 +288,7 @@ def rapidRelative(x=None, y=None, z=None, verbose='WARNING'):
   cmd = cmd.rstrip()
 
   ui.log("Sending command [%s]..." % repr(cmd), k=_k, v='DETAIL')
-  sp.sendSerialCommand(cmd, verbose=verbose)
+  sp.sendCommand(cmd, verbose=verbose)
   waitForMachineIdle(verbose=verbose)
   tbl.showCurrPos(verbose=verbose)
   return
