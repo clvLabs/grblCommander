@@ -18,7 +18,7 @@ import src.test as test
 from src.config import loadedCfg
 
 # Current version
-gVERSION = '0.3.0'
+gVERSION = '0.3.1'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showHelp():
