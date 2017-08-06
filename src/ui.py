@@ -1,19 +1,202 @@
 #!/usr/bin/python3
 """
-grblCommander - interface
-=========================
+grblCommander - ui
+==================
 User interface management
 """
-#print("***[IMPORTING]*** grblCommander - interface")
+
+if __name__ == '__main__':
+  print('This file is a module, it should not be executed directly')
+
+from src.config import cfg
+
+# ------------------------------------------------------------------
+# Make it easier (shorter) to use cfg object
+uiCfg = cfg['ui']
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Give a string some ANSI color formatting
+def colorStr(string, foreColor, backColor=None):
+
+  if backColor is None:
+    colors = foreColor.replace(' ', '').split(',')
+    if len(colors) > 1:
+      foreColor=colors[0]
+      backColor=colors[1]
+    else:
+      backColor = 'black'
+
+  attr = []
+
+  if foreColor.find('+') != -1:
+    foreColor = foreColor.replace('+','')
+    attr.append('1')  # bright
+
+  if foreColor == 'black':       attr.append('30')
+  elif foreColor == 'red':       attr.append('31')
+  elif foreColor == 'green':     attr.append('32')
+  elif foreColor == 'yellow':    attr.append('33')
+  elif foreColor == 'blue':      attr.append('34')
+  elif foreColor == 'magenta':   attr.append('35')
+  elif foreColor == 'cyan':      attr.append('36')
+  elif foreColor == 'white':     attr.append('37')
+
+  if backColor == 'black':  pass
+  elif backColor == 'red':       attr.append('41')
+  elif backColor == 'green':     attr.append('42')
+  elif backColor == 'yellow':    attr.append('43')
+  elif backColor == 'blue':      attr.append('44')
+  elif backColor == 'magenta':   attr.append('45')
+  elif backColor == 'cyan':      attr.append('46')
+  elif backColor == 'white':     attr.append('47')
+
+  return '\x1b[{:s}m{:s}\x1b[0m'.format(';'.join(attr), string)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Give a string some ANSI color formatting - allows to use config colors
+# Color format examples:
+#  - ui.title
+#  - comms.send
+#  - machineState.Run
+#
+def setStrColor(str, colorName):
+  if '.' in colorName:
+    parts = colorName.split('.')
+    colorSet = parts[0]
+    colorName = parts[1]
+  else:
+    colorSet = 'ui'
+
+  if colorName in uiCfg['colors'][colorSet]:
+    color = uiCfg['colors'][colorSet][colorName]
+  else:
+    color = colorName
+
+  return colorStr(str, color)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def fillLogParams(kwargs):
+  verboseStr = 'BASIC'
+  color = None
+
+  while( 'verbose' in kwargs ):   verboseStr = kwargs.pop('verbose')
+  while( 'v' in kwargs ):         verboseStr = kwargs.pop('v')
+
+  while( 'color' in kwargs ):     color = kwargs.pop('color')
+  while( 'c' in kwargs ):         color = kwargs.pop('c')
+
+  # Write values back
+  kwargs['verbose'] = verboseStr
+  kwargs['color'] = color
+
+  return kwargs
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def log(message='', **kwargs):
+  kwargs = fillLogParams(kwargs)
+
+  verboseStr = kwargs.pop('verbose')
+  verboseLevel = getVerboseLevelIndex(verboseStr)
+  color = kwargs.pop('color')
+
+  if( verboseLevel > 0 and verboseLevel <= getVerboseLevel()):  # > 0 to avoid NONE
+
+    if(getVerboseLevelStr() == 'DEBUG'):
+      print('{:d}| '.format(verboseLevel), end='')
+
+    if color is not None:
+      message = setStrColor(message, color)
+
+    print(message, **kwargs)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def logBlock(message, **kwargs):
+  separator = gBLOCK_SEPARATOR
+
+  while( 'separator' in kwargs ):   separator = kwargs.pop('separator')
+  while( 's' in kwargs ):           separator = kwargs.pop('s')
+
+  message = message.rstrip(' ').strip('\r\n')
+  log('\n{0}\n{1}\n{2}'.format(separator, message, separator), **kwargs)
+  log('', **kwargs)  # Additional separator line NOT colored!
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def logTitle(text, **kwargs):
+  if not 'color' in kwargs:    kwargs['color'] = 'ui.title'
+  log('{:s}[{:s}]'.format(gTITLE_SEPARATOR, text), **kwargs)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def logSubtitle(text, **kwargs):
+  if not 'color' in kwargs:    kwargs['color'] = 'ui.subtitle'
+  log('{:s}[{:s}]'.format(gSUBTITLE_SEPARATOR, text), **kwargs)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def inputMsg(text, **kwargs):
+  if not 'color' in kwargs:    kwargs['color'] = 'ui.inputMsg'
+  log('{:}'.format(text), **kwargs)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def readyMsg(extraInfo=''):
+  readyMsg = '\n{:} {:}\n'.format(
+    setStrColor(uiCfg['readyMsg'], 'ui.readyMsg'),
+    extraInfo,
+  )
+
+  log(readyMsg)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def keyPressMessage(message, key, char):
+  log('\n{:}\n{:}\n'.format(gMSG_SEPARATOR, message)
+    , color='ui.keyPressMsg', v='WARNING')
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def clearScreen():
+  log('\n' * uiCfg['clearScreenLines'])
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def charLine(char, widthMultiplier=1):
+  return char * int(uiCfg['maxLineLen'] * widthMultiplier)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def clearLine():
+  log('\r{0}'.format(charLine(' ')), end='')
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def getUserInput(description, dataType='str', default=None):
+  titleWidth = uiCfg['inputTitleWidth']
+  inputMsg('Enter {0}:'.format(description)[:titleWidth].ljust(titleWidth), end='')
+  userInput=input()
+  try:
+    userInput=dataType(userInput)
+    return userInput
+  except:
+    return default
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def coordStr(c):
+  cFmt = uiCfg['coordFormat']
+  return cFmt.format(c)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def xyzStr(x, y, z, xColor='', yColor='', zColor=''):
+  xyzFmt = uiCfg['xyzFormat']
+  return xyzFmt.format(
+    setStrColor(coordStr(x), xColor ),
+    setStrColor(coordStr(y), yColor ),
+    setStrColor(coordStr(z), zColor ),
+    )
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # Verbose level
 gVerboseLevels = [ 'NONE', 'BASIC', 'ERROR', 'WARNING', 'DETAIL', 'SUPER', 'DEBUG' ]
 gMIN_VERBOSE_LEVEL = gVerboseLevels.index('BASIC')
 gMAX_VERBOSE_LEVEL = len(gVerboseLevels) - 1
-gVerboseLevel = gVerboseLevels.index('WARNING')
-gCaller = ''
+gVerboseLevel = gVerboseLevels.index(uiCfg['verboseLevel'])
 
 def getVerboseLevel():    return(gVerboseLevel)
+
 def getVerboseLevelStr(level=None):
   if(level is None):
     return(gVerboseLevels[gVerboseLevel])
@@ -27,139 +210,11 @@ def setVerboseLevel(level):
   global gVerboseLevel
   gVerboseLevel = level
 
-# Ready message
-gREADY_MSG = "\n***[ Ready ]***\n"
-
 # Standard separator
-gMSG_SEPARATOR_LEN = 70
-gMSG_SEPARATOR_CHAR = "-"
-gMSG_SEPARATOR = gMSG_SEPARATOR_CHAR * gMSG_SEPARATOR_LEN
+gMSG_SEPARATOR = charLine(uiCfg['msgSeparatorChar'])
+gMSG_SEPARATOR_HALF = charLine(uiCfg['msgSeparatorChar'], 0.5)
 
-class AnsiColors:
-  aaa = '\033[95m'
-  bbb = '\033[94m'
-  ccc = '\033[92m'
-  ddd = '\033[93m'
-  eee = '\033[91m'
-  _END = '\033[0m'
+gTITLE_SEPARATOR = charLine(uiCfg['titleSeparatorChar'], 0.5)
+gSUBTITLE_SEPARATOR = charLine(uiCfg['titleSeparatorChar'], 0.5)
 
-"""
-#define ANSI_COLOR_RED     "\x1b[31m"
-#define ANSI_COLOR_GREEN   "\x1b[32m"
-#define ANSI_COLOR_YELLOW  "\x1b[33m"
-#define ANSI_COLOR_BLUE    "\x1b[34m"
-#define ANSI_COLOR_MAGENTA "\x1b[35m"
-#define ANSI_COLOR_CYAN    "\x1b[36m"
-
-#define ANSI_COLOR_BRIGHT  "\x1b[1m"
-#define ANSI_COLOR_RESET   "\x1b[0m"
-"""
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def log(message,*pargs, **kargs):
-  verboseStr = 'BASIC'
-  caller = None
-  color = None
-
-  if( "verbose" in kargs ):   verboseStr = kargs.pop("verbose")
-  if( "v" in kargs ):         verboseStr = kargs.pop("v")
-
-  if( "caller" in kargs ):    caller = kargs.pop("caller")
-  if( "k" in kargs ):         caller = kargs.pop("k")
-
-  if( "color" in kargs ):     color = kargs.pop("color")
-  if( "c" in kargs ):         color = kargs.pop("c")
-
-  verboseLevel = getVerboseLevelIndex(verboseStr)
-
-  if( verboseLevel > 0 and verboseLevel <= getVerboseLevel()):  # > 0 to avoid NONE
-
-    if(getVerboseLevelStr() == 'DEBUG'):
-      print("%d| " % verboseLevel, end="")
-
-    # Only display caller on DEBUG level
-    if((caller is not None) and (getVerboseLevelStr() == 'DEBUG')):
-      print("%s - " % caller, end="")
-
-   # if( color != None ):
-   #   print(color + message + AnsiColors._END, *pargs, **kargs)
-   # else:
-   #   print(message, *pargs, **kargs)
-
-    print(message, *pargs, **kargs)
-
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def logBlock(message,*pargs, **kargs):
-  separator = gMSG_SEPARATOR
-  verboseStr = 'BASIC'
-  caller = None
-  color = None
-
-  if( "verbose" in kargs ):   verboseStr = kargs.pop("verbose")
-  if( "v" in kargs ):         verboseStr = kargs.pop("v")
-
-  if( "caller" in kargs ):    caller = kargs.pop("caller")
-  if( "k" in kargs ):         caller = kargs.pop("k")
-
-  if( "separator" in kargs ): separator = kargs.pop("separator")
-  if( "sep" in kargs ):       separator = kargs.pop("sep")
-  if( "s" in kargs ):         separator = kargs.pop("s")
-
-  if( "color" in kargs ):     color = kargs.pop("color")
-  if( "c" in kargs ):         color = kargs.pop("c")
-
-  log(
-"""
-{0}
-{1}
-{2}
-""".format(separator, message, separator)
-    , k=caller, v=verboseStr, c=color)
-
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def showReadyMsg(caller=None):
-  _k = 'ui.showReadyMsg()'
-  # log("[ Entering ]", k=_k, v='DEBUG')
-
-  if(caller is None):
-    log(gREADY_MSG, k=_k, v='BASIC')
-  else:
-    log(gREADY_MSG, k=caller, v='BASIC')
-
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def keyPressMessage(message, key, char):
-  _k = 'ui.keyPressMessage()'
-  # log("[ Entering ]", k=_k, v='DEBUG')
-
-  log(
-"""
-{0}
-{1}
-""".format(gMSG_SEPARATOR, message)
-    , k=_k, v='WARNING')
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def clearScreen():
-  _k = 'ui.clearScreen()'
-  log("\n"*100, k=_k, v='BASIC')
-
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def getUserInput(description, dataType='str'):
-  _k = 'ui.getUserInput()'
-  log('Enter {0}:'.format(description).ljust(45), k=_k, v='BASIC', end='')
-  userInput=input()
-  try:
-    userInput=dataType(userInput)
-    return userInput
-  except:
-    return None
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-
+gBLOCK_SEPARATOR = charLine(uiCfg['blockSeparatorChar'])

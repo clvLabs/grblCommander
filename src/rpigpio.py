@@ -4,55 +4,27 @@ grblCommander - rpigpio
 =======================
 Raspberry Pi GPIO utilities
 """
-#print("***[IMPORTING]*** grblCommander - rpigpio")
+
+if __name__ == '__main__':
+  print('This file is a module, it should not be executed directly')
 
 import time
 import os
 import RPi.GPIO as GPIO
-#HARDWARE SETUP
-# P1
-# 2[==X==1=======]26
-# 1[=============]25
-#Button Config
-BTN = 12
+from src.config import cfg
+
+# ------------------------------------------------------------------
+# Make it easier (shorter) to use cfg object
+gpioCfg = cfg['gpio']
+
+#Probe Config
+gPROBE_PIN = gpioCfg['probePin']
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def setup():
-  #Setup the wiring
   GPIO.setmode(GPIO.BOARD)
-  #Setup Ports
-  GPIO.setup(BTN,GPIO.IN,pull_up_down=GPIO.PUD_UP)
-
+  GPIO.setup(gPROBE_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def isContactActive():
-  return(not GPIO.input(BTN))
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-if __name__ == '__main__':
-
-  def main():
-    setup()
-    count=0
-    btn_closed = True
-    while True:
-      btn_val = GPIO.input(BTN)
-      if btn_val and btn_closed:
-        print("OPEN")
-        btn_closed=False
-      elif btn_val==False and btn_closed==False:
-        count+=1
-        print("CLOSE %s" % count)
-        #os.system("flite -t '%s'" % count)
-        btn_closed=True
-      time.sleep(0.1)
-
-  try:
-    main()
-  finally:
-    GPIO.cleanup()
-    print("Closed Everything. END")
-  #End
-
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def isProbeContactActive():
+  return(not GPIO.input(gPROBE_PIN))

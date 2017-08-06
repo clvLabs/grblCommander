@@ -1,10 +1,12 @@
-  #!/usr/bin/python3
+#!/usr/bin/python3
 """
 grblCommander - utils
 =====================
 Programming utilities
 """
-#print("***[IMPORTING]*** grblCommander - utils")
+
+if __name__ == '__main__':
+  print('This file is a module, it should not be executed directly')
 
 import sys
 from . import ui as ui
@@ -14,10 +16,7 @@ def isWindows():
   return( 'win' in sys.platform )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def genericValueChanger(value, direction, min, max, loop=False, valueName="", valueFormatter=None):
-  _k = 'ut.genericValueChanger()'
-  ui.log("[ Entering ]", k=_k, v='DEBUG')
-
+def genericValueChanger(value, direction, min, max, loop=False, valueName='', valueFormatter=None):
   newValue = 0
   increment = 0
 
@@ -40,11 +39,11 @@ def genericValueChanger(value, direction, min, max, loop=False, valueName="", va
     if( newValue > max ):  newValue = min
   else:
     if( newValue < min ):
-      ui.log( "ERROR: %s below %d not allowed!" % (valueName, min), k=_k, v='BASIC')
+      ui.log( 'ERROR: {:s} below {:d} not allowed!'.format(valueName, min))
       return value
 
     if( newValue > max ):
-      ui.log( "ERROR: %s over %d not allowed!" % (valueName, max), k=_k, v='BASIC')
+      ui.log( 'ERROR: {:s} over {:d} not allowed!'.format(valueName, max))
       return value
 
   if( valueFormatter != None ):
@@ -52,8 +51,5 @@ def genericValueChanger(value, direction, min, max, loop=False, valueName="", va
   else:
     formattedValue = newValue
 
-  ui.log("New %s: %s" % (valueName, formattedValue), k=_k, v='BASIC')
+  ui.log('New {:s}: {:}'.format(valueName, formattedValue))
   return newValue
-
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

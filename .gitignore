@@ -2,6 +2,9 @@
 # grblCommander
 #
 
+# User configuration
+src/config_user.py
+
 # Logs
 logs/
 

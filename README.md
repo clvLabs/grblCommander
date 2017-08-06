@@ -4,6 +4,8 @@
 
 A handy tool for playing around with your grbl-controlled CNC.
 
+Currently compatible with [grbl](https://github.com/gnea/grbl) v1.1
+
 Allows:
 
 * Manually moving X/Y/Z axis at configurable steps
@@ -13,10 +15,15 @@ Allows:
 
 Custom tests are currently stored on `src/test.py`:
 
-* Point test
+* Point probe
     * Finds current Z height at current X/Y using a custom probe (to be used with a Raspberry Pi or similar)
-* Table test
-    * Performs a grid check of the whole table using `Point test`
+* Table probing scan
+    * Performs a grid check of the whole table using `Point probe`
+* Table position scan
+    * Moves the spindle around a 3x3 grid representing the coordinates:
+        * [UL] [UC] [UR]
+        * [CL] [CC] [CR]
+        * [DL] [DC] [DR]
 * Base levelling holes
     * Drills a series of holes targeted @ Z0 to manually level a wasteboard by sanding
 * Zig-zag pattern
@@ -29,8 +36,12 @@ Custom tests are currently stored on `src/test.py`:
 
 ## Setup
 
-* Make sure you have Python3 installed.
-* Edit `src/serialport.py` to update the `Serial configuration` section.
+* Make sure you have Python3 installed
+* Copy `src/config_default.py` as `src/config_user.py`
+* Check the following sections in the new file for settings that need to be changed:
+    * `[Serial configuration]`
+    * `[GPIO configuration]`
+    * `[Machine configuration]`
 
 **TO-DO**: Add details about 3rd party library setup
 

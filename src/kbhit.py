@@ -1,4 +1,13 @@
 #!/usr/bin/python3
+"""
+grblCommander - kbhit
+=======================
+(copied) Keyboard hit detector
+"""
+
+# if __name__ == '__main__':
+#   print('This file is a module, it should not be executed directly')
+
 '''
 A Python class implementing KBHIT, the standard keyboard-interrupt poller.
 Works transparently on Windows and Posix (Linux, Mac OS X).  Doesn't work
@@ -15,7 +24,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 NOTE: Modified on 2015/01/11 -> NOT disabling termios.ECHO, messes with input()
-
 '''
 
 import os
@@ -113,7 +121,7 @@ class KBHit:
 
 
 # Test
-if __name__ == "__main__":
+if __name__ == '__main__':
 
   kb = KBHit()
 

@@ -4,40 +4,47 @@ grblCommander - table
 =======================
 Table boundaries management
 """
-#print("***[IMPORTING]*** grblCommander - table")
+
+if __name__ == '__main__':
+  print('This file is a module, it should not be executed directly')
 
 from . import ui as ui
+from src.config import cfg
+
+# ------------------------------------------------------------------
+# Make it easier (shorter) to use cfg object
+mchCfg = cfg['machine']
 
 # Current coordinates
-gX = 0
-gMIN_X = 0
-gMAX_X = 291
+gX = 0.0
+gMIN_X = 0.0
+gMAX_X = mchCfg['maxX']
 
-gY = 0
-gMIN_Y = 0
-gMAX_Y = 295
+gY = 0.0
+gMIN_Y = 0.0
+gMAX_Y = mchCfg['maxY']
 
-gZ = 0
-gMIN_Z = 0
-gMAX_Z = 80
+gZ = 0.0
+gMIN_Z = 0.0
+gMAX_Z = mchCfg['maxX']
 
 # Rapid Increment (XY plane)
-gRI_XY = 25
+gRI_XY = mchCfg['rapidXY']
 gMIN_RI_XY = 0.1
 gMAX_RI_XY = 100
 
 # Rapid Increment (Z plane)
-gRI_Z = 10
+gRI_Z = mchCfg['rapidZ']
 gMIN_RI_Z = 0.1
 gMAX_RI_Z = 20
 
 # Safe Z height
-gSAFE_HEIGHT = 0 # 10
+gSAFE_HEIGHT = mchCfg['zSafeHeight']
 gMIN_SAFE_HEIGHT = 0
 gMAX_SAFE_HEIGHT = 30
 
-#Table size percent (divisor)
-gTableSizePercent=100
+# Table size percent (divisor)
+gTableSizePercent = mchCfg['tableSizePercent']
 gMIN_TABLE_SIZE_PERCENT = 10
 gMAX_TABLE_SIZE_PERCENT = 100
 
@@ -94,9 +101,6 @@ def setSafeHeight(height):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def changeRI_XY(direction):
-  _k = 'tbl.changeRI_XY()'
-  ui.log("[ Entering ]", k=_k, v='DEBUG')
-
   newRI = 0
   increment = 0
 
@@ -121,23 +125,19 @@ def changeRI_XY(direction):
   newRI = gRI_XY + increment
 
   if( newRI < gMIN_RI_XY ):
-    ui.log( "ERROR: RI_XY below %.3f not allowed!" % gMIN_RI_XY , k=_k, v='BASIC')
+    ui.log( 'ERROR: RI_XY below {:} not allowed!'.format(ui.coordStr(gMIN_RI_XY)), color='ui.msg')
     return
 
   if( newRI > gMAX_RI_XY ):
-    ui.log( "ERROR: RI_XY over %.3f not allowed!" % gMAX_RI_XY , k=_k, v='BASIC')
+    ui.log( 'ERROR: RI_XY over {:} not allowed!'.format(ui.coordStr(gMAX_RI_XY)), color='ui.msg')
     return
 
   setRI_XY(newRI)
-  ui.log("New Rapid Increment (XY): %.3f" % newRI, k=_k, v='BASIC')
+  ui.log('New Rapid Increment (XY): {:}'.format(ui.coordStr(newRI)), color='ui.info')
   return
-
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def changeRI_Z(direction):
-  _k = 'tbl.changeRI_Z()'
-  ui.log("[ Entering ]", k=_k, v='DEBUG')
-
   newRI = 0
   increment = 0
 
@@ -158,172 +158,135 @@ def changeRI_Z(direction):
   newRI = gRI_Z + increment
 
   if( newRI < gMIN_RI_Z ):
-    ui.log( "ERROR: RI_Z below %.3f not allowed!" % gMIN_RI_Z , k=_k, v='BASIC')
+    ui.log('ERROR: RI_Z below {:} not allowed!'.format(ui.coordStr(gMIN_RI_Z)), color='ui.msg')
     return
 
   if( newRI > gMAX_RI_Z ):
-    ui.log( "ERROR: RI_Z over %.3f not allowed!" % gMAX_RI_Z , k=_k, v='BASIC')
+    ui.log('ERROR: RI_Z over {:} not allowed!'.format(ui.coordStr(gMAX_RI_Z)), color='ui.msg')
     return
 
   setRI_Z(newRI)
-  ui.log("New Rapid Increment (Z): %.3f" % newRI, k=_k, v='BASIC')
+  ui.log('New Rapid Increment (Z): {:}'.format(ui.coordStr(newRI)), color='ui.info')
   return
-
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def showCurrPos(verbose='WARNING'):
-  _k = 'tbl.showCurrPos()'
-  ui.log("[ Entering ]", k=_k, v='DEBUG')
-
-  ui.log("[X=%.3f Y=%.3f Z=%.3f]" % (getX(), getY(), getZ()), k=_k, v=verbose)
-
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def checkAbsoluteXYZ(x=None, y=None, z=None):
-  _k = 'tbl.checkAbsoluteXYZ()'
-  ui.log("[ Entering ]", k=_k, v='DEBUG')
-
-  ui.log("Calculating result...", k=_k, v='DEBUG')
+  ui.log('Calculating result...', v='DEBUG')
   result = (checkAbsoluteX(x) and checkAbsoluteY(y) and checkAbsoluteZ(z))
 
-  ui.log(  "checkAbsoluteXYZ() - Absolute coordinates are %s"
-        % ("OK" if result else "WRONG")
-        , k=_k, v='DEBUG')
+  ui.log(  'checkAbsoluteXYZ() - Absolute coordinates are {:s}'.format(
+        'OK' if result else 'WRONG'), v='DEBUG')
   return(result)
 
 
 def checkAbsoluteX(x=None):
-  _k = 'tbl.checkAbsoluteX()'
-  ui.log("[ Entering ]", k=_k, v='DEBUG')
-
   if(x is None):
-    ui.log("Empty value", k=_k, v='DEBUG')
+    ui.log('Empty value', v='DEBUG')
     return True
   elif(x < getMinX()):
-    ui.log("ERROR: X below %.3f not allowed!" % getMinX(), k=_k, v='ERROR')
+    ui.log('ERROR: X below {:} not allowed!'.format(ui.coordStr(getMinX())), v='ERROR')
     return False
 
   elif(x > getMaxX()):
-    ui.log("ERROR: X over %.3f not allowed!" % getMaxX(), k=_k, v='ERROR')
+    ui.log('ERROR: X over {:} not allowed!'.format(ui.coordStr(getMaxX())), v='ERROR')
     return False
 
-  ui.log("Absolute value is OK", k=_k, v='DEBUG')
+  ui.log('Absolute value is OK', v='DEBUG')
   return True
 
 
 def checkAbsoluteY(y=None):
-  _k = 'tbl.checkAbsoluteY()'
-  ui.log("[ Entering ]", k=_k, v='DEBUG')
-
   if(y is None):
-    ui.log("Empty value is OK", k=_k, v='DEBUG')
+    ui.log('Empty value is OK', v='DEBUG')
     return True
 
   elif(y < getMinY()):
-    ui.log("ERROR: Y below %.3f not allowed!" % getMinY(), k=_k, v='ERROR')
+    ui.log('ERROR: Y below {:} not allowed!'.format(ui.coordStr(getMinY())), v='ERROR')
     return False
 
   elif(y > getMaxY()):
-    ui.log("ERROR: Y over %.3f not allowed!" % getMaxY(), k=_k, v='ERROR')
+    ui.log('ERROR: Y over {:} not allowed!'.format(ui.coordStr(getMaxY())), v='ERROR')
     return False
 
-  ui.log("Absolute value is OK", k=_k, v='DEBUG')
+  ui.log('Absolute value is OK', v='DEBUG')
   return True
 
 
 def checkAbsoluteZ(z=None):
-  _k = 'tbl.checkAbsoluteZ()'
-  ui.log("[ Entering ]", k=_k, v='DEBUG')
-
   if(z is None):
-    ui.log("Empty value is OK", k=_k, v='DEBUG')
+    ui.log('Empty value is OK', v='DEBUG')
     return True
 
   elif(z < getMinZ()):
-    ui.log("ERROR: Z below %.3f not allowed!" % getMinZ(), k=_k, v='ERROR')
+    ui.log('ERROR: Z below {:} not allowed!'.format(ui.coordStr(getMinZ())), color='ui.msg', v='ERROR')
     return False
 
   elif(z > getMaxZ()):
-    ui.log("ERROR: Z over %.3f not allowed!" % getMaxZ(), k=_k, v='ERROR')
+    ui.log('ERROR: Z over {:} not allowed!'.format(ui.coordStr(getMaxZ())), color='ui.msg', v='ERROR')
     return False
 
-  ui.log("Absolute value is OK", k=_k, v='DEBUG')
+  ui.log('Absolute value is OK', v='DEBUG')
   return True
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def checkRelativeXYZ(x=None, y=None, z=None):
-  _k = 'tbl.checkRelativeXYZ()'
-  ui.log("[ Entering ]", k=_k, v='DEBUG')
-
   result = (checkRelativeX(x) or checkRelativeY(y) or checkRelativeZ(z))
 
-  ui.log(  "Relative coordinates are %s"
-
-        % ("OK" if result else "WRONG")
-        , k=_k, v='DEBUG')
+  ui.log(  'Relative coordinates are {:s}'.format(
+        'OK' if result else 'WRONG'), v='DEBUG')
   return(result)
 
 
 def checkRelativeX(x=None):
-  _k = 'tbl.checkRelativeX()'
-  ui.log("[ Entering ]", k=_k, v='DEBUG')
-
   if(not x):  # No X provided or X==0
-    ui.log("Empty or 0 means no change", k=_k, v='DEBUG')
+    ui.log('Empty or 0 means no change', v='DEBUG')
     return False
 
   elif(x>0):  # Up
     if(getX()==getMaxX()):
-      ui.log("X is already at MAX_X (%.3f)" % getMaxX(), k=_k, v='ERROR')
+      ui.log('X is already at MAX_X ({:})'.format(ui.coordStr(getMaxX())), color='ui.msg', v='ERROR')
       return False
   else:    # Down
     if(getX()==getMinX()):
-      ui.log("X is already at MIN_X (%.3f)" % getMinX(), k=_k, v='ERROR')
+      ui.log('X is already at MIN_X ({:})'.format(ui.coordStr(getMinX())), color='ui.msg', v='ERROR')
       return False
 
-  ui.log("Relative value means change", k=_k, v='DEBUG')
+  ui.log('Relative value means change', v='DEBUG')
   return True
 
 
 def checkRelativeY(y=None):
-  _k = 'tbl.checkRelativeY()'
-  ui.log("[ Entering ]", k=_k, v='DEBUG')
-
   if(not y):  # No Y provided or Y==0
-    ui.log("Empty or 0 means no change", k=_k, v='DEBUG')
+    ui.log('Empty or 0 means no change', v='DEBUG')
     return False
 
   elif(y>0):  # Up
     if(getY()==getMaxY()):
-      ui.log("Y is already at MAX_Y (%.3f)" % getMaxY(), k=_k, v='ERROR')
+      ui.log('Y is already at MAX_Y ({:})'.format(ui.coordStr(getMaxY())), color='ui.msg', v='ERROR')
       return False
   else:    # Down
     if(getY()==getMinY()):
-      ui.log("Y is already at MIN_Y (%.3f)" % getMinY(), k=_k, v='ERROR')
+      ui.log('Y is already at MIN_Y ({:})'.format(ui.coordStr(getMinY())), color='ui.msg', v='ERROR')
       return False
 
-  ui.log("Relative value means change", k=_k, v='DEBUG')
+  ui.log('Relative value means change', v='DEBUG')
   return True
 
 
 def checkRelativeZ(z=None):
-  _k = 'tbl.checkRelativeZ()'
-  ui.log("[ Entering ]", k=_k, v='DEBUG')
-
   if(not z):  # No Z provided or Z==0
-    ui.log("Empty or 0 means no change", k=_k, v='DEBUG')
+    ui.log('Empty or 0 means no change', v='DEBUG')
     return False
 
   elif(z>0):  # Up
     if(getZ()==getMaxZ()):
-      ui.log("Z is already at MAX_Z (%.3f)" % getMaxZ(), k=_k, v='ERROR')
+      ui.log('Z is already at MAX_Z ({:})'.format(ui.coordStr(getMaxZ())), color='ui.msg', v='ERROR')
       return False
   else:    # Down
     if(getZ()==getMinZ()):
-      ui.log("Z is already at MIN_Z (%.3f)" % getMinZ(), k=_k, v='ERROR')
+      ui.log('Z is already at MIN_Z ({:})'.format(ui.coordStr(getMinZ())), color='ui.msg', v='ERROR')
       return False
 
-  ui.log("Relative value means change", k=_k, v='DEBUG')
+  ui.log('Relative value means change', v='DEBUG')
   return True
-
