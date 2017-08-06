@@ -37,8 +37,17 @@ def sendGCodeInitSequence():
     ui.log('Sending command [{0}]: {1}'.format(command[0], command[1]), k=_k, v='WARNING')
     sp.sendSerialCommand(command[0])
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def viewGCodeParameters():
+  _k = 'mch.viewGCodeParameters()'
+  ui.log("[ Entering ]", k=_k, v='DEBUG')
 
+  ui.log('', k=_k, v='BASIC')
+  ui.log('Requesting GCode parameters...', k=_k, v='BASIC')
+  ui.log('', k=_k, v='BASIC')
 
+  ui.log('Sending command [$G]...', k=_k, v='WARNING')
+  sp.sendSerialCommand('$G')
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def getMachineStatus():
