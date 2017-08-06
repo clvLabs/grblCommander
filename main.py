@@ -22,7 +22,7 @@ from src.config import cfg, loadedCfg
 mchCfg = cfg['machine']
 
 # Current version
-gVERSION = '0.3.2'
+gVERSION = '0.4.0'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def readyMsg(extraInfo=None):
