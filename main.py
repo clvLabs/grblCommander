@@ -380,16 +380,15 @@ def main():
   ui.logBlock("    grblCommander v{0}".format(gVERSION), k=_k, v='BASIC')
 
   sp.serialConnect()
-
   mch.sendGCodeInitSequence()
+  mch.viewGCodeParameters()
 
   ui.log("", k=_k, v='BASIC')
   ui.log("System ready!", k=_k, v='BASIC')
-  ui.log("", k=_k, v='BASIC')
-
-  showHelp()
 
   mch.showStatus()
+
+  ui.log('Type "H" for help', k=_k, v='BASIC')
 
   ui.showReadyMsg(caller='main()')
 
