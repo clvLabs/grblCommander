@@ -62,8 +62,8 @@ def serialConnect():
   if(gSerial.isOpen()):
     ui.log("Serial port open, waiting for startup message...", k=_k, v='BASIC')
     ui.log("", k=_k, v='BASIC')
-    response = readSerialResponse(2)
-    if( len(response) == 2 ):
+    response = readSerialResponse(expectedLines=None)
+    if( len(response) >= 2 ):
       ui.log("", k=_k, v='BASIC')
       ui.log("Startup message received, machine ready", k=_k, v='BASIC')
       ui.log("", k=_k, v='BASIC')
