@@ -21,17 +21,23 @@ def sendGCodeInitSequence():
   _k = 'mch.sendGCodeInitSequence()'
   ui.log("[ Entering ]", k=_k, v='DEBUG')
 
-  ui.log("Sending GCode init sequence...", k=_k, v='BASIC')
-  ui.log("", k=_k, v='BASIC')
+  ui.log('Sending GCode init sequence...', k=_k, v='BASIC')
+  ui.log('', k=_k, v='BASIC')
 
-  ui.log("Sending command [G21]: Programming in millimeters (mm)", k=_k, v='WARNING')
-  sp.sendSerialCommand("G21")
+  initSeq = [
+    [ 'G0', 'Rapid positioning' ],
+    [ 'G54', 'Machine coordinate system G54' ],
+    [ 'G17', 'XY Plane selection' ],
+    [ 'G90', 'Absolute programming' ],
+    [ 'G21', 'Programming in millimeters (mm)' ],
+    [ 'F100', 'Feed rate' ],
+  ]
 
-  ui.log("Sending command [G90]: Absolute programming", k=_k, v='WARNING')
-  sp.sendSerialCommand("G90")
+  for command in initSeq:
+    ui.log('Sending command [{0}]: {1}'.format(command[0], command[1]), k=_k, v='WARNING')
+    sp.sendSerialCommand(command[0])
 
-  ui.log("Sending command [F100]: Feed rate", k=_k, v='WARNING')
-  sp.sendSerialCommand("F100")
+
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
