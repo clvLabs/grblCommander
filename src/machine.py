@@ -269,11 +269,6 @@ def feedAbsolute(x=None, y=None, z=None, speed=mchCfg['feedSpeed'], verbose='WAR
     ui.log("Wouldn't move, doing nothing", color='ui.msg', v=verbose)
     return
 
-  # if( tbl.getZ() < tbl.getSafeHeight() ):
-  #   if( x != None or y != None ):
-  #     ui.log("ERROR: Can't feed on X/Y while Z < {:d} (SAFE_HEIGHT)!".format(tbl.getSafeHeight()), v='ERROR')
-  #     return
-
   cmd = 'G1 '
 
   if( x != None and x != tbl.getX() ):
@@ -307,7 +302,7 @@ def rapidAbsolute(x=None, y=None, z=None, verbose='WARNING'):
 
   if( tbl.getZ() < tbl.getSafeHeight() ):
     if( x != None or y != None ):
-      ui.log("ERROR: Can't rapid on X/Y while Z < {:d} (SAFE_HEIGHT)!".format(tbl.getSafeHeight()), v='ERROR')
+      ui.log("ERROR: Can't rapid on X/Y while Z < {:} (SAFE_HEIGHT)!".format(tbl.getSafeHeight()), color='ui.errorMsg', v='ERROR')
       return
 
   if(not tbl.checkAbsoluteXYZ(x, y, z)):
@@ -347,7 +342,7 @@ def rapidRelative(x=None, y=None, z=None, verbose='WARNING'):
 
   if( tbl.getZ() < tbl.getSafeHeight() ):
     if( x != None or y != None ):
-      ui.log("ERROR: Can't rapid on X/Y while Z < {:d} (SAFE_HEIGHT)!".format(tbl.getSafeHeight()), v='ERROR')
+      ui.log("ERROR: Can't rapid on X/Y while Z < {:} (SAFE_HEIGHT)!".format(tbl.getSafeHeight()), color='ui.errorMsg', v='ERROR')
       return
 
   if(not tbl.checkRelativeXYZ(x, y, z)):
@@ -359,10 +354,10 @@ def rapidRelative(x=None, y=None, z=None, verbose='WARNING'):
   if(x):
     newX = tbl.getX() + x
     if(newX<tbl.getMinX()):
-      ui.log('Adjusting X to MinX ({:d})'.format(tbl.getMinX()), v='DETAIL')
+      ui.log('Adjusting X to MinX ({:})'.format(tbl.getMinX()), v='DETAIL')
       newX=tbl.getMinX()
     elif(newX>tbl.getMaxX()):
-      ui.log('Adjusting X to MaxX ({:d})'.format(tbl.getMaxX()), v='DETAIL')
+      ui.log('Adjusting X to MaxX ({:})'.format(tbl.getMaxX()), v='DETAIL')
       newX=tbl.getMaxX()
 
     if(newX == tbl.getX()):
@@ -374,10 +369,10 @@ def rapidRelative(x=None, y=None, z=None, verbose='WARNING'):
   if(y):
     newY = tbl.getY() + y
     if(newY<tbl.getMinY()):
-      ui.log('Adjusting Y to MinY ({:d})'.format(tbl.getMinY()), v='DETAIL')
+      ui.log('Adjusting Y to MinY ({:})'.format(tbl.getMinY()), v='DETAIL')
       newY=tbl.getMinY()
     elif(newY>tbl.getMaxY()):
-      ui.log('Adjusting Y to MaxY ({:d})'.format(tbl.getMaxY()), v='DETAIL')
+      ui.log('Adjusting Y to MaxY ({:})'.format(tbl.getMaxY()), v='DETAIL')
       newY=tbl.getMaxY()
 
     if(newY == tbl.getY()):
@@ -389,10 +384,10 @@ def rapidRelative(x=None, y=None, z=None, verbose='WARNING'):
   if(z):
     newZ = tbl.getZ() + z
     if(newZ<tbl.getMinZ()):
-      ui.log('Adjusting Z to MinZ ({:d})'.format(tbl.getMinZ()), v='DETAIL')
+      ui.log('Adjusting Z to MinZ ({:})'.format(tbl.getMinZ()), v='DETAIL')
       newZ=tbl.getMinZ()
     elif(newZ>tbl.getMaxZ()):
-      ui.log('Adjusting Z to MaxZ ({:d})'.format(tbl.getMaxZ()), v='DETAIL')
+      ui.log('Adjusting Z to MaxZ ({:})'.format(tbl.getMaxZ()), v='DETAIL')
       newZ=tbl.getMaxZ()
 
     if(newZ == tbl.getZ()):

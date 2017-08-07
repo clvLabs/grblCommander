@@ -61,10 +61,10 @@ def connect():
       ui.log('Startup message received, machine ready')
       ui.log()
     else:
-      ui.log('ERROR: startup message error, exiting program')
+      ui.log('ERROR: startup message error, exiting program', color='ui.errorMsg', v='ERROR')
       quit()
   else:
-    ui.log('ERROR opening serial port, exiting program')
+    ui.log('ERROR opening serial port, exiting program', color='ui.errorMsg', v='ERROR')
     quit()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -125,11 +125,11 @@ def changeRI_XY(direction):
   newRI = gRI_XY + increment
 
   if( newRI < gMIN_RI_XY ):
-    ui.log( 'ERROR: RI_XY below {:} not allowed!'.format(ui.coordStr(gMIN_RI_XY)), color='ui.msg')
+    ui.log( 'ERROR: RI_XY below {:} not allowed!'.format(ui.coordStr(gMIN_RI_XY)), color='ui.errorMsg', v='ERROR')
     return
 
   if( newRI > gMAX_RI_XY ):
-    ui.log( 'ERROR: RI_XY over {:} not allowed!'.format(ui.coordStr(gMAX_RI_XY)), color='ui.msg')
+    ui.log( 'ERROR: RI_XY over {:} not allowed!'.format(ui.coordStr(gMAX_RI_XY)), color='ui.errorMsg', v='ERROR')
     return
 
   setRI_XY(newRI)
@@ -158,11 +158,11 @@ def changeRI_Z(direction):
   newRI = gRI_Z + increment
 
   if( newRI < gMIN_RI_Z ):
-    ui.log('ERROR: RI_Z below {:} not allowed!'.format(ui.coordStr(gMIN_RI_Z)), color='ui.msg')
+    ui.log('ERROR: RI_Z below {:} not allowed!'.format(ui.coordStr(gMIN_RI_Z)), color='ui.errorMsg', v='ERROR')
     return
 
   if( newRI > gMAX_RI_Z ):
-    ui.log('ERROR: RI_Z over {:} not allowed!'.format(ui.coordStr(gMAX_RI_Z)), color='ui.msg')
+    ui.log('ERROR: RI_Z over {:} not allowed!'.format(ui.coordStr(gMAX_RI_Z)), color='ui.errorMsg', v='ERROR')
     return
 
   setRI_Z(newRI)
@@ -184,11 +184,11 @@ def checkAbsoluteX(x=None):
     ui.log('Empty value', v='DEBUG')
     return True
   elif(x < getMinX()):
-    ui.log('ERROR: X below {:} not allowed!'.format(ui.coordStr(getMinX())), v='ERROR')
+    ui.log('ERROR: X below {:} not allowed!'.format(ui.coordStr(getMinX())), color='ui.errorMsg', v='ERROR')
     return False
 
   elif(x > getMaxX()):
-    ui.log('ERROR: X over {:} not allowed!'.format(ui.coordStr(getMaxX())), v='ERROR')
+    ui.log('ERROR: X over {:} not allowed!'.format(ui.coordStr(getMaxX())), color='ui.errorMsg', v='ERROR')
     return False
 
   ui.log('Absolute value is OK', v='DEBUG')
@@ -201,11 +201,11 @@ def checkAbsoluteY(y=None):
     return True
 
   elif(y < getMinY()):
-    ui.log('ERROR: Y below {:} not allowed!'.format(ui.coordStr(getMinY())), v='ERROR')
+    ui.log('ERROR: Y below {:} not allowed!'.format(ui.coordStr(getMinY())), color='ui.errorMsg', v='ERROR')
     return False
 
   elif(y > getMaxY()):
-    ui.log('ERROR: Y over {:} not allowed!'.format(ui.coordStr(getMaxY())), v='ERROR')
+    ui.log('ERROR: Y over {:} not allowed!'.format(ui.coordStr(getMaxY())), color='ui.errorMsg', v='ERROR')
     return False
 
   ui.log('Absolute value is OK', v='DEBUG')
@@ -218,11 +218,11 @@ def checkAbsoluteZ(z=None):
     return True
 
   elif(z < getMinZ()):
-    ui.log('ERROR: Z below {:} not allowed!'.format(ui.coordStr(getMinZ())), color='ui.msg', v='ERROR')
+    ui.log('ERROR: Z below {:} not allowed!'.format(ui.coordStr(getMinZ())), color='ui.errorMsg', v='ERROR')
     return False
 
   elif(z > getMaxZ()):
-    ui.log('ERROR: Z over {:} not allowed!'.format(ui.coordStr(getMaxZ())), color='ui.msg', v='ERROR')
+    ui.log('ERROR: Z over {:} not allowed!'.format(ui.coordStr(getMaxZ())), color='ui.errorMsg', v='ERROR')
     return False
 
   ui.log('Absolute value is OK', v='DEBUG')
@@ -245,11 +245,11 @@ def checkRelativeX(x=None):
 
   elif(x>0):  # Up
     if(getX()==getMaxX()):
-      ui.log('X is already at MAX_X ({:})'.format(ui.coordStr(getMaxX())), color='ui.msg', v='ERROR')
+      ui.log('X is already at MAX_X ({:})'.format(ui.coordStr(getMaxX())), color='ui.errorMsg', v='ERROR')
       return False
   else:    # Down
     if(getX()==getMinX()):
-      ui.log('X is already at MIN_X ({:})'.format(ui.coordStr(getMinX())), color='ui.msg', v='ERROR')
+      ui.log('X is already at MIN_X ({:})'.format(ui.coordStr(getMinX())), color='ui.errorMsg', v='ERROR')
       return False
 
   ui.log('Relative value means change', v='DEBUG')
@@ -263,11 +263,11 @@ def checkRelativeY(y=None):
 
   elif(y>0):  # Up
     if(getY()==getMaxY()):
-      ui.log('Y is already at MAX_Y ({:})'.format(ui.coordStr(getMaxY())), color='ui.msg', v='ERROR')
+      ui.log('Y is already at MAX_Y ({:})'.format(ui.coordStr(getMaxY())), color='ui.errorMsg', v='ERROR')
       return False
   else:    # Down
     if(getY()==getMinY()):
-      ui.log('Y is already at MIN_Y ({:})'.format(ui.coordStr(getMinY())), color='ui.msg', v='ERROR')
+      ui.log('Y is already at MIN_Y ({:})'.format(ui.coordStr(getMinY())), color='ui.errorMsg', v='ERROR')
       return False
 
   ui.log('Relative value means change', v='DEBUG')
@@ -281,11 +281,11 @@ def checkRelativeZ(z=None):
 
   elif(z>0):  # Up
     if(getZ()==getMaxZ()):
-      ui.log('Z is already at MAX_Z ({:})'.format(ui.coordStr(getMaxZ())), color='ui.msg', v='ERROR')
+      ui.log('Z is already at MAX_Z ({:})'.format(ui.coordStr(getMaxZ())), color='ui.errorMsg', v='ERROR')
       return False
   else:    # Down
     if(getZ()==getMinZ()):
-      ui.log('Z is already at MIN_Z ({:})'.format(ui.coordStr(getMinZ())), color='ui.msg', v='ERROR')
+      ui.log('Z is already at MIN_Z ({:})'.format(ui.coordStr(getMinZ())), color='ui.errorMsg', v='ERROR')
       return False
 
   ui.log('Relative value means change', v='DEBUG')
