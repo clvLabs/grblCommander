@@ -15,6 +15,7 @@ import src.serialport as sp
 import src.machine as mch
 import src.table as tbl
 import src.test as test
+from src.config import loadedCfg
 
 # Current version
 gVERSION = '0.3.0'
@@ -360,6 +361,8 @@ def main():
   ui.clearScreen()
 
   ui.logBlock('    grblCommander v{0}'.format(gVERSION), color='ui.header')
+  ui.log('Using configuration file: {:}'.format(loadedCfg))
+  ui.log()
 
   sp.connect()
   mch.sendGCodeInitSequence()

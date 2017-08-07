@@ -11,6 +11,8 @@ if __name__ == '__main__':
 try:
   from src.config_user import cfg as user
   cfg = user
+  loadedCfg = 'src.config_user'
 except:
   from src.config_default import cfg as default
   cfg = default
+  loadedCfg = 'src.config_default'
