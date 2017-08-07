@@ -930,7 +930,7 @@ def dummy():
   currX = 0
   currY = 0
   currZ = materialZ - plunge
-  if (currZ - plunge) < targetZ:
+  if currZ < targetZ:
     currZ = targetZ
 
   tabStartX = (pocketWidth / 2) - (tabWidth / 2)
