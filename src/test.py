@@ -10,6 +10,7 @@ if __name__ == '__main__':
 
 import sys
 import time
+import math
 
 from . import utils as ut
 from . import ui as ui
@@ -872,6 +873,9 @@ def dummy():
       Plunge                {:f}
       PlungeSpeed           {:d}
       Feed                  {:d}
+
+      TOTAL
+        ZPasses             {:d}
       """.format(
         title,
         materialZ,
@@ -884,6 +888,7 @@ def dummy():
         plunge,
         plungeSpeed,
         feed,
+        zPasses,
         ))
 
   # Check before trying with other materials!!
@@ -897,6 +902,8 @@ def dummy():
   plunge = 1.0
   plungeSpeed = 100
   feed = 500
+
+  zPasses = math.ceil((materialZ - targetZ) / plunge)
 
   showParams('Default parameters')
 
@@ -912,6 +919,9 @@ def dummy():
   plunge=ui.getUserInput('Plunge ({:f})'.format(plunge), float, plunge)
   plungeSpeed=ui.getUserInput('PlungeSpeed ({:d})'.format(plungeSpeed), int, plungeSpeed)
   feed=ui.getUserInput('Feed ({:d})'.format(feed), int, feed)
+
+  zPasses = math.ceil((materialZ - targetZ) / plunge)
+
   showParams('FINAL parameters')
 
   if not userConfirmTest():
@@ -933,20 +943,24 @@ def dummy():
   if currZ < targetZ:
     currZ = targetZ
 
+  currZPass = 0
+
   tabStartX = (pocketWidth / 2) - (tabWidth / 2)
   tabEndX = tabStartX + tabWidth
   tabZ = targetZ + tabHeight
 
   finished = False
   while not finished and not testCancelled:
+    currZPass += 1
+
     # Plunge
     if not testCancelled:
-      ui.logTitle('Plunge Z{0}'.format(currZ))
+      ui.logTitle('Plunge Z{:} ({:}/{:})'.format(ui.coordStr(currZ), currZPass, zPasses))
       mchFeed(z=currZ, speed=plungeSpeed)
 
     # Horizontal line DL-DR
     if not testCancelled:
-      ui.logTitle('Horizontal line DL-DR Z{0}'.format(currZ))
+      ui.logTitle('Horizontal line DL-DR Z{:} ({:}/{:})'.format(ui.coordStr(currZ), currZPass, zPasses))
       if currZ == targetZ:
         mchFeed(x=tabStartX, speed=feed)
         ui.logTitle('tab:start')
@@ -960,12 +974,12 @@ def dummy():
 
     # Vertical line DR-UR
     if not testCancelled:
-      ui.logTitle('Vertical line DR-UR Z{0}'.format(currZ))
+      ui.logTitle('Vertical line DR-UR Z{:} ({:}/{:})'.format(ui.coordStr(currZ), currZPass, zPasses))
       mchFeed(y=pocketHeight, speed=feed)
 
     # Horizontal line UR-UL
     if not testCancelled:
-      ui.logTitle('Horizontal line UR-UL Z{0}'.format(currZ))
+      ui.logTitle('Horizontal line UR-UL Z{:} ({:}/{:})'.format(ui.coordStr(currZ), currZPass, zPasses))
       if currZ == targetZ:
         mchFeed(x=tabEndX, speed=feed)
         ui.logTitle('tab:start')
@@ -979,7 +993,7 @@ def dummy():
 
     # Vertical line UL-DL
     if not testCancelled:
-      ui.logTitle('Vertical line UL-DL Z{0}'.format(currZ))
+      ui.logTitle('Vertical line UL-DL Z{:} ({:}/{:})'.format(ui.coordStr(currZ), currZPass, zPasses))
       mchFeed(y=0, speed=feed)
 
     # Next plunge calculation/check
