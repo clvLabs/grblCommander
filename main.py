@@ -289,8 +289,11 @@ def processUserInput():
 
     elif(key in [24, 25]):  # <CTRL>x/y
       ui.keyPressMessage('<CTRL>x/y - Set rapid increment (XY)', key, char)
-      tmpRI_XY=ui.getUserInput('Increment (current {:f})'.format(tbl.getRI_XY()), float)
-      tbl.setRI_XY(tmpRI_XY)
+      tbl.setRI_XY(
+        ui.getUserInput(
+          'Increment ({:})'.format(tbl.getRI_XY()),
+          float,
+          tbl.getRI_XY()))
       mch.showStatus()
 
     elif(char == 'Z'):
@@ -303,8 +306,11 @@ def processUserInput():
 
     elif(key == 26):  # <CTRL>z
       ui.keyPressMessage('<CTRL>z - Set rapid increment (Z)', key, char)
-      tmpRI_Z=ui.getUserInput('Increment (current {:f})'.format(tbl.getRI_Z()), float)
-      tbl.setRI_Z(tmpRI_Z)
+      tbl.setRI_Z(
+        ui.getUserInput(
+          'Increment ({:})'.format(tbl.getRI_Z()),
+          float,
+          tbl.getRI_Z()))
       mch.showStatus()
 
     elif(char == '%'):
