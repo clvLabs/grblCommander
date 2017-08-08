@@ -103,7 +103,7 @@ def processUserInput():
       ui.keyPressMessage('gG - Send raw GCode command', key, char)
       ui.inputMsg('Enter command...')
       userCommand=input()
-      sp.sendCommand(userCommand,  expectedResultLines=None, responseTimeout=2)
+      sp.sendCommand(userCommand)
 
     elif(char in 'sS'):
       ui.keyPressMessage('sS - Show current status', key, char)

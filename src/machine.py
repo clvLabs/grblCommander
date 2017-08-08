@@ -38,9 +38,9 @@ def viewGCodeParameters():
   ui.log()
   ui.log('Requesting GCode parameters...')
   ui.log()
+  sp.sendCommand('$G')
 
   ui.log('Sending command [$G]...', v='WARNING')
-  sp.sendCommand('$G', expectedResultLines=2)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def parseMachineStatus(status):

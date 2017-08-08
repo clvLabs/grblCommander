@@ -55,8 +55,8 @@ def connect():
   if(gSerial.isOpen()):
     ui.log('Serial port open, waiting for startup message...')
     ui.log()
-    response = readResponse(expectedLines=None)
-    if( len(response) >= 2 ):
+    response = readResponse()
+    if len(response):
       ui.log()
       ui.log('Startup message received, machine ready')
       ui.log()
@@ -72,17 +72,16 @@ def close():
   return gSerial.close()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def sendCommand(command, responseTimeout=spCfg['responseTimeout'], expectedResultLines=1, verbose='BASIC'):
+def sendCommand(command, responseTimeout=spCfg['responseTimeout'], verbose='BASIC'):
   command = command.rstrip()
   ui.log('>>>>> [{0}]'.format(command), color='comms.send' ,v=verbose)
   write(command+'\n')
 
-  return readResponse(expectedLines=expectedResultLines,responseTimeout=responseTimeout,verbose=verbose)
+  return readResponse(responseTimeout=responseTimeout,verbose=verbose)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def readResponse(expectedLines=1, responseTimeout=spCfg['responseTimeout'], verbose='BASIC'):
-  ui.log(  'readResponse() - Waiting for {:} lines from serial...'.format(
-        expectedLines if expectedLines != None else 'undefined'), v='SUPER')
+def readResponse(responseTimeout=spCfg['responseTimeout'], verbose='BASIC'):
+  ui.log('readResponse() - Waiting for response from serial...', v='SUPER')
 
   startTime = time.time()
   receivedLines = 0
@@ -90,19 +89,27 @@ def readResponse(expectedLines=1, responseTimeout=spCfg['responseTimeout'], verb
 
   while( (time.time() - startTime) < responseTimeout ):
     line = readline()
-    if(line):
-      ui.log('<<<<< [{0}]'.format(line), color='comms.recv' ,v=verbose)
-      receivedLines += 1
-      responseArray.append(line)
-      if((expectedLines != None) and (receivedLines == expectedLines)):
+    if line:
+      finished = False
+
+      if line == 'ok':
+        finished = True
+      else:
+        if line[:1] == '>' and line[-3:] == ':ok':
+          line = line[:-3]
+          finished = True
+
+        receivedLines += 1
+        responseArray.append(line)
+        ui.log('<<<<< {:}'.format(line), color='comms.recv' ,v=verbose)
+
+      if finished:
         ui.log(  'readResponse() - Successfully received {:d} lines from serial'.format(
           expectedLines), v='SUPER')
         break
   else:
-    if(expectedLines != None):
-      ui.log('readResponse() - TIMEOUT Waiting for data from serial', v='WARNING')
-    else:
-      ui.log('readResponse() - Finished waiting for undefined lines from serial', v='DEBUG')
+    ui.log('readResponse() - TIMEOUT Waiting for data from serial', color='ui.errorMsg', v='ERROR')
+    return []
 
   return responseArray
 
