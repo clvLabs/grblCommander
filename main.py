@@ -413,7 +413,7 @@ def main():
 
     line = sp.readline()
     if(line):
-      ui.log('<<<<< {:}'.format(line))
+      ui.log('<<<<< {:}'.format(line), color='comms.recv')
 
     if not processUserInput():
       break
