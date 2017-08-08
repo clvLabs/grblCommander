@@ -68,10 +68,12 @@ def setStrColor(str, colorName):
   else:
     colorSet = 'ui'
 
-  if colorName in uiCfg['colors'][colorSet]:
-    color = uiCfg['colors'][colorSet][colorName]
-  else:
-    color = colorName
+  color = colorName
+
+  if 'colors' in uiCfg:
+    if colorSet in uiCfg['colors']:
+      if colorName in uiCfg['colors'][colorSet]:
+        color = uiCfg['colors'][colorSet][colorName]
 
   return colorStr(str, color)
 
