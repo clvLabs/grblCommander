@@ -37,6 +37,11 @@ def viewGCodeParameters():
   ui.log('Sending command [$G]...', v='DETAIL')
   sp.sendCommand('$G')
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def viewGrblConfig():
+  ui.logTitle('Requesting grbl config')
+  ui.log('Sending command [$$]...', v='DETAIL')
+  sp.sendCommand('$$')
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def parseMachineStatus(status):
