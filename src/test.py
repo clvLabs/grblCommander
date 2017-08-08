@@ -314,6 +314,11 @@ def pointProbe():
   else:
     automaticProbe(iterations)
 
+  if testCancelled:
+    testCancelled = False
+  else:
+    logTestFinished()
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def tableProbingScan():
   global testCancelled
