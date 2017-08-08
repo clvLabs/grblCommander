@@ -44,7 +44,9 @@ def showHelp():
   Zz             - Set rapid increment (Z) +/-
   <CTRL>z        - Set rapid increment (Z)
   Aa             - Set safe height (Z) +/-
+  <CTRL>a        - Set safe height (Z)
   %              - Set table size percent (loop)
+  <ALT>5         - Set table size percent
   Vv             - Set verbose level +/- (loop)
   """)
 
@@ -320,6 +322,15 @@ def processUserInput():
 
       tbl.setTableSizePercent(tmpTableSizePercent)
 
+    elif(key == 53):  # <ALT>5
+      ui.keyPressMessage('<ALT>5 - Set table size percent', key, char)
+      tbl.setTableSizePercent(
+        ui.getUserInput(
+          'Table size % ({:})'.format(tbl.getTableSizePercent()),
+          int,
+          tbl.getTableSizePercent()))
+      mch.showStatus()
+
     elif(char == 'V'):
       ui.keyPressMessage('V - Set verbose level+', key, char)
       tempVerboseLevel = ut.genericValueChanger(  ui.getVerboseLevel(), +1, ui.gMIN_VERBOSE_LEVEL, ui.gMAX_VERBOSE_LEVEL,
@@ -345,6 +356,15 @@ def processUserInput():
       tempSafeHeight = ut.genericValueChanger(  tbl.getSafeHeight(), -1, tbl.gMIN_SAFE_HEIGHT, tbl.gMAX_SAFE_HEIGHT,
                             loop=False, valueName='Safe Height' )
       tbl.setSafeHeight(tempSafeHeight)
+
+    elif(key == 1):  # <CTRL>a
+      ui.keyPressMessage('<CTRL>a - Set safe height (Z)', key, char)
+      tbl.setSafeHeight(
+        ui.getUserInput(
+          'Safe height ({:})'.format(tbl.getSafeHeight()),
+          int,
+          tbl.getSafeHeight()))
+      mch.showStatus()
 
     else:  # Rest of keys
       processed = False
