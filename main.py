@@ -390,27 +390,21 @@ def main():
   ui.clearScreen()
 
   ui.logBlock('    grblCommander v{0}'.format(gVERSION), color='ui.header')
-
   ui.log('Using configuration file: {:}'.format(loadedCfg))
   ui.log()
 
   sp.connect()
+  mch.viewBuildInfo()
   mch.sendGCodeInitSequence()
-  ui.log()
-
-  mch.viewGCodeParameters()
-  ui.log()
-
+  mch.viewGCodeParserState()
   ui.log('System ready!')
 
   mch.showStatus()
-
   ui.log('Type "H" for help')
 
   ui.readyMsg(extraInfo=mch.getSimpleMachineStatusStr())
 
   while(True):
-
     line = sp.readline()
     if(line):
       ui.log('<<<<< {:}'.format(line), color='comms.recv')

@@ -32,18 +32,49 @@ def sendGCodeInitSequence():
   for command in mchCfg['startupSequence']:
     ui.log('Sending command [{0}]: {1}'.format(command[0], command[1]), v='WARNING')
     sp.sendCommand(command[0])
+  ui.log()
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def viewBuildInfo():
+  ui.logTitle('Requesting build info')
+  ui.log('Sending command [$I]...', v='DETAIL')
+  sp.sendCommand('$I')
+  ui.log()
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def viewGCodeParserState():
+  ui.logTitle('Requesting GCode parser state')
+  ui.log('Sending command [$G]...', v='DETAIL')
+  sp.sendCommand('$G')
+  ui.log()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def viewGCodeParameters():
   ui.logTitle('Requesting GCode parameters')
-  ui.log('Sending command [$G]...', v='DETAIL')
-  sp.sendCommand('$G')
+  ui.log('Sending command [$#]...', v='DETAIL')
+  sp.sendCommand('$#')
+  ui.log()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def viewGrblConfig():
   ui.logTitle('Requesting grbl config')
   ui.log('Sending command [$$]...', v='DETAIL')
   sp.sendCommand('$$')
+  ui.log()
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def viewStartupBlocks():
+  ui.logTitle('Requesting startup blocks')
+  ui.log('Sending command [$N]...', v='DETAIL')
+  sp.sendCommand('$N')
+  ui.log()
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def enableSleepMode():
+  ui.logTitle('Requesting sleep mode enable')
+  ui.log('Sending command [$SLP]...', v='DETAIL')
+  sp.sendCommand('$SLP')
+  ui.log()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def parseMachineStatus(status):
@@ -248,10 +279,12 @@ def showLongStatus():
   Current status (LONG version):
 
   Machine {:}
-
-  {:}
-
+  MPos    {:s}
+  WPos    {:s}
   SPos    {:s}
+
+  Machine FULL status:
+  {:}
 
   Software config:
   RapidIncrement_XY = {:}
@@ -262,8 +295,10 @@ def showLongStatus():
 
   """.format(
       getColoredMachineStateStr(),
-      pprint.pformat(gStatus, indent=4, width=uiCfg['maxLineLen']),
+      getMachinePosStr(),
+      getWorkPosStr(),
       getSoftwarePosStr(),
+      pprint.pformat(gStatus, indent=4, width=uiCfg['maxLineLen']),
       ui.coordStr(tbl.getRI_XY()),
       ui.coordStr(tbl.getRI_Z()),
       ui.coordStr(tbl.getSafeHeight()),
@@ -271,9 +306,11 @@ def showLongStatus():
       ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
     )
 
-  viewGCodeParameters()
-  ui.log()
+  viewBuildInfo()
+  viewStartupBlocks()
+  viewGCodeParserState()
   viewGrblConfig()
+  viewGCodeParameters()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def waitForMachineIdle(verbose='WARNING'):
