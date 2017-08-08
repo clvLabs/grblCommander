@@ -26,21 +26,17 @@ gStatus = {}
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def sendGCodeInitSequence():
-  ui.log('Sending GCode init sequence...')
-  ui.log()
-
+  ui.logTitle('Sending GCode init sequence')
   for command in mchCfg['startupSequence']:
     ui.log('Sending command [{0}]: {1}'.format(command[0], command[1]), v='WARNING')
     sp.sendCommand(command[0])
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def viewGCodeParameters():
-  ui.log()
-  ui.log('Requesting GCode parameters...')
-  ui.log()
+  ui.logTitle('Requesting GCode parameters')
+  ui.log('Sending command [$G]...', v='DETAIL')
   sp.sendCommand('$G')
 
-  ui.log('Sending command [$G]...', v='WARNING')
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def parseMachineStatus(status):

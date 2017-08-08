@@ -26,7 +26,7 @@ gSerial = serial.Serial()
 def connect():
   global gSerial
 
-  if( ut.isWindows() ):
+  if ut.isWindows():
     portNumber = spCfg['portWindows'] - 1
   else:
     portNumber = spCfg['portLinux']
@@ -35,14 +35,14 @@ def connect():
   gSerial.port = portNumber
   gSerial.timeout = spCfg['timeout']
 
-  if(gSerial.isOpen()):
-    if(ut.isWindows()):
+  if gSerial.isOpen():
+    if ut.isWindows():
       ui.log('Closing serial port {:s}...'.format(gSerial.makeDeviceName(gSerial.port)))
     else:
       ui.log('Closing serial port {:s}...'.format(gSerial.port))
     gSerial.close()
 
-  if(ut.isWindows()):
+  if ut.isWindows():
     ui.log('Opening serial port {:s}...'.format(gSerial.makeDeviceName(gSerial.port)))
   else:
     ui.log('Opening serial port {:s}...'.format(gSerial.port))
@@ -52,14 +52,13 @@ def connect():
   except:
     pass
 
-  if(gSerial.isOpen()):
+  if gSerial.isOpen():
     ui.log('Serial port open, waiting for startup message...')
     ui.log()
     response = readResponse()
     if len(response):
       ui.log()
       ui.log('Startup message received, machine ready')
-      ui.log()
     else:
       ui.log('ERROR: startup message error, exiting program', color='ui.errorMsg', v='ERROR')
       quit()
@@ -74,7 +73,7 @@ def close():
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def sendCommand(command, responseTimeout=spCfg['responseTimeout'], verbose='BASIC'):
   command = command.rstrip()
-  ui.log('>>>>> [{0}]'.format(command), color='comms.send' ,v=verbose)
+  ui.log('>>>>> {:}'.format(command), color='comms.send' ,v=verbose)
   write(command+'\n')
 
   return readResponse(responseTimeout=responseTimeout,verbose=verbose)
@@ -87,7 +86,7 @@ def readResponse(responseTimeout=spCfg['responseTimeout'], verbose='BASIC'):
   receivedLines = 0
   responseArray=[]
 
-  while( (time.time() - startTime) < responseTimeout ):
+  while (time.time() - startTime) < responseTimeout:
     line = readline()
     if line:
       finished = False
@@ -105,7 +104,7 @@ def readResponse(responseTimeout=spCfg['responseTimeout'], verbose='BASIC'):
 
       if finished:
         ui.log(  'readResponse() - Successfully received {:d} lines from serial'.format(
-          expectedLines), v='SUPER')
+          receivedLines), v='SUPER')
         break
   else:
     ui.log('readResponse() - TIMEOUT Waiting for data from serial', color='ui.errorMsg', v='ERROR')
@@ -117,11 +116,11 @@ def readResponse(responseTimeout=spCfg['responseTimeout'], verbose='BASIC'):
 def readline():
   line = gSerial.readline()
 
-  if(line):
+  if line:
     line = line.decode('utf-8')
     line = line.strip('\r\n')
 
-    ui.log('Read line: [{0}]'.format(line), v='DEBUG')
+    ui.log('Read line: [{:}]'.format(line), v='DEBUG')
 
   return line
 

@@ -406,7 +406,7 @@ def main():
 
     line = sp.readline()
     if(line):
-      ui.log('<<<<<',line)
+      ui.log('<<<<< {:}'.format(line))
 
     if not processUserInput():
       break
