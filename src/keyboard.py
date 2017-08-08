@@ -15,9 +15,12 @@ from . import utils as ut
 if(ut.isWindows()):      import msvcrt
 if(not ut.isWindows()):  import getch
 
+# Keyboard manager
+gKey = kbhit.KBHit()
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def keyPressed():
-  return kbhit.KBHit().kbhit()
+  return gKey.kbhit()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def readKey():
