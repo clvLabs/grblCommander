@@ -9,6 +9,7 @@ if __name__ == '__main__':
   print('This file is a module, it should not be executed directly')
 
 import time
+import pprint
 
 from . import utils as ut
 from . import ui as ui
@@ -18,6 +19,7 @@ from src.config import cfg
 
 # ------------------------------------------------------------------
 # Make it easier (shorter) to use cfg object
+uiCfg = cfg['ui']
 spCfg = cfg['serial']
 mchCfg = cfg['machine']
 
@@ -236,6 +238,42 @@ def showStatus():
       tbl.getTableSizePercent(),
       ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
     )
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def showLongStatus():
+  getMachineStatus()
+
+  ui.logBlock(
+  """
+  Current status (LONG version):
+
+  Machine {:}
+
+  {:}
+
+  SPos    {:s}
+
+  Software config:
+  RapidIncrement_XY = {:}
+  RapidIncrement_Z  = {:}
+  SafeHeight        = {:}
+  TableSize%        = {:d}%
+  VerboseLevel      = {:d}/{:d} ({:s})
+
+  """.format(
+      getColoredMachineStateStr(),
+      pprint.pformat(gStatus, indent=4, width=uiCfg['maxLineLen']),
+      getSoftwarePosStr(),
+      ui.coordStr(tbl.getRI_XY()),
+      ui.coordStr(tbl.getRI_Z()),
+      ui.coordStr(tbl.getSafeHeight()),
+      tbl.getTableSizePercent(),
+      ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
+    )
+
+  viewGCodeParameters()
+  ui.log()
+  viewGrblConfig()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def waitForMachineIdle(verbose='WARNING'):

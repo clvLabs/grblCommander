@@ -28,7 +28,7 @@ def showHelp():
 
   qQ             - Exit
   hH?            - Show this help text
-  sS             - Show current status
+  s/S            - Show current status (short/LONG)
   rR             - Reset serial connection
   cC             - Clear screen
   tT             - Tests (submenu)
@@ -104,10 +104,15 @@ def processUserInput():
       ui.inputMsg('Enter command...')
       userCommand=input()
       sp.sendCommand(userCommand)
+      mch.waitForMachineIdle()
 
-    elif(char in 'sS'):
-      ui.keyPressMessage('sS - Show current status', key, char)
+    elif(char == 's'):
+      ui.keyPressMessage('s - Show current status (short)', key, char)
       mch.showStatus()
+
+    elif(char == 'S'):
+      ui.keyPressMessage('S - Show current status (LONG)', key, char)
+      mch.showLongStatus()
 
     elif(char in 'rR'):
       ui.keyPressMessage('rR - Reset serial connection', key, char)
@@ -391,6 +396,8 @@ def main():
 
   sp.connect()
   mch.sendGCodeInitSequence()
+  ui.log()
+
   mch.viewGCodeParameters()
   ui.log()
 
