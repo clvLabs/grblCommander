@@ -58,7 +58,8 @@ def connect():
     response = readResponse()
     if len(response):
       ui.log()
-      ui.log('Startup message received, machine ready')
+      ui.log('Startup message received, machine ready', color='ui.msg')
+      ui.log()
     else:
       ui.log('ERROR: startup message error, exiting program', color='ui.errorMsg', v='ERROR')
       quit()

@@ -21,6 +21,13 @@ from src.config import loadedCfg
 gVERSION = '0.3.1'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def readyMsg(extraInfo=None):
+  if extraInfo is None:
+    extraInfo = mch.getSimpleMachineStatusStr()
+
+  ui.readyMsg(extraInfo)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showHelp():
   ui.logBlock(
   """
@@ -380,10 +387,9 @@ def processUserInput():
         #ui.keyPressMessage('Unknown command', key, char)
 
   if(processed):
-    ui.readyMsg(extraInfo=mch.getSimpleMachineStatusStr())
+    readyMsg()
 
   return True
-
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def main():
@@ -394,15 +400,16 @@ def main():
   ui.log()
 
   sp.connect()
+
   mch.viewBuildInfo()
   mch.sendGCodeInitSequence()
   mch.viewGCodeParserState()
-  ui.log('System ready!')
+  ui.log('System ready!', color='ui.msg')
 
   mch.showStatus()
-  ui.log('Type "H" for help')
+  ui.log('Type "H/h/?" for help', color='ui.msg')
 
-  ui.readyMsg(extraInfo=mch.getSimpleMachineStatusStr())
+  readyMsg()
 
   while(True):
     line = sp.readline()

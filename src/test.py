@@ -59,7 +59,7 @@ def checkTestCancelled():
   return testCancelled
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def userConfirmTest(password=tstCfg['password']):
+def userConfirm(password=tstCfg['password']):
   while True:
     ui.log("""
     Are you sure you want to continue?
@@ -306,7 +306,7 @@ def pointProbe():
     iterations=ui.getUserInput('Number of auto probing iterations ({:})'.format(tstCfg['autoProbeIterations']),
       int, tstCfg['autoProbeIterations'])
 
-  if not userConfirmTest():
+  if not userConfirm():
     return
 
   if ut.isWindows():
@@ -332,7 +332,7 @@ def tableProbingScan():
 
   userLines=ui.getUserInput('Number of inner lines (0)', int, 0)
 
-  if not userConfirmTest():
+  if not userConfirm():
     return
 
   gridLines = int(userLines) + 2
@@ -568,7 +568,7 @@ def tablePositionScan():
   [DL] [DC] [DR]
   """)
 
-  if not userConfirmTest():
+  if not userConfirm():
     return
 
   def tpsSingleStep(stepName, x, y):
@@ -611,7 +611,7 @@ def baseLevelingHoles():
   of your machine, so it will send NEGATIVE COORDINATES.
   """)
 
-  if not userConfirmTest():
+  if not userConfirm():
     return
 
   # - [X/Y steps]- - - - - - - - - - - - - - - - - -
@@ -770,7 +770,7 @@ def zigZagPattern():
 
   showZZParameters('FINAL parameters')
 
-  if not userConfirmTest():
+  if not userConfirm():
     return
 
   ui.logTitle('Safe initial position')
@@ -929,7 +929,7 @@ def dummy():
 
   showParams('FINAL parameters')
 
-  if not userConfirmTest():
+  if not userConfirm():
     return
 
   ui.logTitle('Safe initial position')
