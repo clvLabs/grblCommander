@@ -11,6 +11,7 @@ Allows:
 * Manually moving X/Y/Z axis at configurable steps
 * Directly going to table corners / individual axis limits
 * Sending raw g-code commands
+* Running custom macros, stored in the configuration file
 * Running custom tests (read: configurable/programmable g-code)
 
 Custom tests are currently stored on `src/test.py`:

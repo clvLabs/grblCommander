@@ -15,7 +15,11 @@ import src.serialport as sp
 import src.machine as mch
 import src.table as tbl
 import src.test as test
-from src.config import loadedCfg
+from src.config import cfg, loadedCfg
+
+# ------------------------------------------------------------------
+# Make it easier (shorter) to use cfg object
+mchCfg = cfg['machine']
 
 # Current version
 gVERSION = '0.3.1'
@@ -39,6 +43,7 @@ def showHelp():
   rR             - Reset serial connection
   cC             - Clear screen
   tT             - Tests (submenu)
+  mM             - Macro (submenu)
   gG             - Send raw GCode command
 
   <numpad>       - Safe relative rapid (XY) (including diagonals)
@@ -105,6 +110,41 @@ def processUserInput():
     elif(char in 'hH?'):
       ui.keyPressMessage('hH? - Show help text', key, char)
       showHelp()
+
+    elif(char in 'mM'):
+      ui.keyPressMessage('mM - Macro', key, char)
+
+      ui.logBlock(
+      """
+      Available options:
+
+      lL             - List macros
+      rR             - Run macro
+      sS             - Show macro
+      """)
+
+      ui.inputMsg('Select option...')
+      key = kb.readKey()
+      char=chr(key)
+
+      if(char in 'lL'):
+        ui.keyPressMessage('lL - List macros', key, char)
+        mch.listGCodeMacros()
+
+      elif(char in 'rR'):
+        ui.keyPressMessage('rR - Run macro', key, char)
+        ui.inputMsg('Enter macro name...')
+        macroName=input()
+        mch.sendGCodeMacro(macroName)
+
+      elif(char in 'sS'):
+        ui.keyPressMessage('sS - Show macro', key, char)
+        ui.inputMsg('Enter macro name...')
+        macroName=input()
+        mch.showGCodeMacro(macroName)
+
+      else:
+        ui.keyPressMessage('Unknown option', key, char)
 
     elif(char in 'gG'):
       ui.keyPressMessage('gG - Send raw GCode command', key, char)
@@ -402,7 +442,11 @@ def main():
   sp.connect()
 
   mch.viewBuildInfo()
-  mch.sendGCodeInitSequence()
+
+  if mchCfg['startupMacro']:
+    ui.logTitle('Sending startup macro')
+    mch.sendGCodeMacro(mchCfg['startupMacro'], silent=True)
+
   mch.viewGCodeParserState()
   ui.log('System ready!', color='ui.msg')
 

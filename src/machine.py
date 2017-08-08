@@ -13,6 +13,7 @@ import pprint
 
 from . import utils as ut
 from . import ui as ui
+from . import keyboard as kb
 from . import serialport as sp
 from . import table as tbl
 from src.config import cfg
@@ -21,18 +22,98 @@ from src.config import cfg
 # Make it easier (shorter) to use cfg object
 uiCfg = cfg['ui']
 spCfg = cfg['serial']
+macroCfg = cfg['macro']
+macroCfgScripts = macroCfg['scripts']
 mchCfg = cfg['machine']
 
 gStatusStr = ''
 gStatus = {}
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def sendGCodeInitSequence():
-  ui.logTitle('Sending GCode init sequence')
-  for command in mchCfg['startupSequence']:
-    ui.log('Sending command [{0}]: {1}'.format(command[0], command[1]), v='WARNING')
+def listGCodeMacros():
+  maxNameLen = 0
+  for macroName in macroCfgScripts:
+    if len(macroName) > maxNameLen:
+      maxNameLen = len(macroName)
+
+  block = ''
+  block += '{:}   {:} {:}\n\n'.format(
+    'NAME'.ljust(maxNameLen),
+    'LINES'.ljust(5),
+    'DESCRIPTION'
+    )
+
+  for macroName in macroCfgScripts:
+    macro = macroCfgScripts[macroName]
+    description = macro['description']
+    commands = macro['commands']
+
+    block += '{:}   {:} {:}\n'.format(
+      macroName.ljust(maxNameLen),
+      str(len(commands)).ljust(5),
+      description
+      )
+
+  ui.logBlock(block)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def sendGCodeMacro(name, silent=False):
+  if not name in macroCfgScripts:
+    ui.log('ERROR: Macro [{:}] does not exist, please check config file.'.format(name),
+      color='ui.errorMsg')
+    return
+
+  macro = macroCfgScripts[name]
+  description = macro['description']
+  commands = macro['commands']
+
+  if not silent:
+    showGCodeMacro(name)
+
+    ui.inputMsg('Press y/Y to execute, any other key to cancel...')
+    key=kb.readKey()
+    char=chr(key)
+
+    if not char in 'yY':
+      testCancelled = True
+      ui.logBlock('MACRO EXECUTION CANCELLED', color='ui.cancelMsg')
+      return
+
+  for command in commands:
     sp.sendCommand(command[0])
+    if not silent:
+      waitForMachineIdle()
+
+  if not silent:
+    ui.logBlock('MACRO EXECUTION FINISHED', color='ui.finishedMsg')
+
   ui.log()
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def showGCodeMacro(name):
+  if not name in macroCfgScripts:
+    ui.log('ERROR: Macro [{:}] does not exist, check config file.'.format(name),
+      color='ui.errorMsg')
+    return
+
+  macro = macroCfgScripts[name]
+  description = macro['description']
+  commands = macro['commands']
+
+  block = 'Macro [{:}] - {:} ({:} commands)\n\n'.format(
+    name, description, len(commands))
+
+  maxCommandLen = 0
+  for command in commands:
+    if len(command[0]) > maxCommandLen:
+      maxCommandLen = len(command[0])
+
+  for command in commands:
+    block += '{:}   {:}\n'.format(
+      ui.setStrColor(command[0].ljust(maxCommandLen), 'macro.command'),
+      ui.setStrColor(command[1], 'macro.comment') )
+
+  ui.logBlock(block)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def viewBuildInfo():

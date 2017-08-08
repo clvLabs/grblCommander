@@ -40,14 +40,36 @@ cfg = {
     'seekSpeed': 2000,
     'feedSpeed': 50,
 
-    'startupSequence': [
-      [ 'G0', 'Rapid positioning' ],
-      [ 'G54', 'Machine coordinate system G54' ],
-      [ 'G17', 'XY Plane selection' ],
-      [ 'G90', 'Absolute programming' ],
-      [ 'G21', 'Programming in millimeters (mm)' ],
-      [ 'F100', 'Feed rate' ],
-    ],
+    'startupMacro': 'startup',
+  },
+
+  # ---[Macro configuration]--------------------------------------
+  'macro': {
+
+    'scripts': {
+      'startup': {
+        'description': 'Startup sequence for grblCommander',
+        'commands': [
+          ['G0',      'Rapid positioning'],
+          ['G54',     'Machine coordinate system G54'],
+          ['G17',     'XY Plane selection'],
+          ['G90',     'Absolute programming'],
+          ['G21',     'Programming in millimeters (mm)'],
+          ['F100',    'Feed rate'],
+        ],
+      },
+
+      'sample': {
+        'description': 'Sample macro',
+        'commands': [
+          ['G0 Z1',         'Comments'],
+          ['G0 X1 Y1',      'are'],
+          ['G1 Z0',         'optional'],
+          ['G1 X0 Y0',      ''],
+        ],
+      },
+    },
+
   },
 
   # ---[Test configuration]--------------------------------------
@@ -87,6 +109,12 @@ cfg = {
         'confirmMsg':           'magenta+',
         'finishedMsg':          'white+, green',
         'waiting':              'cyan+',
+      },
+
+      'macro': {
+        '':         'white',    # Default
+        'command':  'white+',
+        'comment':  'green+',
       },
 
       'comms': {
