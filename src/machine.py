@@ -282,7 +282,7 @@ def waitForMachineIdle(verbose='WARNING'):
 
   showStatus = ((verbose != 'NONE') and (ui.getVerboseLevel() >= ui.getVerboseLevelIndex(verbose)))
 
-  while( gStatus['machineState'] != 'Idle' ):
+  while gStatus['machineState'] != 'Idle' and gStatus['machineState'] != 'Check':
     if showStatus:
       ui.clearLine()
       coloredMachineStatusStr = ui.setStrColor(gStatusStr, 'ui.onlineMachineStatus')
