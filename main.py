@@ -30,15 +30,13 @@ def showHelp():
   hH?            - Show this help text
   sS             - Show current status
   rR             - Reset serial connection
-
-  gG             - Send raw GCode command
   cC             - Clear screen
-
   tT             - Tests (submenu)
+  gG             - Send raw GCode command
 
+  <numpad>       - Safe relative rapid (XY) (including diagonals)
   /*             - Relative rapid (Z) +/-
   <numpad>0      - Safe go to X0Y0Z0
-  <numpad>       - Safe relative rapid (XY) (including diagonals)
   .              - Safe absolute rapid (XY) to table corners (submenu)
 
   +-             - Set rapid increment (XY) +/-
@@ -331,13 +329,13 @@ def processUserInput():
       ui.setVerboseLevel(tempVerboseLevel)
 
     elif(char == 'A'):
-      ui.keyPressMessage('A - Set safe height+', key, char)
+      ui.keyPressMessage('A - Set safe height (Z)+', key, char)
       tempSafeHeight = ut.genericValueChanger(  tbl.getSafeHeight(), +1, tbl.gMIN_SAFE_HEIGHT, tbl.gMAX_SAFE_HEIGHT,
                             loop=False, valueName='Safe Height' )
       tbl.setSafeHeight(tempSafeHeight)
 
     elif(char == 'a'):
-      ui.keyPressMessage('a - Set safe height-', key, char)
+      ui.keyPressMessage('a - Set safe height (Z)-', key, char)
       tempSafeHeight = ut.genericValueChanger(  tbl.getSafeHeight(), -1, tbl.gMIN_SAFE_HEIGHT, tbl.gMAX_SAFE_HEIGHT,
                             loop=False, valueName='Safe Height' )
       tbl.setSafeHeight(tempSafeHeight)
@@ -361,14 +359,15 @@ def main():
   ui.clearScreen()
 
   ui.logBlock('    grblCommander v{0}'.format(gVERSION), color='ui.header')
+
   ui.log('Using configuration file: {:}'.format(loadedCfg))
   ui.log()
 
   sp.connect()
   mch.sendGCodeInitSequence()
   mch.viewGCodeParameters()
+  ui.log()
 
-  ui.log('')
   ui.log('System ready!')
 
   mch.showStatus()

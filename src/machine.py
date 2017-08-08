@@ -213,17 +213,17 @@ def showStatus():
   """
   Current status:
 
-    Machine {:}
-    MPos    {:s}
-    WPos    {:s}
-    SPos    {:s}
+  Machine {:}
+  MPos    {:s}
+  WPos    {:s}
+  SPos    {:s}
 
-    Software config:
-      RapidIncrement_XY = {:}
-      RapidIncrement_Z  = {:}
-      SafeHeight        = {:}
-      TableSize%        = {:d}%
-      VerboseLevel      = {:d}/{:d} ({:s})
+  Software config:
+  RapidIncrement_XY = {:}
+  RapidIncrement_Z  = {:}
+  SafeHeight        = {:}
+  TableSize%        = {:d}%
+  VerboseLevel      = {:d}/{:d} ({:s})
   """.format(
       getColoredMachineStateStr(),
       getMachinePosStr(),
