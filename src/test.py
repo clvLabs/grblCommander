@@ -182,7 +182,7 @@ def automaticProbe(iterations = tstCfg['autoProbeIterations']):
 
   ui.log('RESULTS:')
   ui.log('--------')
-  ui.log('- TOUCH POINTS @Z={:s}'.format(touchZList), color='ui.finishedMsg')
+  ui.log('- TOUCH POINTS @Z={:}'.format(touchZList), color='ui.finishedMsg')
   ui.log('- Average={:} - Min={:} - Max={:} - MaxDev={:}'.format(
             ui.coordStr(averageTouchZ)
           , ui.coordStr(minTouchZ)
