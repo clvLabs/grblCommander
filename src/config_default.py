@@ -43,35 +43,6 @@ cfg = {
     'startupMacro': 'startup',
   },
 
-  # ---[Macro configuration]--------------------------------------
-  'macro': {
-
-    'scripts': {
-      'startup': {
-        'description': 'Startup sequence for grblCommander',
-        'commands': [
-          ['G0',      'Rapid positioning'],
-          ['G54',     'Machine coordinate system G54'],
-          ['G17',     'XY Plane selection'],
-          ['G90',     'Absolute programming'],
-          ['G21',     'Programming in millimeters (mm)'],
-          ['F100',    'Feed rate'],
-        ],
-      },
-
-      'sample': {
-        'description': 'Sample macro',
-        'commands': [
-          ['G0 Z1',         'Comments'],
-          ['G0 X1 Y1',      'are'],
-          ['G1 Z0',         'optional'],
-          ['G1 X0 Y0',      ''],
-        ],
-      },
-    },
-
-  },
-
   # ---[Test configuration]--------------------------------------
   'test': {
     'password': 'IAmSure',
@@ -135,6 +106,56 @@ cfg = {
         'Home':     'yellow+',
         'Sleep':    'yellow+',
       },
+    },
+  },
+
+  # ---[Macro configuration]--------------------------------------
+  'macro': {
+
+    'scripts': {
+
+      'startup': {
+        'description': 'Startup sequence for grblCommander',
+        'commands': [
+          ['G0',      'Rapid positioning'],
+          ['G54',     'Machine coordinate system G54'],
+          ['G17',     'XY Plane selection'],
+          ['G90',     'Absolute programming'],
+          ['G21',     'Programming in millimeters (mm)'],
+          ['F100',    'Feed rate'],
+        ],
+      },
+
+      'sample': {
+        'description': 'Sample macro',
+        'commands': [
+          ['',              'This is a sample macro used to demonstrate'],
+          ['',              'the use of macros in grblCommander.'],
+          ['',              ''],
+          ['',              'It will move the bit with a speed of 100 for 1mm'],
+          ['',              'in XYZ axis in both directions from the current spot.'],
+          ['',              ''],
+          ['',              'WARNING: This macro will leave your machine working in mm (G21)'],
+          ['',              ''],
+          ['G21',           'Make sure we work in mm'],
+          ['G91',           'Set relative programming (TEMPORARY)'],
+          ['',              ''],
+          ['G1 X+1 F100',   'X - Right'],
+          ['G1 X-2 F100',   'X - Left'],
+          ['G1 X+1 F100',   'X - Center'],
+          ['',              ''],
+          ['G1 Y+1 F100',   'Y - Right'],
+          ['G1 Y-2 F100',   'Y - Left'],
+          ['G1 Y+1 F100',   'Y - Center'],
+          ['',              ''],
+          ['G1 Z+1 F100',   'Z - Right'],
+          ['G1 Z-2 F100',   'Z - Left'],
+          ['G1 Z+1 F100',   'Z - Center'],
+          ['',              ''],
+          ['G90',           'Restore absolute programming'],
+        ],
+      },
+
     },
   },
 
