@@ -85,6 +85,7 @@ def sendGCodeMacro(name, silent=False, isSubCall=False):
     cmdName = command[0] if len(command) > 0 else ''
     cmdComment = command[1] if len(command) > 1 else ''
     isMacroCall = cmdName in macroCfgScripts
+    isReservedName = cmdName in macroCfg['reservedNames']
 
     if cmdComment:
       # if not silent:
@@ -95,6 +96,10 @@ def sendGCodeMacro(name, silent=False, isSubCall=False):
         if not sendGCodeMacro(cmdName, silent=silent, isSubCall=True):
           ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
           return False
+      elif isReservedName:
+        if cmdName == 'PAUSE':
+          ui.inputMsg('Paused, press <ENTER> to continue...')
+          input()
       else:
         sp.sendCommand(cmdName)
         if not silent:
@@ -147,7 +152,8 @@ def showGCodeMacro(name):
     cmdName = command[0] if len(command) > 0 else ''
     cmdComment = command[1] if len(command) > 1 else ''
     isMacroCall = cmdName in macroCfgScripts
-    cmdColor = 'macro.macroCall' if isMacroCall else 'macro.command'
+    isReservedName = cmdName in macroCfg['reservedNames']
+    cmdColor = 'macro.macroCall' if isMacroCall else 'macro.reservedName' if isReservedName else 'macro.command'
 
     block += '{:}   {:}\n'.format(
       ui.setStrColor(cmdName.ljust(maxCommandLen), cmdColor),
