@@ -75,14 +75,23 @@ def sendGCodeMacro(name, silent=False):
     char=chr(key)
 
     if not char in 'yY':
-      testCancelled = True
       ui.logBlock('MACRO EXECUTION CANCELLED', color='ui.cancelMsg')
       return
 
   for command in commands:
-    sp.sendCommand(command[0])
-    if not silent:
-      waitForMachineIdle()
+    if command[1]:
+      if not silent:
+        ui.logTitle(command[1])
+
+    if command[0]:
+      sp.sendCommand(command[0])
+      if not silent:
+        waitForMachineIdle()
+
+    if kb.keyPressed():
+      if kb.readKey() == 27:  # <ESC>
+        ui.logBlock('MACRO EXECUTION CANCELLED', color='ui.cancelMsg')
+        return
 
   if not silent:
     ui.logBlock('MACRO EXECUTION FINISHED', color='ui.finishedMsg')
