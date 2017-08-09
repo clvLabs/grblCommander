@@ -140,16 +140,14 @@ def inputMsg(text, **kwargs):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def readyMsg(extraInfo=''):
-  readyMsg = '\n{:} {:}\n'.format(
+  log('\n{:} {:}'.format(
     setStrColor(uiCfg['readyMsg'], 'ui.readyMsg'),
-    extraInfo,
-  )
-
-  log(readyMsg)
+    extraInfo))
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def keyPressMessage(message, key, char):
-  log('\n{:}\n{:}\n'.format(gMSG_SEPARATOR, message)
+  # log('\n{:}\n{:}\n'.format(gMSG_SEPARATOR, message)
+  log('{:}\n{:}\n'.format(gMSG_SEPARATOR, message)
     , color='ui.keyPressMsg', v='WARNING')
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

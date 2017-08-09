@@ -104,7 +104,7 @@ def readResponse(responseTimeout=spCfg['responseTimeout'], verbose='BASIC'):
         ui.log('<<<<< {:}'.format(line), color='comms.recv' ,v=verbose)
 
       if finished:
-        ui.log(  'readResponse() - Successfully received {:d} lines from serial'.format(
+        ui.log(  'readResponse() - Successfully received {:d} data lines from serial'.format(
           receivedLines), v='SUPER')
         break
   else:

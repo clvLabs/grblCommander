@@ -35,31 +35,41 @@ def readyMsg(extraInfo=None):
 def showHelp():
   ui.logBlock(
   """
-  Available commands:
+  Available commands
+  ---------------------------------------------------------------------
+  hH?        - Show this help text
+  qQ         - Exit
+  rR         - Reset serial connection
+  cC         - Clear screen
 
-  qQ             - Exit
-  hH?            - Show this help text
-  s/S            - Show current status (short/LONG)
-  rR             - Reset serial connection
-  cC             - Clear screen
-  tT             - Tests (submenu)
-  mM             - Macro (submenu)
-  gG             - Send raw GCode command
+  sS         - Show current status (short/LONG)
+  gG         - Send raw GCode command
+  mM         - Macro (submenu)
+  tT         - Tests (submenu)
 
-  <numpad>       - Safe relative rapid (XY) (including diagonals)
-  /*             - Relative rapid (Z) +/-
-  <numpad>0      - Safe go to X0Y0Z0
-  .              - Safe absolute rapid (XY) to table corners (submenu)
+  Rapids
+  ---------------------------------------------------------------------
+  <numpad>   - Safe relative rapid (XY) (including diagonals)
+  */         - Relative rapid (Z) (-/+)
 
-  +-             - Set rapid increment (XY) +/-
-  <CTRL>x/y      - Set rapid increment (XY)
-  Zz             - Set rapid increment (Z) +/-
-  <CTRL>z        - Set rapid increment (Z)
-  Aa             - Set safe height (Z) +/-
-  <CTRL>a        - Set safe height (Z)
-  %              - Set table size percent (loop)
-  <ALT>5         - Set table size percent
-  Vv             - Set verbose level +/- (loop)
+  0          - Safe go to X0Y0Z0
+  .          - Safe absolute rapid (XY) to table position (submenu)
+
+  Settings
+  ---------------------------------------------------------------------
+  -+         - Set rapid increment (XY) (-/+)
+  <CTRL>x/y  - Set rapid increment (XY)
+
+  zZ         - Set rapid increment (Z) (-/+)
+  <CTRL>z    - Set rapid increment (Z)
+
+  aA         - Set safe height (Z) (-/+)
+  <CTRL>a    - Set safe height (Z)
+
+  %          - Set table size percent (loop)
+  <ALT>5     - Set table size percent
+
+  vV         - Set verbose level (-/+) (loop)
   """)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -116,14 +126,14 @@ def processUserInput():
 
       ui.logBlock(
       """
-      Available options:
+      Available commands:
 
-      lL             - List macros
-      rR             - Run macro
-      sS             - Show macro
+      lL  - List macros
+      rR  - Run macro
+      sS  - Show macro
       """)
 
-      ui.inputMsg('Select option...')
+      ui.inputMsg('Select command...')
       key = kb.readKey()
       char=chr(key)
 
@@ -144,11 +154,11 @@ def processUserInput():
         mch.showGCodeMacro(macroName)
 
       else:
-        ui.keyPressMessage('Unknown option', key, char)
+        ui.keyPressMessage('Unknown command', key, char)
 
     elif(char in 'gG'):
       ui.keyPressMessage('gG - Send raw GCode command', key, char)
-      ui.inputMsg('Enter command...')
+      ui.inputMsg('Enter GCode command...')
       userCommand=input()
       sp.sendCommand(userCommand)
       mch.waitForMachineIdle()
@@ -175,17 +185,17 @@ def processUserInput():
 
       ui.logBlock(
       """
-      Available tests:
+      Available commands:
 
-      pP             - Point probe
-      tT             - Table probing scan
-      sS             - Table position scan
-      lL             - Base levelling holes
-      zZ             - Zig-zag pattern
-      *              - DUMMY Test
+      pP  - Point probe
+      tT  - Table probing scan
+      sS  - Table position scan
+      lL  - Base levelling holes
+      zZ  - Zig-zag pattern
+      *   - DUMMY Test
       """)
 
-      ui.inputMsg('Select test to run...')
+      ui.inputMsg('Select command...')
       key = kb.readKey()
       char=chr(key)
 
@@ -214,7 +224,7 @@ def processUserInput():
         test.dummy()
 
       else:
-        ui.keyPressMessage('Unknown test', key, char)
+        ui.keyPressMessage('Unknown command', key, char)
 
     elif(char == '/'):
       ui.keyPressMessage('/ - Relative rapid (Z)+', key, char)
@@ -225,111 +235,112 @@ def processUserInput():
       mch.safeRapidRelative(x=0,y=0,z=tbl.getRI_Z()*-1)
 
     elif(char == '0'):
-      ui.keyPressMessage('<numpad>0 - Safe go to X0Y0Z0', key, char)
+      ui.keyPressMessage('0 - Safe go to X0Y0Z0', key, char)
       mch.safeRapidAbsolute(x=0,y=0,z=0)
 
     elif(char == '1'):
-      ui.keyPressMessage('<numpad>1 - Safe relative rapid - DL', key, char)
+      ui.keyPressMessage('1 - Safe relative rapid - [DL]', key, char)
       mch.safeRapidRelative(x=tbl.getRI_XY()*-1,y=tbl.getRI_XY()*-1)
 
     elif(char == '2'):
-      ui.keyPressMessage('<numpad>2 - Safe relative rapid - D', key, char)
+      ui.keyPressMessage('2 - Safe relative rapid - [D]', key, char)
       mch.safeRapidRelative(y=tbl.getRI_XY()*-1)
 
     elif(char == '3'):
-      ui.keyPressMessage('<numpad>3 - Safe relative rapid - DR', key, char)
+      ui.keyPressMessage('3 - Safe relative rapid - [DR]', key, char)
       mch.safeRapidRelative(x=tbl.getRI_XY(),y=tbl.getRI_XY()*-1)
 
     elif(char == '4'):
-      ui.keyPressMessage('<numpad>4 - Safe relative rapid - L', key, char)
+      ui.keyPressMessage('4 - Safe relative rapid - [L]', key, char)
       mch.safeRapidRelative(x=tbl.getRI_XY()*-1)
 
     elif(char == '6'):
-      ui.keyPressMessage('<numpad>6 - Safe relative rapid - R', key, char)
+      ui.keyPressMessage('6 - Safe relative rapid - [R]', key, char)
       mch.safeRapidRelative(x=tbl.getRI_XY())
 
     elif(char == '7'):
-      ui.keyPressMessage('<numpad>7 - Safe relative rapid - UL', key, char)
+      ui.keyPressMessage('7 - Safe relative rapid - [UL]', key, char)
       mch.safeRapidRelative(x=tbl.getRI_XY()*-1,y=tbl.getRI_XY())
 
     elif(char == '8'):
-      ui.keyPressMessage('<numpad>8 - Safe relative rapid - U', key, char)
+      ui.keyPressMessage('8 - Safe relative rapid - [U]', key, char)
       mch.safeRapidRelative(y=tbl.getRI_XY())
 
     elif(char == '9'):
-      ui.keyPressMessage('<numpad>9 - Safe relative rapid - UR', key, char)
+      ui.keyPressMessage('9 - Safe relative rapid - [UR]', key, char)
       mch.safeRapidRelative(x=tbl.getRI_XY(),y=tbl.getRI_XY())
 
     elif(char == '.'):
-      ui.keyPressMessage('* - Safe absolute rapid to table corners', key, char)
+      ui.keyPressMessage('. - Safe absolute rapid to table position', key, char)
 
       ui.logBlock(
       """
       Available commands:
 
-      <numpad>1..9   - Absolute table positions
-      .              - One axis only (submenu)
+      <numpad>  - Absolute table positions
+      .         - One axis only (submenu)
       """)
 
-      ui.inputMsg('Use <numpad> to select corner...')
+      ui.inputMsg('Select command...')
       key = kb.readKey()
       char=chr(key)
 
       if(char == '.'):
-        ui.keyPressMessage('* - ONE AXIS ONLY', key, char)
+        ui.keyPressMessage('. - ONE AXIS ONLY', key, char)
 
         ui.logBlock(
         """
         Available commands:
 
-        <numpad>2468   - Absolute table positions
+        <numpad>46  - Absolute X axis limits
+        <numpad>28  - Absolute Y axis limits
         """)
 
-        ui.inputMsg('Use <numpad> to select corner...')
+        ui.inputMsg('Select command...')
         key = kb.readKey()
         char=chr(key)
 
         if(char == '2'):
-          ui.keyPressMessage('2 - ONE AXIS ONLY - Safe absolute rapid to table corners - BC', key, char)
+          ui.keyPressMessage('2 - ONE AXIS ONLY - Safe absolute rapid to axis limits - [B]', key, char)
           mch.safeRapidAbsolute(y=0)
         elif(char == '4'):
-          ui.keyPressMessage('4 - ONE AXIS ONLY - Safe absolute rapid to table corners - CL', key, char)
+          ui.keyPressMessage('4 - ONE AXIS ONLY - Safe absolute rapid to axis limits - [L]', key, char)
           mch.safeRapidAbsolute(x=0)
         elif(char == '6'):
-          ui.keyPressMessage('6 - ONE AXIS ONLY - Safe absolute rapid to table corners - CR', key, char)
+          ui.keyPressMessage('6 - ONE AXIS ONLY - Safe absolute rapid to axis limits - [R]', key, char)
           mch.safeRapidAbsolute(x=tbl.getMaxX())
         elif(char == '8'):
-          ui.keyPressMessage('8 - ONE AXIS ONLY - Safe absolute rapid to table corners - UC', key, char)
+          ui.keyPressMessage('8 - ONE AXIS ONLY - Safe absolute rapid to axis limits - [U]', key, char)
           mch.safeRapidAbsolute(y=tbl.getMaxY())
         else:
           ui.keyPressMessage('Unknown command', key, char)
 
       elif(char == '1'):
-        ui.keyPressMessage('1 - Safe absolute rapid to table corners - BL', key, char)
+        ui.keyPressMessage('1 - Safe absolute rapid to table position - [BL]', key, char)
         mch.safeRapidAbsolute(x=0,y=0)
       elif(char == '2'):
-        ui.keyPressMessage('2 - Safe absolute rapid to table corners - BC', key, char)
+        ui.keyPressMessage('2 - Safe absolute rapid to table position - [BC]', key, char)
         mch.safeRapidAbsolute(x=tbl.getMaxX()/2,y=0)
       elif(char == '3'):
-        ui.keyPressMessage('3 - Safe absolute rapid to table corners - BR', key, char)
+        ui.keyPressMessage('3 - Safe absolute rapid to table position - [BR]', key, char)
         mch.safeRapidAbsolute(x=tbl.getMaxX(),y=0)
       elif(char == '4'):
-        ui.keyPressMessage('4 - Safe absolute rapid to table corners - CL', key, char)
+        ui.keyPressMessage('4 - Safe absolute rapid to table position - [CL]', key, char)
         mch.safeRapidAbsolute(x=0,y=tbl.getMaxY()/2)
       elif(char == '5'):
-        ui.keyPressMessage('5 - Safe absolute rapid to table corners - CC', key, char)
+        ui.keyPressMessage('5 - Safe absolute rapid to table position - [CC]', key, char)
         mch.safeRapidAbsolute(x=tbl.getMaxX()/2,y=tbl.getMaxY()/2)
       elif(char == '6'):
-        ui.keyPressMessage('6 - Safe absolute rapid to table corners - CR', key, char)
+        ui.keyPressMessage('6 - Safe absolute rapid to table position - [CR]', key, char)
         mch.safeRapidAbsolute(x=tbl.getMaxX(),y=tbl.getMaxY()/2)
       elif(char == '7'):
-        ui.keyPressMessage('7 - Safe absolute rapid to table corners - UL', key, char)
+        ui.keyPressMessage('7 - Safe absolute rapid to table position - [UL]', key, char)
         mch.safeRapidAbsolute(x=0,y=tbl.getMaxY())
       elif(char == '8'):
-        ui.keyPressMessage('8 - Safe absolute rapid to table corners - UC', key, char)
+        ui.keyPressMessage('8 - Safe absolute rapid to table position - [UC]', key, char)
         mch.safeRapidAbsolute(x=tbl.getMaxX()/2,y=tbl.getMaxY())
       elif(char == '9'):
-        ui.keyPressMessage('9 - Safe absolute rapid to table corners - UR', key, char)
+        ui.keyPressMessage('9 - Safe absolute rapid to table position - [UR]', key, char)
         mch.safeRapidAbsolute(x=tbl.getMaxX(),y=tbl.getMaxY())
       else:
         ui.keyPressMessage('Unknown command', key, char)
@@ -452,7 +463,7 @@ def main():
   ui.log('System ready!', color='ui.msg')
 
   mch.showStatus()
-  ui.log('Type "H/h/?" for help', color='ui.msg')
+  ui.log('Type [hH?] for help', color='ui.msg')
 
   readyMsg()
 

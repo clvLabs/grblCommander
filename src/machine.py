@@ -307,7 +307,7 @@ def getMachineStatus():
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def getSimpleMachineStatusStr():
-  return '{:} - MPos {:}'.format(
+  return '[{:}] - MPos {:}'.format(
     getColoredMachineStateStr(),
     getMachinePosStr()
   )
