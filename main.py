@@ -164,6 +164,7 @@ def processUserInput():
     elif(char in 'rR'):
       ui.keyPressMessage('rR - Reset serial connection', key, char)
       sp.connect()
+      mch.getMachineStatus()
 
     elif(char in 'cC'):
       ui.keyPressMessage('cC - Clear screen', key, char)
