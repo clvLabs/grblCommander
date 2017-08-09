@@ -455,9 +455,8 @@ def main():
 
   mch.viewBuildInfo()
 
-  if mchCfg['startupMacro']:
-    ui.logTitle('Sending startup macro')
-    mch.sendGCodeMacro(mchCfg['startupMacro'], silent=True)
+  ui.logTitle('Sending startup macro')
+  mch.sendGCodeMacro('gc.start', silent=True)
 
   mch.viewGCodeParserState()
   ui.log('System ready!', color='ui.msg')

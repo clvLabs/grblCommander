@@ -39,10 +39,10 @@ Custom tests are currently stored on `src/test.py`:
 
 * Make sure you have Python3 installed
 * Copy `src/config_default.py` as `src/config_user.py`
-* Check the following sections in the new file for settings that need to be changed:
+* Check the following sections in the new file for settings that might need to be changed:
     * `[Serial configuration]`
-    * `[GPIO configuration]`
     * `[Machine configuration]`
+    * `[GC Macros]`
 
 **TO-DO**: Add details about 3rd party library setup
 

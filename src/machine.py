@@ -37,69 +37,84 @@ def listGCodeMacros():
       maxNameLen = len(macroName)
 
   block = ''
-  block += '{:}   {:} {:}\n\n'.format(
-    'NAME'.ljust(maxNameLen),
-    'LINES'.ljust(5),
-    'DESCRIPTION'
+  block += '  Available macros:\n\n'
+  block += '  {:}   {:} {:}\n\n'.format(
+    'Name'.ljust(maxNameLen),
+    'Lines'.ljust(5),
+    'title'
     )
 
   for macroName in macroCfgScripts:
     macro = macroCfgScripts[macroName]
-    description = macro['description']
+    title = macro['title'] if 'title' in macro else ''
     commands = macro['commands']
 
-    block += '{:}   {:} {:}\n'.format(
+    block += '  {:}   {:} {:}\n'.format(
       macroName.ljust(maxNameLen),
       str(len(commands)).ljust(5),
-      description
+      title
       )
 
   ui.logBlock(block)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def sendGCodeMacro(name, silent=False):
+def sendGCodeMacro(name, silent=False, isSubCall=False):
   if not name in macroCfgScripts:
     ui.log('ERROR: Macro [{:}] does not exist, please check config file.'.format(name),
       color='ui.errorMsg')
-    return
+    return False
 
   macro = macroCfgScripts[name]
-  description = macro['description']
   commands = macro['commands']
 
   if not silent:
-    showGCodeMacro(name)
+    if isSubCall:
+      ui.logTitle('Macro [{:}] subcall START'.format(name), color='macro.subCallStart')
+    else:
+      showGCodeMacro(name)
 
-    ui.inputMsg('Press y/Y to execute, any other key to cancel...')
-    key=kb.readKey()
-    char=chr(key)
+      ui.inputMsg('Press y/Y to execute, any other key to cancel...')
+      key=kb.readKey()
+      char=chr(key)
 
-    if not char in 'yY':
-      ui.logBlock('MACRO EXECUTION CANCELLED', color='ui.cancelMsg')
-      return
+      if not char in 'yY':
+        ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
+        return False
 
   for command in commands:
-    cmdName = command[0]
+    cmdName = command[0] if len(command) > 0 else ''
     cmdComment = command[1] if len(command) > 1 else ''
+    isMacroCall = cmdName in macroCfgScripts
 
     if cmdComment:
-      if not silent:
-        ui.logTitle(cmdComment)
+      # if not silent:
+      ui.logTitle(cmdComment, color='macro.macroCall' if isMacroCall else 'macro.comment')
 
-    if command[0]:
-      sp.sendCommand(cmdName)
-      if not silent:
-        waitForMachineIdle()
+    if cmdName:
+      if isMacroCall:
+        if not sendGCodeMacro(cmdName, silent=silent, isSubCall=True):
+          ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
+          return False
+      else:
+        sp.sendCommand(cmdName)
+        if not silent:
+          waitForMachineIdle()
 
     if kb.keyPressed():
       if kb.readKey() == 27:  # <ESC>
-        ui.logBlock('MACRO EXECUTION CANCELLED', color='ui.cancelMsg')
-        return
+        ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
+        return False
 
   if not silent:
-    ui.logBlock('MACRO EXECUTION FINISHED', color='ui.finishedMsg')
+    if isSubCall:
+      ui.logTitle('Macro [{:}] subCall END'.format(name), color='macro.subCallEnd')
+    else:
+      ui.logBlock('MACRO [{:}] FINISHED'.format(name), color='ui.finishedMsg')
 
-  ui.log()
+  if not isSubCall:
+    ui.log()
+
+  return True
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showGCodeMacro(name):
@@ -109,26 +124,33 @@ def showGCodeMacro(name):
     return
 
   macro = macroCfgScripts[name]
-  description = macro['description']
+  title = macro['title'] if 'title' in macro else ''
+
   commands = macro['commands']
 
-  block = 'Macro [{:}] - {:} ({:} commands)\n\n'.format(
-    name, description, len(commands))
+  block = ui.setStrColor('Macro [{:}] - {:} ({:} lines)\n\n'.format(
+    name, title, len(commands)), 'ui.title')
+
+  if 'description' in macro:
+    description = macro['description'].rstrip(' ').strip('\r\n')
+    block += ui.setStrColor(description, 'ui.msg') + '\n\n'
 
   maxCommandLen = 0
   for command in commands:
-    cmdName = command[0]
+    cmdName = command[0] if len(command) > 0 else ''
     cmdComment = command[1] if len(command) > 1 else ''
 
     if len(cmdName) > maxCommandLen:
       maxCommandLen = len(cmdName)
 
   for command in commands:
-    cmdName = command[0]
+    cmdName = command[0] if len(command) > 0 else ''
     cmdComment = command[1] if len(command) > 1 else ''
+    isMacroCall = cmdName in macroCfgScripts
+    cmdColor = 'macro.macroCall' if isMacroCall else 'macro.command'
 
     block += '{:}   {:}\n'.format(
-      ui.setStrColor(cmdName.ljust(maxCommandLen), 'macro.command'),
+      ui.setStrColor(cmdName.ljust(maxCommandLen), cmdColor),
       ui.setStrColor(cmdComment, 'macro.comment') )
 
   ui.logBlock(block)
@@ -405,11 +427,7 @@ def showLongStatus():
       ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
     )
 
-  viewBuildInfo()
-  viewStartupBlocks()
-  viewGCodeParserState()
-  viewGrblConfig()
-  viewGCodeParameters()
+  sendGCodeMacro('gc.mls', silent=True)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def waitForMachineIdle(verbose='WARNING'):

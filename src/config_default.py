@@ -23,11 +23,6 @@ cfg = {
     'responseTimeout': 2,
   },
 
-  # ---[GPIO configuration (Raspberry Pi)]----------------------------
-  'gpio': {
-    'probePin': 12,   # Change to match your Raspberry's probe GPIO
-  },
-
   # ---[Machine configuration]--------------------------------------
   'machine': {
     'maxX': 280.0,            # Change to fit your machine
@@ -39,14 +34,17 @@ cfg = {
     'tableSizePercent': 100,
     'seekSpeed': 2000,
     'feedSpeed': 50,
-
-    'startupMacro': 'startup',
   },
 
   # ---[Test configuration]--------------------------------------
   'test': {
     'password': 'IAmSure',
     'autoProbeIterations': 3,
+  },
+
+  # ---[GPIO configuration (Raspberry Pi)]----------------------------
+  'gpio': {
+    'probePin': 12,   # Change to match your Raspberry's probe GPIO
   },
 
   # ---[Interface configuration]--------------------------------------
@@ -83,9 +81,12 @@ cfg = {
       },
 
       'macro': {
-        '':         'white',    # Default
-        'command':  'white+',
-        'comment':  'green+',
+        '':             'white',    # Default
+        'command':      'white+',
+        'comment':      'green+',
+        'macroCall':    'white+, blue',
+        'subCallStart': 'white+, green',
+        'subCallEnd':   'white+, red',
       },
 
       'comms': {
@@ -114,8 +115,25 @@ cfg = {
 
     'scripts': {
 
-      'startup': {
-        'description': 'Startup sequence for grblCommander',
+      # ---[GC Macros: used by grblCommander]---------------------------------------------
+
+      'gc.start': {
+        'title': 'grblCommander - Startup sequence',
+        'description': """
+        This macro is called by default each time grlbCommander starts.
+        Usually you will call other macros from here.
+        """,
+        'commands': [
+          ['gc.mbs',   'Basic machine settings'],
+        ],
+      },
+
+      'gc.mbs': {
+        'title': 'grblCommander - Machine Basic Settings',
+        'description': """
+        This macro is called by default from gc.start.
+        Set your preferred modal settings here.
+        """,
         'commands': [
           ['G0',      'Rapid positioning'],
           ['G54',     'Machine coordinate system G54'],
@@ -126,45 +144,66 @@ cfg = {
         ],
       },
 
-      'demo': {
-        'description': 'Macro example - star pattern XYZ',
+      'gc.mls': {
+        'title': 'grblCommander - Machine Long Status',
+        'description': """
+        This macro is used by grblCommander to display extended
+        machine settings in the 'Show current status (LONG)' option.
+        You can customize the settings being shown and their display order here.
+        """,
         'commands': [
-          ['',              'This is a sample macro used to demonstrate'],
-          ['',              'the use of macros in grblCommander.'],
-          ['',              ''],
-          ['',              'It will move the bit with a speed of 100 for 1mm'],
-          ['',              'in XYZ axis in both directions from the current spot.'],
-          ['',              ''],
-          ['',              'WARNING: This macro will leave your machine working in mm (G21)'],
-          ['',              ''],
-          ['G21',           'Make sure we work in mm'],
-          ['G91',           'Set relative programming (TEMPORARY)'],
-          ['',              ''],
-          ['G1 X+1 F100',   'X - Right'],
-          ['G1 X-2 F100',   'X - Left'],
-          ['G1 X+1 F100',   'X - Center'],
-          ['',              ''],
-          ['G1 Y+1 F100',   'Y - Right'],
-          ['G1 Y-2 F100',   'Y - Left'],
-          ['G1 Y+1 F100',   'Y - Center'],
-          ['',              ''],
-          ['G1 Z+1 F100',   'Z - Right'],
-          ['G1 Z-2 F100',   'Z - Left'],
-          ['G1 Z+1 F100',   'Z - Center'],
-          ['',              ''],
-          ['G90',           'Restore absolute programming'],
+          ['$I',      'Build info'],
+          ['$N',      'Startup blocks'],
+          ['$G',      'GCode parser state'],
+          ['$#',      'GCode parameters'],
+          ['$$',      'grbl config'],
         ],
       },
 
-      'simple': {
-        'description': 'Simple macro example - X0Y0Z0 rapid',
+      # ---[SAMPLE Macros: You can delete these in config_user.py]----------------------------------
+
+      'sample.1': {
+        'title': 'Macro sample - 1mm feeds XYZ',
+        'description': """
+        This is an example on using grblCommanders' macros:
+        - Each line can contain a command and/or a comment
+        - Empty lines are allowed as display spacers
+        - Macros can be called from macros
+        """,
+        'commands': [
+          ['',              'Prepare machine modal settings'],
+          ['G21',           'Programming in millimeters (mm)'],
+          ['G91',           'Relative programming'],
+          [],
+          ['',              'X axis travel'],
+          ['G1 X+1 F100',   'X - Right'],
+          ['G1 X-2 F100',   'X - Left'],
+          ['G1 X+1 F100',   'X - Center'],
+          [],
+          ['',              'Y axis travel'],
+          ['G1 Y+1 F100',   'Y - Right'],
+          ['G1 Y-2 F100',   'Y - Left'],
+          ['G1 Y+1 F100',   'Y - Center'],
+          [],
+          ['',              'Z axis travel'],
+          ['G1 Z+1 F100',   'Z - Right'],
+          ['G1 Z-2 F100',   'Z - Left'],
+          ['G1 Z+1 F100',   'Z - Center'],
+          [],
+          ['gc.mbs',         'Restore machine modal settings'],
+        ],
+      },
+
+      'sample.2': {
+        'title': 'Macro example - simple X0Y0Z0 rapid',
         'commands': [
           ['G0 X0Y0'],
           ['G0 Z0'],
         ],
       },
 
-      # ---[OWN Macros]--------------------------------------
+      # ---[USER Macros]--------------------------------------
+
 
     },
   },
