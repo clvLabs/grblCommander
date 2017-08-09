@@ -79,12 +79,15 @@ def sendGCodeMacro(name, silent=False):
       return
 
   for command in commands:
-    if command[1]:
+    cmdName = command[0]
+    cmdComment = command[1] if len(command) > 1 else ''
+
+    if cmdComment:
       if not silent:
-        ui.logTitle(command[1])
+        ui.logTitle(cmdComment)
 
     if command[0]:
-      sp.sendCommand(command[0])
+      sp.sendCommand(cmdName)
       if not silent:
         waitForMachineIdle()
 
@@ -114,13 +117,19 @@ def showGCodeMacro(name):
 
   maxCommandLen = 0
   for command in commands:
-    if len(command[0]) > maxCommandLen:
-      maxCommandLen = len(command[0])
+    cmdName = command[0]
+    cmdComment = command[1] if len(command) > 1 else ''
+
+    if len(cmdName) > maxCommandLen:
+      maxCommandLen = len(cmdName)
 
   for command in commands:
+    cmdName = command[0]
+    cmdComment = command[1] if len(command) > 1 else ''
+
     block += '{:}   {:}\n'.format(
-      ui.setStrColor(command[0].ljust(maxCommandLen), 'macro.command'),
-      ui.setStrColor(command[1], 'macro.comment') )
+      ui.setStrColor(cmdName.ljust(maxCommandLen), 'macro.command'),
+      ui.setStrColor(cmdComment, 'macro.comment') )
 
   ui.logBlock(block)
 

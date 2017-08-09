@@ -126,8 +126,8 @@ cfg = {
         ],
       },
 
-      'sample': {
-        'description': 'Sample macro',
+      'demo': {
+        'description': 'Macro example - star pattern XYZ',
         'commands': [
           ['',              'This is a sample macro used to demonstrate'],
           ['',              'the use of macros in grblCommander.'],
@@ -155,6 +155,16 @@ cfg = {
           ['G90',           'Restore absolute programming'],
         ],
       },
+
+      'simple': {
+        'description': 'Simple macro example - X0Y0Z0 rapid',
+        'commands': [
+          ['G0 X0Y0'],
+          ['G0 Z0'],
+        ],
+      },
+
+      # ---[OWN Macros]--------------------------------------
 
     },
   },
