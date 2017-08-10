@@ -3,13 +3,28 @@
 #
 
 # User configuration
-src/config_user.py
+src/cfg/**
+!src/cfg/README.md
+!src/cfg/default.py
+
+# User macros
+src/macros/**
+!src/macros/README.md
+!src/macros/def
+!src/macros/def/**
+!src/macros/demo
+!src/macros/demo/**
+!src/macros/u
+!src/macros/u/README.md
 
 # Logs
 logs/
 
 # Local files
 local/
+
+# Dummy python files
+dummy.py
 
 # ###########################################
 

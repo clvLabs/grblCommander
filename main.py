@@ -7,6 +7,7 @@ Allows to control a CNC driven by a grblShield
 
 import sys
 import time
+import pprint
 
 import src.utils as ut
 import src.ui as ui
@@ -14,12 +15,15 @@ import src.keyboard as kb
 import src.serialport as sp
 import src.machine as mch
 import src.table as tbl
+import src.macro as mcr
 import src.test as test
 from src.config import cfg, loadedCfg
 
 # ------------------------------------------------------------------
 # Make it easier (shorter) to use cfg object
+uiCfg = cfg['ui']
 mchCfg = cfg['machine']
+mcrCfg = cfg['macro']
 
 # Current version
 gVERSION = '0.4.0'
@@ -71,6 +75,75 @@ def showHelp():
 
   vV         - Set verbose level (-/+) (loop)
   """)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def showMachineStatus():
+  mch.getMachineStatus()
+
+  ui.logBlock(
+  """
+  Current status:
+
+  Machine {:}
+  MPos    {:s}
+  WPos    {:s}
+  SPos    {:s}
+
+  Software config:
+  RapidIncrement_XY = {:}
+  RapidIncrement_Z  = {:}
+  SafeHeight        = {:}
+  TableSize%        = {:d}%
+  VerboseLevel      = {:d}/{:d} ({:s})
+  """.format(
+      mch.getColoredMachineStateStr(),
+      mch.getMachinePosStr(),
+      mch.getWorkPosStr(),
+      mch.getSoftwarePosStr(),
+      ui.coordStr(tbl.getRI_XY()),
+      ui.coordStr(tbl.getRI_Z()),
+      ui.coordStr(tbl.getSafeHeight()),
+      tbl.getTableSizePercent(),
+      ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
+    )
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def showMachineLongStatus():
+  machineStatus = mch.getMachineStatus()
+
+  ui.logBlock(
+  """
+  Current status (LONG version):
+
+  Machine {:}
+  MPos    {:s}
+  WPos    {:s}
+  SPos    {:s}
+
+  Machine FULL status:
+  {:}
+
+  Software config:
+  RapidIncrement_XY = {:}
+  RapidIncrement_Z  = {:}
+  SafeHeight        = {:}
+  TableSize%        = {:d}%
+  VerboseLevel      = {:d}/{:d} ({:s})
+
+  """.format(
+      mch.getColoredMachineStateStr(),
+      mch.getMachinePosStr(),
+      mch.getWorkPosStr(),
+      mch.getSoftwarePosStr(),
+      pprint.pformat(machineStatus, indent=4, width=uiCfg['maxLineLen']),
+      ui.coordStr(tbl.getRI_XY()),
+      ui.coordStr(tbl.getRI_Z()),
+      ui.coordStr(tbl.getSafeHeight()),
+      tbl.getTableSizePercent(),
+      ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
+    )
+
+  mcr.run(mcrCfg['machineLongStatus'], silent=True)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def processUserInput():
@@ -131,6 +204,7 @@ def processUserInput():
       lL  - List macros
       rR  - Run macro
       sS  - Show macro
+      xX  - Reload macros
       """)
 
       ui.inputMsg('Select command...')
@@ -139,19 +213,24 @@ def processUserInput():
 
       if(char in 'lL'):
         ui.keyPressMessage('lL - List macros', key, char)
-        mch.listGCodeMacros()
+        mcr.list()
 
       elif(char in 'rR'):
         ui.keyPressMessage('rR - Run macro', key, char)
         ui.inputMsg('Enter macro name...')
         macroName=input()
-        mch.sendGCodeMacro(macroName)
+        mcr.run(macroName)
 
       elif(char in 'sS'):
         ui.keyPressMessage('sS - Show macro', key, char)
         ui.inputMsg('Enter macro name...')
         macroName=input()
-        mch.showGCodeMacro(macroName)
+        mcr.show(macroName)
+
+      elif(char in 'xX'):
+        ui.keyPressMessage('xX - Reload macros', key, char)
+        ui.logTitle('Reloading macros')
+        mcr.load()
 
       else:
         ui.keyPressMessage('Unknown command', key, char)
@@ -165,11 +244,11 @@ def processUserInput():
 
     elif(char == 's'):
       ui.keyPressMessage('s - Show current status (short)', key, char)
-      mch.showStatus()
+      showMachineStatus()
 
     elif(char == 'S'):
       ui.keyPressMessage('S - Show current status (LONG)', key, char)
-      mch.showLongStatus()
+      showMachineLongStatus()
 
     elif(char in 'rR'):
       ui.keyPressMessage('rR - Reset serial connection', key, char)
@@ -360,7 +439,7 @@ def processUserInput():
           'Increment ({:})'.format(tbl.getRI_XY()),
           float,
           tbl.getRI_XY()))
-      mch.showStatus()
+      showMachineStatus()
 
     elif(char == 'Z'):
       ui.keyPressMessage('Z - Set rapid increment (Z)+', key, char)
@@ -377,7 +456,7 @@ def processUserInput():
           'Increment ({:})'.format(tbl.getRI_Z()),
           float,
           tbl.getRI_Z()))
-      mch.showStatus()
+      showMachineStatus()
 
     elif(char == '%'):
       ui.keyPressMessage('% - Set table size percent (loop)', key, char)
@@ -393,7 +472,7 @@ def processUserInput():
           'Table size % ({:})'.format(tbl.getTableSizePercent()),
           int,
           tbl.getTableSizePercent()))
-      mch.showStatus()
+      showMachineStatus()
 
     elif(char == 'V'):
       ui.keyPressMessage('V - Set verbose level+', key, char)
@@ -428,7 +507,7 @@ def processUserInput():
           'Safe height ({:})'.format(tbl.getSafeHeight()),
           int,
           tbl.getSafeHeight()))
-      mch.showStatus()
+      showMachineStatus()
 
     else:  # Rest of keys
       processed = False
@@ -448,20 +527,27 @@ def main():
   ui.clearScreen()
 
   ui.logBlock('    grblCommander v{0}'.format(gVERSION), color='ui.header')
+
+  ui.logTitle('Loading configuration')
   ui.log('Using configuration file: {:}'.format(loadedCfg))
   ui.log()
 
+  ui.logTitle('Loading macros')
+  mcr.load()
+  ui.log()
+
+  ui.logTitle('Serial connection')
   sp.connect()
 
   mch.viewBuildInfo()
 
   ui.logTitle('Sending startup macro')
-  mch.sendGCodeMacro('gc.start', silent=True)
+  mcr.run(mcrCfg['startup'], silent=True)
 
   mch.viewGCodeParserState()
   ui.log('System ready!', color='ui.msg')
 
-  mch.showStatus()
+  showMachineStatus()
   ui.log('Type [hH?] for help', color='ui.msg')
 
   readyMsg()

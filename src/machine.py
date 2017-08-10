@@ -9,7 +9,6 @@ if __name__ == '__main__':
   print('This file is a module, it should not be executed directly')
 
 import time
-import pprint
 
 from . import utils as ut
 from . import ui as ui
@@ -20,146 +19,12 @@ from src.config import cfg
 
 # ------------------------------------------------------------------
 # Make it easier (shorter) to use cfg object
-uiCfg = cfg['ui']
 spCfg = cfg['serial']
-macroCfg = cfg['macro']
-macroCfgScripts = macroCfg['scripts']
 mchCfg = cfg['machine']
+mcrCfg = cfg['macro']
 
 gStatusStr = ''
 gStatus = {}
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def listGCodeMacros():
-  maxNameLen = 0
-  for macroName in macroCfgScripts:
-    if len(macroName) > maxNameLen:
-      maxNameLen = len(macroName)
-
-  block = ''
-  block += '  Available macros:\n\n'
-  block += '  {:}   {:} {:}\n\n'.format(
-    'Name'.ljust(maxNameLen),
-    'Lines'.ljust(5),
-    'title'
-    )
-
-  for macroName in macroCfgScripts:
-    macro = macroCfgScripts[macroName]
-    title = macro['title'] if 'title' in macro else ''
-    commands = macro['commands']
-
-    block += '  {:}   {:} {:}\n'.format(
-      macroName.ljust(maxNameLen),
-      str(len(commands)).ljust(5),
-      title
-      )
-
-  ui.logBlock(block)
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def sendGCodeMacro(name, silent=False, isSubCall=False):
-  if not name in macroCfgScripts:
-    ui.log('ERROR: Macro [{:}] does not exist, please check config file.'.format(name),
-      color='ui.errorMsg')
-    return False
-
-  macro = macroCfgScripts[name]
-  commands = macro['commands']
-
-  if not silent:
-    if isSubCall:
-      ui.logTitle('Macro [{:}] subcall START'.format(name), color='macro.subCallStart')
-    else:
-      showGCodeMacro(name)
-
-      ui.inputMsg('Press y/Y to execute, any other key to cancel...')
-      key=kb.readKey()
-      char=chr(key)
-
-      if not char in 'yY':
-        ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
-        return False
-
-  for command in commands:
-    cmdName = command[0] if len(command) > 0 else ''
-    cmdComment = command[1] if len(command) > 1 else ''
-    isMacroCall = cmdName in macroCfgScripts
-    isReservedName = cmdName in macroCfg['reservedNames']
-
-    if cmdComment:
-      # if not silent:
-      ui.logTitle(cmdComment, color='macro.macroCall' if isMacroCall else 'macro.comment')
-
-    if cmdName:
-      if isMacroCall:
-        if not sendGCodeMacro(cmdName, silent=silent, isSubCall=True):
-          ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
-          return False
-      elif isReservedName:
-        if cmdName == 'PAUSE':
-          ui.inputMsg('Paused, press <ENTER> to continue...')
-          input()
-      else:
-        sp.sendCommand(cmdName)
-        if not silent:
-          waitForMachineIdle()
-
-    if kb.keyPressed():
-      if kb.readKey() == 27:  # <ESC>
-        ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
-        return False
-
-  if not silent:
-    if isSubCall:
-      ui.logTitle('Macro [{:}] subCall END'.format(name), color='macro.subCallEnd')
-    else:
-      ui.logBlock('MACRO [{:}] FINISHED'.format(name), color='ui.finishedMsg')
-
-  if not isSubCall:
-    ui.log()
-
-  return True
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def showGCodeMacro(name):
-  if not name in macroCfgScripts:
-    ui.log('ERROR: Macro [{:}] does not exist, check config file.'.format(name),
-      color='ui.errorMsg')
-    return
-
-  macro = macroCfgScripts[name]
-  title = macro['title'] if 'title' in macro else ''
-
-  commands = macro['commands']
-
-  block = ui.setStrColor('Macro [{:}] - {:} ({:} lines)\n\n'.format(
-    name, title, len(commands)), 'ui.title')
-
-  if 'description' in macro:
-    description = macro['description'].rstrip(' ').strip('\r\n')
-    block += ui.setStrColor(description, 'ui.msg') + '\n\n'
-
-  maxCommandLen = 0
-  for command in commands:
-    cmdName = command[0] if len(command) > 0 else ''
-    cmdComment = command[1] if len(command) > 1 else ''
-
-    if len(cmdName) > maxCommandLen:
-      maxCommandLen = len(cmdName)
-
-  for command in commands:
-    cmdName = command[0] if len(command) > 0 else ''
-    cmdComment = command[1] if len(command) > 1 else ''
-    isMacroCall = cmdName in macroCfgScripts
-    isReservedName = cmdName in macroCfg['reservedNames']
-    cmdColor = 'macro.macroCall' if isMacroCall else 'macro.reservedName' if isReservedName else 'macro.command'
-
-    block += '{:}   {:}\n'.format(
-      ui.setStrColor(cmdName.ljust(maxCommandLen), cmdColor),
-      ui.setStrColor(cmdComment, 'macro.comment') )
-
-  ui.logBlock(block)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def viewBuildInfo():
@@ -333,6 +198,8 @@ def getMachineStatus():
     gStatusStr = ''
     ui.log('TIMEOUT Waiting for machine status', v='WARNING')
 
+  return gStatus
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def getSimpleMachineStatusStr():
   return '[{:}] - MPos {:}'.format(
@@ -365,75 +232,6 @@ def getSoftwarePosStr():
     'ui.machinePosDiff' if tbl.getY() != gStatus['MPos']['y'] else '',
     'ui.machinePosDiff' if tbl.getZ() != gStatus['MPos']['z'] else '',
     )
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def showStatus():
-  getMachineStatus()
-
-  ui.logBlock(
-  """
-  Current status:
-
-  Machine {:}
-  MPos    {:s}
-  WPos    {:s}
-  SPos    {:s}
-
-  Software config:
-  RapidIncrement_XY = {:}
-  RapidIncrement_Z  = {:}
-  SafeHeight        = {:}
-  TableSize%        = {:d}%
-  VerboseLevel      = {:d}/{:d} ({:s})
-  """.format(
-      getColoredMachineStateStr(),
-      getMachinePosStr(),
-      getWorkPosStr(),
-      getSoftwarePosStr(),
-      ui.coordStr(tbl.getRI_XY()),
-      ui.coordStr(tbl.getRI_Z()),
-      ui.coordStr(tbl.getSafeHeight()),
-      tbl.getTableSizePercent(),
-      ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
-    )
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def showLongStatus():
-  getMachineStatus()
-
-  ui.logBlock(
-  """
-  Current status (LONG version):
-
-  Machine {:}
-  MPos    {:s}
-  WPos    {:s}
-  SPos    {:s}
-
-  Machine FULL status:
-  {:}
-
-  Software config:
-  RapidIncrement_XY = {:}
-  RapidIncrement_Z  = {:}
-  SafeHeight        = {:}
-  TableSize%        = {:d}%
-  VerboseLevel      = {:d}/{:d} ({:s})
-
-  """.format(
-      getColoredMachineStateStr(),
-      getMachinePosStr(),
-      getWorkPosStr(),
-      getSoftwarePosStr(),
-      pprint.pformat(gStatus, indent=4, width=uiCfg['maxLineLen']),
-      ui.coordStr(tbl.getRI_XY()),
-      ui.coordStr(tbl.getRI_Z()),
-      ui.coordStr(tbl.getSafeHeight()),
-      tbl.getTableSizePercent(),
-      ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
-    )
-
-  sendGCodeMacro('gc.mls', silent=True)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def waitForMachineIdle(verbose='WARNING'):
