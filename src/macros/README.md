@@ -4,9 +4,10 @@
 
 This folder contains all the macros available to grblCommander:
 
-* Only `*.py` files inside this folder and its subfolders will be considered as macros
+* Only `*.py` files inside this folder and its subfolders which export a `macro` object will be considered as macros
+* These `macro` object must contain `title` and `commands` members
 * File name will be used as macro name
-* Folder names will be joined using dots to form a path (e.g. `gc.start`)
+* Folder names will be joined using dots to form a path (e.g. `demo.2.run`)
 
 Default folders:
 
