@@ -192,7 +192,10 @@ def getMachineStatus():
       if(receivedLines == 2):
         ui.log('Successfully received machine status', v='DEBUG')
         gStatusStr = responseArray[0]
-        parseMachineStatus(gStatusStr)
+        try:
+          parseMachineStatus(gStatusStr)
+        except:
+          ui.log("UNKNOWN machine data [{:}]".format(gStatusStr), color='ui.errorMsg', v='ERROR')
         break
   else:
     gStatusStr = ''
