@@ -13,6 +13,7 @@ macro = {
     ['',                   'Prepare machine modal settings'],
     ['G21',                'Programming in millimeters (mm)'],
     ['G90',                'Absolute programming'],
+    ['F50',                'Feed'],
     [],
     ['',                   'Spindle initialization'],
     [SAFE_HEIGHT,          'Rapid to safe height'],
