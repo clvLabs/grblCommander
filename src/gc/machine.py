@@ -245,7 +245,7 @@ def waitForMachineIdle(verbose='WARNING'):
       ui.clearLine()
       coloredMachineStatusStr = ui.setStrColor(gStatusStr, 'ui.onlineMachineStatus')
       ui.log('\r[{:}] {:}'.format(getColoredMachineStateStr(), coloredMachineStatusStr), end='')
-    time.sleep(0.2)
+    time.sleep(0.5)
     getMachineStatus()
 
   if showStatus:
