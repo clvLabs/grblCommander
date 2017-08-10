@@ -113,6 +113,16 @@ def list():
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def run(name, silent=False, isSubCall=False):
+  success = _run(name, silent=silent)
+
+  if not success:
+    ui.logTitle('Restoring machine settings after macro cancel')
+    _run(mcrCfg['startup'], silent=True)
+
+  return success
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def _run(name, silent=False, isSubCall=False):
   if mcrCfg['autoReload']:
     load(silent=True)
 
@@ -160,7 +170,7 @@ def run(name, silent=False, isSubCall=False):
           isMacroCall = cmdName in gMACROS
 
       if isMacroCall:
-        if not run(cmdName, silent=silent, isSubCall=True):
+        if not _run(cmdName, silent=silent, isSubCall=True):
           ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
           return False
       else:
