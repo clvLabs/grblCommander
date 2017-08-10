@@ -1,5 +1,5 @@
 # Get shared variables for this macro
-from .vars import *
+from . import vars
 
 macro = {
   'title': 'Single drill',
@@ -10,9 +10,11 @@ macro = {
 
   'commands': [
     ['',          'Preparing drill'],
-    ['G90',       'Absolute programming'],
-    ['G0 Z5',     'Rapid to material top'],
-    ['G91',       'Relative programming'],
+    vars.absolute,
+    vars.materialTop,
+    [],
+    ['',          'Starting sequence'],
+    vars.relative,
     [],
     ['',          'Drilling: Z (-1/-5)'],
     ['G1 Z-1',    'Feed'],
@@ -39,7 +41,7 @@ macro = {
     ['G0 Z5',     'Rapid back to material top'],
     [],
     ['',          'Restoring settings'],
-    ['G90',       'Absolute programming'],
-    [SAFE_HEIGHT, 'Rapid to safe height'],
+    vars.absolute,
+    vars.safeHeight,
   ],
 }
