@@ -58,7 +58,12 @@ def loadFolder(folder='', silent=False):
       try:
         tmpModule = __import__(macroName, fromlist=[''])
         importlib.reload(tmpModule)
-        tmpMacro = tmpModule.macro
+
+        try:
+          tmpMacro = tmpModule.macro
+        except AttributeError:
+          continue
+
         if 'title' in tmpMacro and 'commands' in tmpMacro:
           gMACROS[macroShortName] = tmpMacro
           if not silent:
