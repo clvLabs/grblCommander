@@ -868,13 +868,15 @@ def dummy():
   def showParams(title):
     ui.log("""
     {:s}:
+      StartX                {:f}
+      StartY                {:f}
       MaterialZ             {:f}
+      TargetZ               {:f}
+      SafeHeight            {:f}
       PocketWidth           {:f}
       PocketHeight          {:f}
       TabWidth              {:f}
       TabHeight             {:f}
-      TargetZ               {:f}
-      SafeHeight            {:f}
       Plunge                {:f}
       PlungeSpeed           {:d}
       Feed                  {:d}
@@ -883,13 +885,15 @@ def dummy():
         ZPasses             {:d}
       """.format(
         title,
+        startX,
+        startY,
         materialZ,
+        targetZ,
+        safeHeight,
         pocketWidth,
         pocketHeight,
         tabWidth,
         tabHeight,
-        targetZ,
-        safeHeight,
         plunge,
         plungeSpeed,
         feed,
@@ -897,33 +901,43 @@ def dummy():
         ))
 
   # Check before trying with other materials!!
+  startX = 0
+  startY = 0
   materialZ = 10.5
+  targetZ = 7.0
+  safeHeight = materialZ + 5
   pocketWidth = 50.0
   pocketHeight = 6.5
   tabWidth = 6.0
   tabHeight = 0.5
-  targetZ = 7.0
-  safeHeight = materialZ + 5
   plunge = 1.0
   plungeSpeed = 100
   feed = 500
+
+  if not tabWidth or not tabHeight:
+    tabWidth = tabHeight = 0
 
   zPasses = math.ceil((materialZ - targetZ) / plunge)
 
   showParams('Default parameters')
 
+  startX=ui.getUserInput('StartX ({:f})'.format(startX), float, startX)
+  startY=ui.getUserInput('StartY ({:f})'.format(startY), float, startY)
   materialZ=ui.getUserInput('MaterialZ ({:f})'.format(materialZ), float, materialZ)
-  pocketWidth=ui.getUserInput('PocketWidth ({:f})'.format(pocketWidth), float, pocketWidth)
-  pocketHeight=ui.getUserInput('PocketHeight ({:f})'.format(pocketHeight), float, pocketHeight)
-  tabWidth=ui.getUserInput('TabWidth ({:f})'.format(tabWidth), float, tabWidth)
-  tabHeight=ui.getUserInput('TabHeight ({:f})'.format(tabHeight), float, tabHeight)
   targetZ=ui.getUserInput('TargetZ ({:f})'.format(targetZ), float, targetZ)
 
   safeHeight = materialZ + 5
   safeHeight=ui.getUserInput('SafeHeight ({:f})'.format(safeHeight), float, safeHeight)
+  pocketWidth=ui.getUserInput('PocketWidth ({:f})'.format(pocketWidth), float, pocketWidth)
+  pocketHeight=ui.getUserInput('PocketHeight ({:f})'.format(pocketHeight), float, pocketHeight)
+  tabWidth=ui.getUserInput('TabWidth ({:f})'.format(tabWidth), float, tabWidth)
+  tabHeight=ui.getUserInput('TabHeight ({:f})'.format(tabHeight), float, tabHeight)
   plunge=ui.getUserInput('Plunge ({:f})'.format(plunge), float, plunge)
   plungeSpeed=ui.getUserInput('PlungeSpeed ({:d})'.format(plungeSpeed), int, plungeSpeed)
   feed=ui.getUserInput('Feed ({:d})'.format(feed), int, feed)
+
+  if not tabWidth or not tabHeight:
+    tabWidth = tabHeight = 0
 
   zPasses = math.ceil((materialZ - targetZ) / plunge)
 
@@ -942,15 +956,24 @@ def dummy():
   ui.inputMsg('Please start spindle and press <ENTER>...')
   input()
 
-  currX = 0
-  currY = 0
+  ui.logTitle('Rapid to initial position')
+  mchRapid(x=startX, y=startY)
+
+  ui.logTitle('Rapid Z approach to material top')
+  mchRapid(z=materialZ)
+
   currZ = materialZ - plunge
   if currZ < targetZ:
     currZ = targetZ
 
   currZPass = 0
 
-  tabStartX = (pocketWidth / 2) - (tabWidth / 2)
+  holeStartX = startX
+  holeEndX = holeStartX + pocketWidth
+  holeStartY = startY
+  holeEndY = holeStartY + pocketHeight
+
+  tabStartX = holeStartX + (pocketWidth / 2) - (tabWidth / 2)
   tabEndX = tabStartX + tabWidth
   tabZ = targetZ + tabHeight
 
@@ -966,40 +989,40 @@ def dummy():
     # Horizontal line DL-DR
     if not testCancelled:
       ui.logTitle('Horizontal line DL-DR Z{:} ({:}/{:})'.format(ui.coordStr(currZ), currZPass, zPasses))
-      if currZ == targetZ:
+      if currZ < tabZ:
         mchFeed(x=tabStartX, speed=feed)
         ui.logTitle('tab:start')
         mchFeed(z=tabZ, speed=plungeSpeed)
         mchFeed(x=tabEndX, speed=feed)
         mchFeed(z=currZ, speed=plungeSpeed)
         ui.logTitle('tab:end')
-        mchFeed(x=pocketWidth, speed=feed)
+        mchFeed(x=holeEndX, speed=feed)
       else:
-        mchFeed(x=pocketWidth, speed=feed)
+        mchFeed(x=holeEndX, speed=feed)
 
     # Vertical line DR-UR
     if not testCancelled:
       ui.logTitle('Vertical line DR-UR Z{:} ({:}/{:})'.format(ui.coordStr(currZ), currZPass, zPasses))
-      mchFeed(y=pocketHeight, speed=feed)
+      mchFeed(y=holeEndY, speed=feed)
 
     # Horizontal line UR-UL
     if not testCancelled:
       ui.logTitle('Horizontal line UR-UL Z{:} ({:}/{:})'.format(ui.coordStr(currZ), currZPass, zPasses))
-      if currZ == targetZ:
+      if currZ < tabZ:
         mchFeed(x=tabEndX, speed=feed)
         ui.logTitle('tab:start')
         mchFeed(z=tabZ, speed=plungeSpeed)
         mchFeed(x=tabStartX, speed=feed)
         mchFeed(z=currZ, speed=plungeSpeed)
         ui.logTitle('tab:end')
-        mchFeed(x=0, speed=feed)
+        mchFeed(x=holeStartX, speed=feed)
       else:
-        mchFeed(x=0, speed=feed)
+        mchFeed(x=holeStartX, speed=feed)
 
     # Vertical line UL-DL
     if not testCancelled:
       ui.logTitle('Vertical line UL-DL Z{:} ({:}/{:})'.format(ui.coordStr(currZ), currZPass, zPasses))
-      mchFeed(y=0, speed=feed)
+      mchFeed(y=holeStartY, speed=feed)
 
     # Next plunge calculation/check
     if not testCancelled:
