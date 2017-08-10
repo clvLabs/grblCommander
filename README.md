@@ -63,12 +63,15 @@ To change the macros used in grblCommander:
 
 * Copy the macro files in `src/macro/def` to `src/macro/u/def` (create folder)
 * Edit the new macro files
-* Edit `src/cfg/user.py` and set the new macro names to be used:
+* Edit `src/cfg/user.py` to:
+    * Set the new macro names to be used
+    * Put `def.` in th macro blackList so it's not loaded anymore
 ```
     'macro': {
       'startup': 'u.def.start',
       'machineLongStatus': 'u.def.mls',
       ...
+      'blackList': [ 'def.' ],
 ```
 
 ## Usage

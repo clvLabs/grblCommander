@@ -42,6 +42,7 @@ cfg = {
     'startup': 'def.start',
     'machineLongStatus': 'def.mls',
     'reservedNames': [ 'PAUSE', 'STARTUP' ],
+    'blackList': [ ],
   },
 
   # ---[Test configuration]--------------------------------------

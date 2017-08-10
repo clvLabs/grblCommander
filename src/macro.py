@@ -55,6 +55,15 @@ def loadFolder(folder='', silent=False):
       macroName = dotPath + fileName
       macroShortName = macroName.replace(dotBasePath,'')
 
+      blackListed = False
+      for item in mcrCfg['blackList']:
+        if macroShortName[:len(item)] == item:
+          blackListed = True
+          continue
+
+      if blackListed:
+        continue
+
       try:
         tmpModule = __import__(macroName, fromlist=[''])
         importlib.reload(tmpModule)
