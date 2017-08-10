@@ -24,15 +24,17 @@ mcrCfg = cfg['macro']
 gMACROS = {}
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def load():
+def load(silent=False):
   global gMACROS
   gMACROS = {}
 
-  loadFolder('src/macros')
-  ui.log()
+  loadFolder('src/macros', silent=silent)
+
+  if not silent:
+    ui.log()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def loadFolder(folder=''):
+def loadFolder(folder='', silent=False):
   global gMACROS
 
   dotBasePath = 'src.macros.'
@@ -59,19 +61,25 @@ def loadFolder(folder=''):
         tmpMacro = tmpModule.macro
         if 'title' in tmpMacro and 'commands' in tmpMacro:
           gMACROS[macroShortName] = tmpMacro
-          ui.log('[{:}]'.format(macroShortName), end=' ')
+          if not silent:
+            ui.log('[{:}]'.format(macroShortName), end=' ')
         else:
-          ui.log('[{:}]'.format(macroShortName), color='ui.errorMsg', end=' ')
+          if not silent:
+            ui.log('[{:}]'.format(macroShortName), color='ui.errorMsg', end=' ')
       except ImportError:
-        ui.log('[{:}]'.format(macroShortName), color='ui.errorMsg', end=' ')
+        if not silent:
+          ui.log('[{:}]'.format(macroShortName), color='ui.errorMsg', end=' ')
 
   for item in Path(folder).glob('*'):
     if item.is_dir():
       folderName = PurePath(item).as_posix()
-      loadFolder(folderName)
+      loadFolder(folderName, silent=silent)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def list():
+  if mcrCfg['autoReload']:
+    load(silent=True)
+
   maxNameLen = 0
   for macroName in gMACROS:
     if len(macroName) > maxNameLen:
@@ -100,6 +108,9 @@ def list():
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def run(name, silent=False, isSubCall=False):
+  if mcrCfg['autoReload']:
+    load(silent=True)
+
   if not name in gMACROS:
     ui.log('ERROR: Macro [{:}] does not exist, please check config file.'.format(name),
       color='ui.errorMsg')
@@ -112,7 +123,7 @@ def run(name, silent=False, isSubCall=False):
     if isSubCall:
       ui.logTitle('Macro [{:}] subcall START'.format(name), color='macro.subCallStart')
     else:
-      show(name)
+      show(name, avoidReload=True)
 
       ui.inputMsg('Press y/Y to execute, any other key to cancel...')
       key=kb.readKey()
@@ -169,7 +180,10 @@ def run(name, silent=False, isSubCall=False):
   return True
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def show(name):
+def show(name, avoidReload=False):
+  if mcrCfg['autoReload'] and not avoidReload:
+    load(silent=True)
+
   if not name in gMACROS:
     ui.log('ERROR: Macro [{:}] does not exist, check config file.'.format(name),
       color='ui.errorMsg')

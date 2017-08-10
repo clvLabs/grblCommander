@@ -38,6 +38,7 @@ cfg = {
 
   # ---[Macro configuration]--------------------------------------
   'macro': {
+    'autoReload': True,
     'startup': 'def.start',
     'machineLongStatus': 'def.mls',
     'reservedNames': [ 'PAUSE', 'STARTUP' ],
