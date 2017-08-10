@@ -9,15 +9,15 @@ import sys
 import time
 import pprint
 
-import src.utils as ut
-import src.ui as ui
-import src.keyboard as kb
-import src.serialport as sp
-import src.machine as mch
-import src.table as tbl
-import src.macro as mcr
-import src.test as test
-from src.config import cfg, loadedCfg
+import src.gc.utils as ut
+import src.gc.ui as ui
+import src.gc.keyboard as kb
+import src.gc.serialport as sp
+import src.gc.machine as mch
+import src.gc.table as tbl
+import src.gc.macro as mcr
+import src.gc.test as test
+from src.gc.config import cfg, loadedCfg
 
 # ------------------------------------------------------------------
 # Make it easier (shorter) to use cfg object

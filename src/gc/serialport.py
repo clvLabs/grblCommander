@@ -13,7 +13,7 @@ import serial
 
 from . import utils as ut
 from . import ui as ui
-from src.config import cfg
+from src.gc.config import cfg
 
 # ------------------------------------------------------------------
 # Make it easier (shorter) to use cfg object

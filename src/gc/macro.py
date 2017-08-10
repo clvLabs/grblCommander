@@ -15,7 +15,7 @@ from . import ui as ui
 from . import keyboard as kb
 from . import serialport as sp
 from . import machine as mch
-from src.config import cfg
+from src.gc.config import cfg
 
 # ------------------------------------------------------------------
 # Make it easier (shorter) to use cfg object

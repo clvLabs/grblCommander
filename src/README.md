@@ -4,10 +4,9 @@
 
 This folder contains application code, configuration, macros and test code.
 
-Application code is kept directly under this folder, and should not be modified.
-
 Folders:
 
-* `cfg`: grblCommander configuration
+* `gc`: grblCommander application code
+* `cfg`: configuration
 * `macros`: macros
 * `test`: test code

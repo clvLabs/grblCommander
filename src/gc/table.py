@@ -9,7 +9,7 @@ if __name__ == '__main__':
   print('This file is a module, it should not be executed directly')
 
 from . import ui as ui
-from src.config import cfg
+from src.gc.config import cfg
 
 # ------------------------------------------------------------------
 # Make it easier (shorter) to use cfg object

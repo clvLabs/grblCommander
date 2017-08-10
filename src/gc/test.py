@@ -18,7 +18,7 @@ from . import table as tbl
 from . import machine as mch
 from . import serialport as sp
 from . import keyboard as kb
-from src.config import cfg
+from src.gc.config import cfg
 
 # ------------------------------------------------------------------
 # Make it easier (shorter) to use cfg object
