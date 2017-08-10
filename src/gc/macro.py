@@ -22,11 +22,20 @@ from src.gc.config import cfg
 mcrCfg = cfg['macro']
 
 gMACROS = {}
+gSUPPORT_FILES = {}
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def load(silent=False):
-  global gMACROS
+  global gMACROS, gSUPPORT_FILES
   gMACROS = {}
+
+  # Reload support files before macros
+  for index in gSUPPORT_FILES:
+    try:
+      importlib.reload(gSUPPORT_FILES[index])
+    except:
+      pass
+  gSUPPORT_FILES = {}
 
   loadFolder('src/macros', silent=silent)
 
@@ -71,6 +80,7 @@ def loadFolder(folder='', silent=False):
         try:
           tmpMacro = tmpModule.macro
         except AttributeError:
+          gSUPPORT_FILES[macroName] = tmpModule
           continue
 
         if 'title' in tmpMacro and 'commands' in tmpMacro:
