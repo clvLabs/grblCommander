@@ -691,6 +691,9 @@ def zigZagPattern():
   def showZZParameters(title):
     ui.log("""
     {:s}:
+      StartX                {:f}
+      StartY                {:f}
+      MaterialTop           {:f}
       BitDiameter           {:f}
       BitFlutes             {:d}
       BitRPM                {:d}
@@ -708,8 +711,13 @@ def zigZagPattern():
       TOTAL
         Width               {:f}
         Height              {:f}
+        EndX                {:f}
+        EndY                {:f}
       """.format(
         title,
+        startX,
+        startY,
+        materialTop,
         bitDiameter,
         bitFlutes,
         bitRPM,
@@ -726,34 +734,57 @@ def zigZagPattern():
 
         zzTotalWidth,
         zzTotalHeight,
+        endX,
+        endY,
         ))
 
   # zig-zag default parameter calculations
   # NOTE: Using parameters for softwoods!!
   # Check before trying with other materials!!
 
-  bitDiameter = 3
+  """
+  Col3 107
+  Col2 76
+  Col1 45
+
+  Row4 100
+  Row3 70
+  Row2 40
+  Row1 10
+  """
+
+  startX = 45
+  startY = 40
+  bitDiameter = 3.175
+  materialTop = 10.1
   bitFlutes = 2
   bitRPM = 12000
-  zSafeHeight = 3
+  zSafeHeight = 28 # materialTop + 5
   zzRun = 25 if bitDiameter < 3.18 else 50
   zzRise = bitDiameter * 2
-  zzPlunge = bitDiameter
-  zzPlungeSpeed = 100
-  zzInitialFeed = 0.02 * bitDiameter * bitFlutes * bitRPM
-  zzDeltaFeed = 125 if bitDiameter < 0.8 else 200 if bitDiameter < 3.0 else 250
-  zzZigZagPerIteration = 4
-  zzIterations = 4
+  zzPlunge = 1.5 # bitDiameter
+  zzPlungeSpeed = 200
+  zzInitialFeed = 400 # 0.02 * bitDiameter * bitFlutes * bitRPM
+  zzDeltaFeed = 100 # 125 if bitDiameter < 0.8 else 200 if bitDiameter < 3.0 else 250
+  zzZigZagPerIteration = 2
+  zzIterations = 3
   zzSpacing = bitDiameter * 2
 
   zzTotalWidth = ((zzRun + zzSpacing) * zzIterations) - zzSpacing + bitDiameter
   zzTotalHeight = (zzRise * zzZigZagPerIteration * 2) + bitDiameter
+  endX = startX + zzTotalWidth
+  endY = startY + zzTotalHeight
 
   showZZParameters('Calculated parameters')
 
+  startX=ui.getUserInput('StartX ({:f})'.format(startX), float, startX)
+  startY=ui.getUserInput('StartY ({:f})'.format(startY), float, startY)
+  materialTop=ui.getUserInput('MaterialTop ({:f})'.format(materialTop), float, materialTop)
   bitDiameter=ui.getUserInput('Bit diameter (mm) ({:})'.format(bitDiameter), float, bitDiameter)
   bitFlutes=ui.getUserInput('Number of flutes ({:})'.format(bitFlutes), int, bitFlutes)
   bitRPM=ui.getUserInput('Spindle RPM ({:})'.format(bitRPM), int, bitRPM)
+
+  zSafeHeight = 28 # materialTop + 5
   zSafeHeight=ui.getUserInput('Z safe height (mm) ({:})'.format(zSafeHeight), float, zSafeHeight)
   zzRun=ui.getUserInput('Run ({:f}) (0 for straight line)'.format(zzRun), float, zzRun)
   zzRise=ui.getUserInput('Rise ({:f})'.format(zzRise), float, zzRise)
@@ -767,6 +798,8 @@ def zigZagPattern():
 
   zzTotalWidth = ((zzRun + zzSpacing) * zzIterations) - zzSpacing + bitDiameter
   zzTotalHeight = (zzRise * zzZigZagPerIteration * 2) + bitDiameter
+  endX = startX + zzTotalWidth
+  endY = startY + zzTotalHeight
 
   showZZParameters('FINAL parameters')
 
@@ -783,8 +816,11 @@ def zigZagPattern():
   ui.inputMsg('Please start spindle and press <ENTER>...')
   input()
 
-  currX = 0
-  currY = 0
+  ui.logTitle('Rapid to initial position')
+  mchRapid(x=startX, y=startY)
+
+  currX = startX
+  currY = startY
   currFeed = zzInitialFeed
 
   for currIteration in range(zzIterations):
@@ -799,8 +835,11 @@ def zigZagPattern():
       currIterY = currY
 
       # Plunge
+      ui.logTitle('Rapid Z approach to material top')
+      mchRapid(z=materialTop)
+
       ui.logTitle('Iteration {:}/{:} Plunge'.format(currIteration+1,zzIterations))
-      mchFeed(z=zzPlunge*-1, speed=zzPlungeSpeed)
+      mchFeed(z=(materialTop-zzPlunge), speed=zzPlungeSpeed)
 
       # "Draw" the zig-zag patterns
       for zigZag in range(zzZigZagPerIteration):
@@ -870,7 +909,7 @@ def dummy():
     {:s}:
       StartX                {:f}
       StartY                {:f}
-      MaterialZ             {:f}
+      MaterialTop           {:f}
       TargetZ               {:f}
       SafeHeight            {:f}
       PocketWidth           {:f}
@@ -887,7 +926,7 @@ def dummy():
         title,
         startX,
         startY,
-        materialZ,
+        materialTop,
         targetZ,
         safeHeight,
         pocketWidth,
@@ -903,30 +942,30 @@ def dummy():
   # Check before trying with other materials!!
   startX = 0
   startY = 0
-  materialZ = 10.5
-  targetZ = 7.0
-  safeHeight = materialZ + 5
+  materialTop = 13.4
+  targetZ = 0.4
+  safeHeight = materialTop + 5
   pocketWidth = 50.0
-  pocketHeight = 6.5
+  pocketHeight = 3.2
   tabWidth = 6.0
-  tabHeight = 0.5
+  tabHeight = 0.0
   plunge = 1.0
   plungeSpeed = 100
-  feed = 500
+  feed = 400
 
   if not tabWidth or not tabHeight:
     tabWidth = tabHeight = 0
 
-  zPasses = math.ceil((materialZ - targetZ) / plunge)
+  zPasses = math.ceil((materialTop - targetZ) / plunge)
 
   showParams('Default parameters')
 
   startX=ui.getUserInput('StartX ({:f})'.format(startX), float, startX)
   startY=ui.getUserInput('StartY ({:f})'.format(startY), float, startY)
-  materialZ=ui.getUserInput('MaterialZ ({:f})'.format(materialZ), float, materialZ)
+  materialTop=ui.getUserInput('MaterialTop ({:f})'.format(materialTop), float, materialTop)
   targetZ=ui.getUserInput('TargetZ ({:f})'.format(targetZ), float, targetZ)
 
-  safeHeight = materialZ + 5
+  safeHeight = materialTop + 5
   safeHeight=ui.getUserInput('SafeHeight ({:f})'.format(safeHeight), float, safeHeight)
   pocketWidth=ui.getUserInput('PocketWidth ({:f})'.format(pocketWidth), float, pocketWidth)
   pocketHeight=ui.getUserInput('PocketHeight ({:f})'.format(pocketHeight), float, pocketHeight)
@@ -939,7 +978,7 @@ def dummy():
   if not tabWidth or not tabHeight:
     tabWidth = tabHeight = 0
 
-  zPasses = math.ceil((materialZ - targetZ) / plunge)
+  zPasses = math.ceil((materialTop - targetZ) / plunge)
 
   showParams('FINAL parameters')
 
@@ -960,9 +999,9 @@ def dummy():
   mchRapid(x=startX, y=startY)
 
   ui.logTitle('Rapid Z approach to material top')
-  mchRapid(z=materialZ)
+  mchRapid(z=materialTop)
 
-  currZ = materialZ - plunge
+  currZ = materialTop - plunge
   if currZ < targetZ:
     currZ = targetZ
 
