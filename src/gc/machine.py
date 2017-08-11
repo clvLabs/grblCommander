@@ -237,6 +237,12 @@ def getSoftwarePosStr():
     )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def refreshSoftwarePos():
+  tbl.setX(gStatus['MPos']['x'])
+  tbl.setY(gStatus['MPos']['y'])
+  tbl.setZ(gStatus['MPos']['z'])
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def waitForMachineIdle(verbose='WARNING'):
   ui.log('Waiting for machine operation to finish...', v='SUPER')
   getMachineStatus()

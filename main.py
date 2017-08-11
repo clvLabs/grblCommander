@@ -51,6 +51,8 @@ def showHelp():
   mM         - Macro (submenu)
   tT         - Tests (submenu)
 
+  <F12>      - Copy MPos to SPos
+
   Rapids
   ---------------------------------------------------------------------
   <numpad>   - Safe relative rapid (XY) (including diagonals)
@@ -176,6 +178,10 @@ def processUserInput():
 
     if(key == 999999):
       pass
+    elif(key == 134): # <F12>
+      ui.keyPressMessage('<F12> - Copy MPos to SPos', key, char)
+      mch.refreshSoftwarePos()
+
     else:  # Rest of keys
       processed = False
       if(ui.getVerboseLevelStr() == 'DEBUG'):
