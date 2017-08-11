@@ -26,7 +26,7 @@ mchCfg = cfg['machine']
 mcrCfg = cfg['macro']
 
 # Current version
-gVERSION = '0.4.1'
+gVERSION = '0.4.2'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def readyMsg(extraInfo=None):
