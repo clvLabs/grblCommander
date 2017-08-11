@@ -218,7 +218,17 @@ def getColoredMachineStateStr():
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def getMachinePosStr():
   mPos = gStatus['MPos'] if 'MPos' in gStatus else None
-  return ui.xyzStr(mPos['x'], mPos['y'], mPos['z']) if mPos else '<NONE>'
+
+  if not mPos:
+    return '<NONE>'
+
+  return ui.xyzStr(
+    mPos['x'],
+    mPos['y'],
+    mPos['z'],
+    'ui.machinePosDiff' if tbl.getX() != mPos['x'] else '',
+    'ui.machinePosDiff' if tbl.getY() != mPos['y'] else '',
+    'ui.machinePosDiff' if tbl.getZ() != mPos['z'] else '')
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def getWorkPosStr():
