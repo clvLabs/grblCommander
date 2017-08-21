@@ -691,37 +691,43 @@ def zigZagPattern():
   def showZZParameters(title):
     ui.log("""
     {:s}:
-      StartX                {:f}
-      StartY                {:f}
-      MaterialTop           {:f}
-      BitDiameter           {:f}
-      BitFlutes             {:d}
-      BitRPM                {:d}
-      ZSafeHeight           {:f}
-      Run                   {:f}
-      Rise                  {:f}
-      Plunge                {:f}
-      PlungeSpeed           {:f}
-      InitialFeed           {:f}
-      DeltaFeed             {:d}
-      ZigZagPerIteration    {:d}
-      Iterations            {:d}
-      Spacing               {:f}
+      startRow              {:d}
+      startCol              {:d}
+      startY                {:f}
+      startX                {:f}
+      materialTop           {:f}
+      bitDiameter           {:f}
+      bitFlutes             {:d}
+      bitRPM                {:d}
+      safeTravelZ           {:f}
+      safeWorkZ             {:f}
+      zzRun                 {:f}
+      zzRise                {:f}
+      zzPlunge              {:f}
+      zzPlungeSpeed         {:f}
+      zzInitialFeed         {:f}
+      zzDeltaFeed           {:d}
+      zzZigZagPerIteration  {:d}
+      zzIterations          {:d}
+      zzSpacing             {:f}
 
       TOTAL
-        Width               {:f}
         Height              {:f}
-        EndX                {:f}
+        Width               {:f}
         EndY                {:f}
+        EndX                {:f}
       """.format(
         title,
-        startX,
+        startRow,
+        startCol,
         startY,
+        startX,
         materialTop,
         bitDiameter,
         bitFlutes,
         bitRPM,
-        zSafeHeight,
+        safeTravelZ,
+        safeWorkZ,
         zzRun,
         zzRise,
         zzPlunge,
@@ -732,69 +738,86 @@ def zigZagPattern():
         zzIterations,
         zzSpacing,
 
-        zzTotalWidth,
         zzTotalHeight,
-        endX,
+        zzTotalWidth,
         endY,
+        endX,
         ))
 
   # zig-zag default parameter calculations
   # NOTE: Using parameters for softwoods!!
   # Check before trying with other materials!!
 
-  """
-  Col3 107
-  Col2 76
-  Col1 45
+  # DEFINE THESE FOR CURRENT WASTEBOARD ======
+  startOffsetY = 0
+  startOffsetX = 0
+  # ==========================================
 
-  Row4 100
-  Row3 70
-  Row2 40
-  Row1 10
-  """
+  rows = []
+  cols = []
 
-  startX = 45
-  startY = 40
+  SAMPLE_ITEM_HEIGHT = 20
+  SAMPLE_ITEM_WIDTH = 31.35
+
+  for i in range(10):
+    rows.append(startOffsetY + (i*SAMPLE_ITEM_HEIGHT))
+    cols.append(startOffsetX + (i*SAMPLE_ITEM_WIDTH))
+
+  startRow = 1
+  startCol = 1
+  startY = rows[startRow-1]
+  startX = cols[startCol-1]
   bitDiameter = 3.175
-  materialTop = 10.1
+  # materialTop = 10.1
+  materialTop = 0
   bitFlutes = 2
   bitRPM = 12000
-  zSafeHeight = 28 # materialTop + 5
+  safeTravelZ = 30
+  safeWorkZ = materialTop + 3
   zzRun = 25 if bitDiameter < 3.18 else 50
   zzRise = bitDiameter * 2
-  zzPlunge = 1.5 # bitDiameter
-  zzPlungeSpeed = 200
-  zzInitialFeed = 400 # 0.02 * bitDiameter * bitFlutes * bitRPM
-  zzDeltaFeed = 100 # 125 if bitDiameter < 0.8 else 200 if bitDiameter < 3.0 else 250
-  zzZigZagPerIteration = 2
-  zzIterations = 3
+  # zzPlunge = bitDiameter
+  zzPlunge = 0.1
+  zzPlungeSpeed = 100
+  # zzInitialFeed = 0.02 * bitDiameter * bitFlutes * bitRPM
+  zzInitialFeed = 100
+  # zzDeltaFeed = 125 if bitDiameter < 0.8 else 200 if bitDiameter < 3.0 else 250
+  zzDeltaFeed = 50
+  zzZigZagPerIteration = 1
+  zzIterations = 1
   zzSpacing = bitDiameter * 2
 
-  zzTotalWidth = ((zzRun + zzSpacing) * zzIterations) - zzSpacing + bitDiameter
   zzTotalHeight = (zzRise * zzZigZagPerIteration * 2) + bitDiameter
-  endX = startX + zzTotalWidth
+  zzTotalWidth = ((zzRun + zzSpacing) * zzIterations) - zzSpacing + bitDiameter
   endY = startY + zzTotalHeight
+  endX = startX + zzTotalWidth
 
   showZZParameters('Calculated parameters')
 
-  startX=ui.getUserInput('StartX ({:f})'.format(startX), float, startX)
-  startY=ui.getUserInput('StartY ({:f})'.format(startY), float, startY)
-  materialTop=ui.getUserInput('MaterialTop ({:f})'.format(materialTop), float, materialTop)
-  bitDiameter=ui.getUserInput('Bit diameter (mm) ({:})'.format(bitDiameter), float, bitDiameter)
-  bitFlutes=ui.getUserInput('Number of flutes ({:})'.format(bitFlutes), int, bitFlutes)
-  bitRPM=ui.getUserInput('Spindle RPM ({:})'.format(bitRPM), int, bitRPM)
+  startRow=ui.getUserInput('startRow (BASE 1!!!) ({:d})'.format(startRow), int, startRow)
+  startCol=ui.getUserInput('startCol (BASE 1!!!) ({:d})'.format(startCol), int, startCol)
+  # startY=ui.getUserInput('StartY ({:f})'.format(startY), float, startY)
+  # startX=ui.getUserInput('StartX ({:f})'.format(startX), float, startX)
+  startY = rows[startRow-1]
+  startX = cols[startCol-1]
 
-  zSafeHeight = 28 # materialTop + 5
-  zSafeHeight=ui.getUserInput('Z safe height (mm) ({:})'.format(zSafeHeight), float, zSafeHeight)
-  zzRun=ui.getUserInput('Run ({:f}) (0 for straight line)'.format(zzRun), float, zzRun)
-  zzRise=ui.getUserInput('Rise ({:f})'.format(zzRise), float, zzRise)
+  materialTop=ui.getUserInput('MaterialTop ({:f})'.format(materialTop), float, materialTop)
+  # bitDiameter=ui.getUserInput('Bit diameter (mm) ({:})'.format(bitDiameter), float, bitDiameter)
+  # bitFlutes=ui.getUserInput('Number of flutes ({:})'.format(bitFlutes), int, bitFlutes)
+  # bitRPM=ui.getUserInput('Spindle RPM ({:})'.format(bitRPM), int, bitRPM)
+
+  safeWorkZ = materialTop + 3
+  # safeTravelZ=ui.getUserInput('Z safe TRAVEL height (mm) ({:})'.format(safeTravelZ), float, safeTravelZ)
+  # safeWorkZ=ui.getUserInput('Z safe WORK height (mm) ({:})'.format(safeWorkZ), float, safeWorkZ)
+  # zzRun=ui.getUserInput('Run ({:f}) (0 for straight line)'.format(zzRun), float, zzRun)
+  # zzRise=ui.getUserInput('Rise ({:f})'.format(zzRise), float, zzRise)
   zzPlunge=ui.getUserInput('Plunge ({:f})'.format(zzPlunge), float, zzPlunge)
-  zzPlungeSpeed=ui.getUserInput('PlungeSpeed ({:f})'.format(zzPlungeSpeed), float, zzPlungeSpeed)
+  # zzPlungeSpeed=ui.getUserInput('PlungeSpeed ({:f})'.format(zzPlungeSpeed), float, zzPlungeSpeed)
   zzInitialFeed=ui.getUserInput('InitialFeed ({:f})'.format(zzInitialFeed), float, zzInitialFeed)
   zzDeltaFeed=ui.getUserInput('DeltaFeed ({:d})'.format(zzDeltaFeed), int, zzDeltaFeed)
-  zzZigZagPerIteration=ui.getUserInput('ZigZagPerIteration ({:d})'.format(zzZigZagPerIteration), int, zzZigZagPerIteration)
+  # zzZigZagPerIteration=ui.getUserInput('ZigZagPerIteration ({:d})'.format(zzZigZagPerIteration), int, zzZigZagPerIteration)
   zzIterations=ui.getUserInput('Iterations ({:d})'.format(zzIterations), int, zzIterations)
-  zzSpacing=ui.getUserInput('Spacing ({:f})'.format(zzSpacing), float, zzSpacing)
+  # zzSpacing=ui.getUserInput('Spacing ({:f})'.format(zzSpacing), float, zzSpacing)
 
   zzTotalWidth = ((zzRun + zzSpacing) * zzIterations) - zzSpacing + bitDiameter
   zzTotalHeight = (zzRise * zzZigZagPerIteration * 2) + bitDiameter
@@ -807,7 +830,7 @@ def zigZagPattern():
     return
 
   ui.logTitle('Safe initial position')
-  mchRapid(z=zSafeHeight)
+  mchRapid(z=safeTravelZ)
   mchRapid(x=0, y=0)
   ui.log()
 
@@ -869,7 +892,7 @@ def zigZagPattern():
       if currIteration+1 < zzIterations:
         if not testCancelled:
           ui.logTitle('Rapid to iteration {:}/{:}'.format(currIteration+2,zzIterations))
-          mchRapid(z=zSafeHeight)
+          mchRapid(z=safeWorkZ)
 
         if not testCancelled:
           if currIteration < (zzIterations-1):
@@ -886,7 +909,7 @@ def zigZagPattern():
     logTestFinished()
 
   ui.logTitle('Back home')
-  mchRapid(z=zSafeHeight)
+  mchRapid(z=safeTravelZ)
   mchRapid(x=0, y=0)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
