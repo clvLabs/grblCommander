@@ -13,7 +13,7 @@ macro = {
 
   'commands': [
     ['G0',      'Rapid positioning'],
-    ['G54',     'Machine coordinate system G54'],
+    ['G53',     'Move in Machine Coordinates'],
     ['G17',     'XY Plane selection'],
     ['G90',     'Absolute programming'],
     ['G21',     'Programming in millimeters (mm)'],
