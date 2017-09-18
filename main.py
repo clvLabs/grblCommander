@@ -163,6 +163,36 @@ def processUserInput():
 
     if(key == 999999):
       pass
+    elif(key == 59): # <F1>
+      if mcrCfg['hotKeys']['F1']:
+        mcr.run(mcrCfg['hotKeys']['F1'], silent=True)
+    elif(key == 60): # <F2>
+      if mcrCfg['hotKeys']['F2']:
+        mcr.run(mcrCfg['hotKeys']['F2'], silent=True)
+    elif(key == 61): # <F3>
+      if mcrCfg['hotKeys']['F3']:
+        mcr.run(mcrCfg['hotKeys']['F3'], silent=True)
+    elif(key == 62): # <F4>
+      if mcrCfg['hotKeys']['F4']:
+        mcr.run(mcrCfg['hotKeys']['F4'], silent=True)
+    elif(key == 63): # <F5>
+      if mcrCfg['hotKeys']['F5']:
+        mcr.run(mcrCfg['hotKeys']['F5'], silent=True)
+    elif(key == 64): # <F6>
+      if mcrCfg['hotKeys']['F6']:
+        mcr.run(mcrCfg['hotKeys']['F6'], silent=True)
+    elif(key == 65): # <F7>
+      if mcrCfg['hotKeys']['F7']:
+        mcr.run(mcrCfg['hotKeys']['F7'], silent=True)
+    elif(key == 66): # <F8>
+      if mcrCfg['hotKeys']['F8']:
+        mcr.run(mcrCfg['hotKeys']['F8'], silent=True)
+    elif(key == 67): # <F9>
+      if mcrCfg['hotKeys']['F9']:
+        mcr.run(mcrCfg['hotKeys']['F9'], silent=True)
+    elif(key == 68): # <F10>
+      if mcrCfg['hotKeys']['F10']:
+        mcr.run(mcrCfg['hotKeys']['F10'], silent=True)
 
     else:  # Rest of keys
       processed = False
