@@ -168,7 +168,7 @@ def _run(name, silent=False, isSubCall=False):
         return False
 
   for command in commands:
-    cmdName = command[0] if len(command) > 0 else ''
+    cmdName = command[0].upper() if len(command) > 0 else ''
     cmdComment = command[1] if len(command) > 1 else ''
     isReservedName = cmdName in mcrCfg['reservedNames']
     isMacroCall = cmdName in gMACROS
