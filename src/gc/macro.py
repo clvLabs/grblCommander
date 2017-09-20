@@ -181,9 +181,17 @@ def _run(name, silent=False, isSubCall=False):
       if isReservedName:
         ui.logTitle(cmdName, color='macro.reservedName')
         if cmdName == 'PAUSE':
-          ui.inputMsg('Paused, press <ENTER> to continue...')
-          input()
-          continue
+          ui.inputMsg('Paused, press <ENTER> to continue / <ESC> to exit ...')
+          key=0
+          while( key != 13 and key != 10 and key != 27 ):
+            key=kb.readKey()
+
+          if key == 27:  # <ESC>
+            ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
+            return False
+          elif key == 13 or key == 10:  # <ENTER>
+            continue
+
         elif cmdName == 'STARTUP':
           cmdName = mcrCfg['startup']
           isMacroCall = cmdName in gMACROS
