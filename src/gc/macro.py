@@ -9,6 +9,7 @@ if __name__ == '__main__':
   print('This file is a module, it should not be executed directly')
 
 import importlib
+import time
 from pathlib import Path, PurePath
 
 from . import ui as ui
@@ -178,6 +179,9 @@ def _run(name, silent=False, isSubCall=False):
       ui.logTitle(cmdComment, color='macro.macroCall' if isMacroCall else 'macro.comment')
 
     if cmdName:
+      if cmdName[:5] == 'SLEEP':
+        isReservedName = True
+
       if isReservedName:
         ui.logTitle(cmdName, color='macro.reservedName')
         if cmdName == 'PAUSE':
@@ -195,6 +199,10 @@ def _run(name, silent=False, isSubCall=False):
         elif cmdName == 'STARTUP':
           cmdName = mcrCfg['startup']
           isMacroCall = cmdName in gMACROS
+
+        elif cmdName[:5] == 'SLEEP':
+          time.sleep(float(cmdName[5:]))
+          continue
 
       if isMacroCall:
         if not _run(cmdName, silent=silent, isSubCall=True):
