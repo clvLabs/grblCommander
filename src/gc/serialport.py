@@ -94,6 +94,12 @@ def readResponse(responseTimeout=spCfg['responseTimeout'], verbose='BASIC'):
 
       if line == 'ok':
         finished = True
+      elif line[:6] == "error:":
+        ui.log('<<<<< {:}'.format(line), color='comms.recv' ,v='ERROR')
+        finished = True
+      elif line == "[MSG:'$H'|'$X' to unlock]":
+        ui.log('<<<<< {:}'.format(line), color='comms.recv' ,v='WARNING')
+        finished = True
       else:
         if line[:1] == '>' and line[-3:] == ':ok':
           line = line[:-3]
