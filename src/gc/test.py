@@ -897,6 +897,7 @@ def zigZagPattern():
         if not testCancelled:
           if currIteration < (zzIterations-1):
             currX = currIterX + zzRun + zzSpacing
+            currX = currIterX + SAMPLE_ITEM_WIDTH
             currY = currIterY
             mchRapid(x=currX, y=currY)
 
