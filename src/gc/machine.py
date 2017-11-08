@@ -3,6 +3,9 @@
 grblCommander - machine
 =======================
 Machine (CNC) related code
+
+SEE:
+https://github.com/gnea/grbl/wiki/Grbl-v1.1-Interface#message-summary
 """
 
 if __name__ == '__main__':
@@ -75,7 +78,7 @@ def parseMachineStatus(status):
   if status[0] == '<':
     status = status[1:-1]
 
-  # Separe parameter groups
+  # Split parameter groups
   params = status.split('|')
 
   # Status is always the first field
