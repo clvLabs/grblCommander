@@ -12,8 +12,11 @@ import pprint
 import src.gc.utils as ut
 import src.gc.ui as ui
 import src.gc.keyboard as kb
-import src.gc.serialport as sp
-import src.gc.machine as mch
+
+# import src.gc.serialport as sp
+# import src.gc.machine as mch
+import src.gc.grbl.grbl as grbl
+
 import src.gc.table as tbl
 import src.gc.macro as mcr
 import src.gc.test as test
@@ -26,7 +29,11 @@ mchCfg = cfg['machine']
 mcrCfg = cfg['macro']
 
 # Current version
-gVERSION = '0.4.2'
+gVERSION = '0.5.0'
+
+# grbl machine manager
+mch = grbl.Grbl(cfg)
+mcr.setGrbl(mch)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def readyMsg(extraInfo=None):
@@ -69,12 +76,6 @@ def showHelp():
   zZ         - Set rapid increment (Z) (-/+)
   <CTRL>z    - Set rapid increment (Z)
 
-  aA         - Set safe height (Z) (-/+)
-  <CTRL>a    - Set safe height (Z)
-
-  %          - Set table size percent (loop)
-  <ALT>5     - Set table size percent
-
   vV         - Set verbose level (-/+) (loop)
   """)
 
@@ -87,6 +88,7 @@ def showMachineStatus():
   Current status:
 
   Machine {:}
+  LastMsg {:s}
   MPos    {:s}
   WPos    {:s}
   SPos    {:s}
@@ -94,18 +96,15 @@ def showMachineStatus():
   Software config:
   RapidIncrement_XY = {:}
   RapidIncrement_Z  = {:}
-  SafeHeight        = {:}
-  TableSize%        = {:d}%
   VerboseLevel      = {:d}/{:d} ({:s})
   """.format(
       mch.getColoredMachineStateStr(),
+      mch.lastMessage,
       mch.getMachinePosStr(),
       mch.getWorkPosStr(),
       mch.getSoftwarePosStr(),
       ui.coordStr(tbl.getRI_XY()),
       ui.coordStr(tbl.getRI_Z()),
-      ui.coordStr(tbl.getSafeHeight()),
-      tbl.getTableSizePercent(),
       ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
     )
 
@@ -128,8 +127,6 @@ def showMachineLongStatus():
   Software config:
   RapidIncrement_XY = {:}
   RapidIncrement_Z  = {:}
-  SafeHeight        = {:}
-  TableSize%        = {:d}%
   VerboseLevel      = {:d}/{:d} ({:s})
 
   """.format(
@@ -140,8 +137,6 @@ def showMachineLongStatus():
       pprint.pformat(machineStatus, indent=4, width=uiCfg['maxLineLen']),
       ui.coordStr(tbl.getRI_XY()),
       ui.coordStr(tbl.getRI_Z()),
-      ui.coordStr(tbl.getSafeHeight()),
-      tbl.getTableSizePercent(),
       ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
     )
 
@@ -275,7 +270,7 @@ def processUserInput():
       ui.keyPressMessage('gG - Send raw GCode command', key, char)
       ui.inputMsg('Enter GCode command...')
       userCommand=input()
-      sp.sendCommand(userCommand)
+      mch.sendCommand(userCommand)
       mch.waitForMachineIdle()
 
     elif(char == 's'):
@@ -288,7 +283,7 @@ def processUserInput():
 
     elif(char in 'rR'):
       ui.keyPressMessage('rR - Reset serial connection', key, char)
-      sp.connect()
+      mch.resetConnection()
       mch.getMachineStatus()
 
     elif(char in 'cC'):
@@ -494,22 +489,6 @@ def processUserInput():
           tbl.getRI_Z()))
       showMachineStatus()
 
-    elif(char == '%'):
-      ui.keyPressMessage('% - Set table size percent (loop)', key, char)
-      tmpTableSizePercent = ut.genericValueChanger(  tbl.getTableSizePercent(), +10, tbl.gMIN_TABLE_SIZE_PERCENT, tbl.gMAX_TABLE_SIZE_PERCENT,
-                              loop=True, valueName='Table size percent')
-
-      tbl.setTableSizePercent(tmpTableSizePercent)
-
-    elif(key == 53):  # <ALT>5
-      ui.keyPressMessage('<ALT>5 - Set table size percent', key, char)
-      tbl.setTableSizePercent(
-        ui.getUserInput(
-          'Table size % ({:})'.format(tbl.getTableSizePercent()),
-          int,
-          tbl.getTableSizePercent()))
-      showMachineStatus()
-
     elif(char == 'V'):
       ui.keyPressMessage('V - Set verbose level+', key, char)
       tempVerboseLevel = ut.genericValueChanger(  ui.getVerboseLevel(), +1, ui.gMIN_VERBOSE_LEVEL, ui.gMAX_VERBOSE_LEVEL,
@@ -523,27 +502,6 @@ def processUserInput():
                           loop=True, valueName='Verbose level',
                           valueFormatter=lambda level : '{:d} {:s}'.format(level,ui.getVerboseLevelStr(level)) )
       ui.setVerboseLevel(tempVerboseLevel)
-
-    elif(char == 'A'):
-      ui.keyPressMessage('A - Set safe height (Z)+', key, char)
-      tempSafeHeight = ut.genericValueChanger(  tbl.getSafeHeight(), +1, tbl.gMIN_SAFE_HEIGHT, tbl.gMAX_SAFE_HEIGHT,
-                            loop=False, valueName='Safe Height' )
-      tbl.setSafeHeight(tempSafeHeight)
-
-    elif(char == 'a'):
-      ui.keyPressMessage('a - Set safe height (Z)-', key, char)
-      tempSafeHeight = ut.genericValueChanger(  tbl.getSafeHeight(), -1, tbl.gMIN_SAFE_HEIGHT, tbl.gMAX_SAFE_HEIGHT,
-                            loop=False, valueName='Safe Height' )
-      tbl.setSafeHeight(tempSafeHeight)
-
-    elif(key == 1):  # <CTRL>a
-      ui.keyPressMessage('<CTRL>a - Set safe height (Z)', key, char)
-      tbl.setSafeHeight(
-        ui.getUserInput(
-          'Safe height ({:})'.format(tbl.getSafeHeight()),
-          int,
-          tbl.getSafeHeight()))
-      showMachineStatus()
 
     else:  # Rest of keys
       processed = False
@@ -572,13 +530,13 @@ def main():
   mcr.load()
   ui.log()
 
-  ui.logTitle('Serial connection')
-  sp.connect()
+  ui.logTitle('Grbl connection')
+  mch.start()
 
   mch.viewBuildInfo()
 
-  ui.logTitle('Sending startup macro')
-  mcr.run(mcrCfg['startup'], silent=True)
+  # ui.logTitle('Sending startup macro')
+  # mcr.run(mcrCfg['startup'], silent=True)
 
   mch.viewGCodeParserState()
   ui.log('System ready!', color='ui.msg')
@@ -589,15 +547,13 @@ def main():
   readyMsg()
 
   while(True):
-    line = sp.readline()
-    if(line):
-      ui.log('<<<<< {:}'.format(line), color='comms.recv')
+    mch.process()
 
     if not processUserInput():
       break
 
-  ui.log('Closing serial port...')
-  sp.close()
+  ui.log('Closing grbl connection...')
+  mch.stop()
 
   ui.log('Closing program...')
 

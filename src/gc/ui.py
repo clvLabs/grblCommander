@@ -8,8 +8,8 @@ User interface management
 if __name__ == '__main__':
   print('This file is a module, it should not be executed directly')
 
+from enum import Enum
 from src.gc.config import cfg
-
 # ------------------------------------------------------------------
 # Make it easier (shorter) to use cfg object
 uiCfg = cfg['ui']
@@ -190,6 +190,15 @@ def xyzStr(x, y, z, xColor='', yColor='', zColor=''):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # Verbose level
+class v(Enum):
+  NONE = 0
+  BASIC = 1
+  ERROR = 2
+  WARNING = 3
+  DETAIL = 4
+  SUPER = 5
+  DEBUG = 6
+
 gVerboseLevels = [ 'NONE', 'BASIC', 'ERROR', 'WARNING', 'DETAIL', 'SUPER', 'DEBUG' ]
 gMIN_VERBOSE_LEVEL = gVerboseLevels.index('BASIC')
 gMAX_VERBOSE_LEVEL = len(gVerboseLevels) - 1

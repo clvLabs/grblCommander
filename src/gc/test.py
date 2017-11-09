@@ -15,8 +15,8 @@ import math
 from . import utils as ut
 from . import ui as ui
 from . import table as tbl
-from . import machine as mch
-from . import serialport as sp
+# from . import machine as mch
+# from . import serialport as sp
 from . import keyboard as kb
 from src.gc.config import cfg
 
@@ -30,6 +30,12 @@ if not ut.isWindows():
   gpio.setup()
 
 testCancelled = False
+
+gGRBL = None
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def setGrbl(grbl):
+  gGRBL = grbl
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def logTestHeader(text):
@@ -80,13 +86,13 @@ def userConfirm(password=tstCfg['password']):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def mchFeed(x=None, y=None, z=None, speed=None):
   if not testCancelled:
-    mch.feedAbsolute(x=x, y=y, z=z, speed=speed)
+    grbl.feedAbsolute(x=x, y=y, z=z, speed=speed)
     checkTestCancelled()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def mchRapid(x=None, y=None, z=None):
   if not testCancelled:
-    mch.rapidAbsolute(x=x, y=y, z=z)
+    grbl.rapidAbsolute(x=x, y=y, z=z)
     checkTestCancelled()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -109,7 +115,7 @@ def automaticProbe(iterations = tstCfg['autoProbeIterations']):
 
     # Prepare Z position
     ui.log('Moving to Z to last known touch point +1 step to start test...')
-    mch.feedAbsolute(z=nextStartPoint, speed=mchCfg['seekSpeed'])
+    grbl.feedAbsolute(z=nextStartPoint, speed=mchCfg['seekSpeed'])
 
     # Step down until contact
     exit = False
@@ -119,7 +125,7 @@ def automaticProbe(iterations = tstCfg['autoProbeIterations']):
     while(not exit and not testCancelled):
       ui.log('Seeking CONTACT point (Z={:})\r'.format(ui.coordStr(z)), end='')
 
-      mch.feedAbsolute(z=z)
+      grbl.feedAbsolute(z=z)
 
       if checkTestCancelled():
         break
@@ -144,7 +150,7 @@ def automaticProbe(iterations = tstCfg['autoProbeIterations']):
         z += upStep
         ui.log('Seeking RELEASE point (Z={:})\r'.format(ui.coordStr(z)), end='')
 
-        mch.feedAbsolute(z=z)
+        grbl.feedAbsolute(z=z)
 
         if checkTestCancelled():
           break
@@ -166,7 +172,7 @@ def automaticProbe(iterations = tstCfg['autoProbeIterations']):
     return False
 
   ui.log('Restoring original Z...')
-  mch.safeRapidAbsolute(z=savedZ)
+  grbl.safeRapidAbsolute(z=savedZ)
 
   averageTouchZ = float(sum(touchZList))/len(touchZList) if len(touchZList) > 0 else 0
 
@@ -206,7 +212,7 @@ def manualProbe():
   ui.log('Saving original Z')
   savedZ = tbl.getZ()
   ui.log('Moving to Z0 to start test...')
-  mch.safeRapidAbsolute(z=0)
+  grbl.safeRapidAbsolute(z=0)
 
   ui.log('Starting manual probe...')
 
@@ -219,7 +225,7 @@ def manualProbe():
     z -= 0.1
     ui.log('Seeking CONTACT point (Z={:})\r'.format(ui.coordStr(z)), end='')
 
-    mch.feedAbsolute(z=z)
+    grbl.feedAbsolute(z=z)
 
     ui.inputMsg('<ENTER>:stop / <SPACE>:continue / <ESC>:exit ...')
     key=0
@@ -250,7 +256,7 @@ def manualProbe():
       z += 0.025
       ui.log('Seeking RELEASE point (Z={:})\r'.format(ui.coordStr(z)), end='')
 
-      mch.feedAbsolute(z=z)
+      grbl.feedAbsolute(z=z)
 
       ui.log('PHASE2 : Seeking RELEASE point')
       ui.inputMsg('<ENTER>:stop / <SPACE>:continue / <ESC>:exit ...')
@@ -279,7 +285,7 @@ def manualProbe():
     return False
 
   ui.log('Restoring original Z...')
-  mch.safeRapidAbsolute(z=savedZ)
+  grbl.safeRapidAbsolute(z=savedZ)
 
   return {
     'z': touchZ,
@@ -331,6 +337,7 @@ def tableProbingScan():
   """)
 
   userLines=ui.getUserInput('Number of inner lines (0)', int, 0)
+  safeHeight=ui.getUserInput('Safe height (0)', float, 0)
 
   if not userConfirm():
     return
@@ -342,9 +349,9 @@ def tableProbingScan():
   ui.log('Saving original XYZ')
   savedX, savedY, savedZ = tbl.getX(), tbl.getY(), tbl.getZ()
 
-  if tbl.getZ() < tbl.getSafeHeight():
+  if tbl.getZ() < safeHeight:
     ui.log('Temporarily moving to safe Z...')
-    mch.rapidAbsolute(z=tbl.getSafeHeight())
+    grbl.rapidAbsolute(z=safeHeight)
 
   gridIncrementX = tbl.getMaxX() / (gridLines-1)
   gridIncrementY = tbl.getMaxY() / (gridLines-1)
@@ -384,11 +391,11 @@ def tableProbingScan():
       , curGridPoint+1
       , gridLines*gridLines ) )
 
-      ui.log('mch.rapidAbsolute(Y={:} X={:})...'.format(
+      ui.log('grbl.rapidAbsolute(Y={:} X={:})...'.format(
           ui.coordStr(gridY[indexY]),
           ui.coordStr(gridX[indexX])
         ), v='DEBUG')
-      mch.rapidAbsolute(y=gridY[indexY], x=gridX[indexX])
+      grbl.rapidAbsolute(y=gridY[indexY], x=gridX[indexX])
 
       if checkTestCancelled():
         break
@@ -419,10 +426,10 @@ def tableProbingScan():
 
   ui.logTitle('Back home')
   ui.log('Temporarily moving to safe Z...')
-  mch.rapidAbsolute(z=tbl.getSafeHeight())
+  grbl.rapidAbsolute(z=safeHeight)
   ui.log('Restoring original XYZ...')
-  mch.safeRapidAbsolute(x=savedX, y=savedY)
-  mch.safeRapidAbsolute(z=savedZ)
+  grbl.safeRapidAbsolute(x=savedX, y=savedY)
+  grbl.safeRapidAbsolute(z=savedZ)
 
   if not saveTestResults:
     return
@@ -468,8 +475,7 @@ def tableProbingScan():
   """  Software config:
     RapidIncrement_XY = {:.2f}
     RapidIncrement_Z  = {:.2f}
-    TableSize%        = {:d}%
-  """.format(tbl.getRI_XY(), tbl.getRI_Z(), tbl.getTableSizePercent()) )
+  """.format(tbl.getRI_XY(), tbl.getRI_Z()) )
   outFile.write('\n')
 
   outFile.write('Test results (real Z):\n')
@@ -576,7 +582,7 @@ def tablePositionScan():
       return
 
     ui.logTitle('Going to [{:}]'.format(stepName))
-    mch.safeRapidAbsolute(x=x,y=y)
+    grbl.safeRapidAbsolute(x=x,y=y)
     checkTestCancelled()
 
   savedX = tbl.getX()
@@ -624,7 +630,7 @@ def baseLevelingHoles():
       return
 
     sp.sendCommand(cmd)
-    mch.waitForMachineIdle()
+    grbl.waitForMachineIdle()
 
     checkTestCancelled()
 

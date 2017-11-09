@@ -25,13 +25,13 @@ cfg = {
 
   # ---[Machine configuration]--------------------------------------
   'machine': {
-    'maxX': 280.0,            # Change to fit your machine
-    'maxY': 280.0,            # Change to fit your machine
-    'maxZ': 80.0,             # Change to fit your machine
-    'zSafeHeight': 5.0,
-    'rapidXY': 25.0,
-    'rapidZ': 10.0,
-    'tableSizePercent': 100,
+    'max': {
+      'X': 280.0,            # Change to fit your machine
+      'Y': 280.0,            # Change to fit your machine
+      'Z': 80.0,             # Change to fit your machine
+    },
+    'xyJogMm': 25.0,
+    'zJogMm': 10.0,
     'seekSpeed': 2000,
     'feedSpeed': 50,
   },
@@ -88,7 +88,6 @@ cfg = {
         'subtitle':             'white+',
         'header':               'cyan+',
         'onlineMachineStatus':  'yellow+',
-        'machinePosDiff':       'yellow+, red',
         'info':                 'white',
         'msg':                  'yellow+',
         'keyPressMsg':          'cyan+',

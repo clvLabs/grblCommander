@@ -14,8 +14,8 @@ from pathlib import Path, PurePath
 
 from . import ui as ui
 from . import keyboard as kb
-from . import serialport as sp
-from . import machine as mch
+# from . import serialport as sp
+# from . import machine as mch
 from src.gc.config import cfg
 
 # ------------------------------------------------------------------
@@ -24,6 +24,12 @@ mcrCfg = cfg['macro']
 
 gMACROS = {}
 gSUPPORT_FILES = {}
+
+gGRBL = None
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def setGrbl(grbl):
+  gGRBL = grbl
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def load(silent=False):
@@ -209,9 +215,9 @@ def _run(name, silent=False, isSubCall=False):
           ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
           return False
       else:
-        sp.sendCommand(cmdName)
+        grbl.sendCommand(cmdName)
         if not silent:
-          mch.waitForMachineIdle()
+          grbl.waitForMachineIdle()
 
     if kb.keyPressed():
       if kb.readKey() == 27:  # <ESC>
