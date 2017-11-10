@@ -48,11 +48,12 @@ def showHelp():
   """
   Available commands
   ---------------------------------------------------------------------
-  hH?        - Show this help text
+  hH         - Show this help text
   qQ         - Exit
   rR         - Reset serial connection
   cC         - Clear screen
 
+  ?          - Force status re-query
   sS         - Show current status (short/LONG)
   gG         - Send raw GCode command
   mM         - Macro (submenu)
@@ -88,7 +89,7 @@ def showMachineStatus():
   Current status:
 
   Machine {:}
-  LastMsg {:s}
+  LastMsg [{:s}]
   MPos    {:s}
   WPos    {:s}
   SPos    {:s}
@@ -221,9 +222,13 @@ def processUserInput():
       ui.keyPressMessage('qQ - Exit', key, char)
       return False
 
-    elif(char in 'hH?'):
-      ui.keyPressMessage('hH? - Show help text', key, char)
+    elif(char in 'hH'):
+      ui.keyPressMessage('hH - Show help text', key, char)
       showHelp()
+
+    elif(char in '?'):
+      ui.keyPressMessage('? - Force status re-query', key, char)
+      mch.queryMachineStatus()
 
     elif(char in 'mM'):
       ui.keyPressMessage('mM - Macro', key, char)
@@ -284,7 +289,7 @@ def processUserInput():
     elif(char in 'rR'):
       ui.keyPressMessage('rR - Reset serial connection', key, char)
       mch.resetConnection()
-      mch.getMachineStatus()
+      mch.queryMachineStatus()
 
     elif(char in 'cC'):
       ui.keyPressMessage('cC - Clear screen', key, char)

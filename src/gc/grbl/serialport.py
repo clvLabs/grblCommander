@@ -75,60 +75,9 @@ class SerialPort:
   def sendCommand(self,command, responseTimeout=None, verbose='BASIC'):
     ''' Send a command
     '''
-    if responseTimeout is None:
-      responseTimeout = self.spCfg['responseTimeout']
-
     command = command.rstrip()
     ui.log('>>>>> {:}'.format(command), color='comms.send' ,v=verbose)
     self.write(command+'\n')
-
-    return self.readResponse(responseTimeout=responseTimeout,verbose=verbose)
-
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def readResponse(self,responseTimeout=None, verbose='BASIC'):
-    ''' Read a command's response
-    '''
-    if responseTimeout is None:
-      responseTimeout = self.spCfg['responseTimeout']
-
-    ui.log('readResponse() - Waiting for response from serial...', v='SUPER')
-
-    startTime = time.time()
-    receivedLines = 0
-    responseArray=[]
-
-    while (time.time() - startTime) < responseTimeout:
-      line = self.readline()
-      if line:
-        finished = False
-
-        if line == 'ok':
-          finished = True
-        elif line[:6] == "error:":
-          ui.log('<<<<< {:}'.format(line), color='comms.recv' ,v='ERROR')
-          finished = True
-        elif line == "[MSG:'$H'|'$X' to unlock]":
-          ui.log('<<<<< {:}'.format(line), color='comms.recv' ,v='WARNING')
-          finished = True
-        else:
-          if line[:1] == '>' and line[-3:] == ':ok':
-            line = line[:-3]
-            finished = True
-
-          receivedLines += 1
-          responseArray.append(line)
-          ui.log('<<<<< {:}'.format(line), color='comms.recv' ,v=verbose)
-
-        if finished:
-          ui.log(  'readResponse() - Successfully received {:d} data lines from serial'.format(
-            receivedLines), v='SUPER')
-          break
-    else:
-      ui.log('readResponse() - TIMEOUT Waiting for data from serial', color='ui.errorMsg', v='ERROR')
-      return []
-
-    return responseArray
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -17,6 +17,8 @@ from .. import table as tbl
 
 from . import serialport
 
+STATUSQUERY_INTERVAL = 5
+
 # ------------------------------------------------------------------
 # Grbl class
 
@@ -33,6 +35,8 @@ class Grbl:
     self.waitingStartup = True
     self.waitingResponse = False
     self.response = []
+    self.lastStatusQuery = 0
+    self.statusQuerySent = False
     self.waitingMachineStatus = False
     self.lastStatusStr = ''
     self.status = {}
@@ -99,6 +103,18 @@ class Grbl:
     '''
     line = self.sp.readline()
     self.parse(line)
+
+    sendQuery = False
+
+    if self.waitingMachineStatus and not self.statusQuerySent:
+      sendQuery = True
+
+    if (time.time() - self.lastStatusQuery) > STATUSQUERY_INTERVAL:
+      sendQuery = True
+
+    if sendQuery:
+      self.queryMachineStatus()
+
     time.sleep(0.1)
 
 
@@ -112,31 +128,25 @@ class Grbl:
         self.response.append(line)
 
       isResponse = False
+      isStatus = False
 
       if self.waitingStartup:
         if line[:5] == 'Grbl ' and line[-15:] == " ['$' for help]":
           self.waitingStartup = False
 
       if line == 'ok':
-        ui.log('<<<<< {:}'.format(line), color='comms.recv')
         isResponse = True
       elif line[:6] == "error:":
-        ui.log('<<<<< {:}'.format(line), color='comms.recv' ,v='ERROR')
         isResponse = True
       elif line[:1] == '>' and line[-3:] == ':ok':
-        ui.log('<<<<< {:}'.format(line), color='comms.recv')
         line = line[:-3]
         isResponse = True
       elif line[:1] == '>' and line[-8:-1] == ':error:':
-        ui.log('<<<<< {:}'.format(line), color='comms.recv' ,v='ERROR')
         line = line[:-8]
         isResponse = True
       elif line[:1] == '>' and line[-9:-2] == ':error:':
-        ui.log('<<<<< {:}'.format(line), color='comms.recv' ,v='ERROR')
         line = line[:-9]
         isResponse = True
-      else:
-        ui.log('<<<<< {:}'.format(line), color='comms.recv')
 
       if isResponse:
         if self.waitingResponse:
@@ -147,17 +157,22 @@ class Grbl:
       # Status
       if line[:1] == '<' and line[-1:] == '>':
         self.lastStatusStr = line
+        isStatus = True
         try:
           self.parseMachineStatus(self.lastStatusStr)
           # self.lastMachineStatusReceptionTimestamp
           if self.waitingMachineStatus:
             self.waitingMachineStatus = False
+            self.statusQuerySent = False
         except:
           ui.log("UNKNOWN machine data [{:}]".format(self.lastStatusStr), color='ui.errorMsg', v='ERROR')
 
       # Messages
       elif line[:5] == "[MSG:":
         self.lastMessage = line[5:-1]
+
+      if not isStatus:
+        ui.log('<<<<< {:}'.format(line), color='comms.recv')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -267,12 +282,20 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def getMachineStatus(self):
+  def queryMachineStatus(self):
     ''' TODO: Comment
     '''
     ui.log('Querying machine status...', v='DEBUG')
     self.sp.write('?')
+    self.statusQuerySent = True
     self.waitingMachineStatus = True
+    self.lastStatusQuery = time.time()
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getMachineStatus(self):
+    ''' TODO: Comment
+    '''
+    self.queryMachineStatus()
     startTime = time.time()
 
     while( (time.time() - startTime) < self.spCfg['responseTimeout'] ):
@@ -283,15 +306,48 @@ class Grbl:
     else:
       self.lastStatusStr = ''
       ui.log('TIMEOUT Waiting for machine status', v='WARNING')
+      self.waitingMachineStatus = False
+      self.statusQuerySent = False
 
     return self.status
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def sendCommand(self, command):
+  def sendCommand(self, command, responseTimeout=None, verbose='BASIC'):
     ''' Send a command
     '''
-    return self.sp.sendCommand(command)
+
+    self.sp.sendCommand(command)
+    return self.readResponse(responseTimeout=responseTimeout,verbose=verbose)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def readResponse(self,responseTimeout=None, verbose='BASIC'):
+    ''' Read a command's response
+    '''
+    if responseTimeout is None:
+      responseTimeout = self.spCfg['responseTimeout']
+
+    ui.log('readResponse() - Waiting for response from serial...', v='SUPER')
+
+    startTime = time.time()
+    receivedLines = 0
+    self.response=[]
+    self.waitingResponse = True
+
+    while (time.time() - startTime) < responseTimeout:
+      self.process()
+      if not self.waitingResponse:
+        ui.log(  'readResponse() - Successfully received {:d} data lines from serial'.format(
+          len(self.response)), v='SUPER')
+        break
+    else:
+      ui.log('TIMEOUT Waiting for machine response', v='WARNING')
+      ui.log('readResponse() - TIMEOUT Waiting for data from serial', color='ui.errorMsg', v='ERROR')
+      self.response = []
+      self.waitingResponse = False
+
+    return self.response
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -340,9 +396,9 @@ class Grbl:
     ''' TODO: comment
     '''
     return ui.xyzStr(
-      tbl.getX(),
-      tbl.getY(),
-      tbl.getZ())
+      self.status['WCO']['x'],
+      self.status['WCO']['y'],
+      self.status['WCO']['z'])
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -359,25 +415,30 @@ class Grbl:
     ''' TODO: comment
     '''
     ui.log('Waiting for machine operation to finish...', v='SUPER')
-    self.process()
+    self.queryMachineStatus()
+    while self.waitingMachineStatus:
+      self.process()
 
     showStatus = ((verbose != 'NONE') and (ui.getVerboseLevel() >= ui.getVerboseLevelIndex(verbose)))
+    showedOnce = False
 
     # Valid states types: Idle, Run, Hold, Jog, Alarm, Door, Check, Home, Sleep
-    while self.status['machineState'] != 'Idle' and self.status['machineState'] != 'Check':
+    while self.status['machineState'] == 'Run':
+      self.queryMachineStatus()
       if showStatus:
         ui.clearLine()
         coloredMachineStatusStr = ui.setStrColor(self.lastStatusStr, 'ui.onlineMachineStatus')
         ui.log('\r[{:}] {:}'.format(self.getColoredMachineStateStr(), coloredMachineStatusStr), end='')
+        showedOnce = True
       self.process()
 
-    if showStatus:
-      ui.clearLine()
-      coloredMachineStatusStr = ui.setStrColor(self.lastStatusStr, 'ui.onlineMachineStatus')
-      ui.log('\r[{:}] {:}'.format(self.getColoredMachineStateStr(), coloredMachineStatusStr), end='')
+    if showedOnce:
+      if showStatus:
+        ui.clearLine()
+        coloredMachineStatusStr = ui.setStrColor(self.lastStatusStr, 'ui.onlineMachineStatus')
+        ui.log('\r[{:}] {:}'.format(self.getColoredMachineStateStr(), coloredMachineStatusStr), end='')
 
-    ui.log(' - ', end='')
-    # ui.log(getSoftwarePosStr(), v=verbose)
+      ui.log(' - SPos {:}'.format(self.getSoftwarePosStr()), v=verbose)
 
     ui.log('Machine operation finished', v='SUPER')
 
