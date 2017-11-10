@@ -179,12 +179,21 @@ def coordStr(c):
   return cFmt.format(c)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def xyzStr(x, y, z, xColor='', yColor='', zColor=''):
+def ColoredXyzStr(x, y, z, xColor='', yColor='', zColor=''):
   xyzFmt = uiCfg['xyzFormat']
   return xyzFmt.format(
     setStrColor(coordStr(x), xColor ),
     setStrColor(coordStr(y), yColor ),
     setStrColor(coordStr(z), zColor ),
+    )
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def xyzStr(x, y, z):
+  xyzFmt = uiCfg['xyzFormat']
+  return xyzFmt.format(
+    coordStr(x),
+    coordStr(y),
+    coordStr(z),
     )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
