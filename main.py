@@ -51,15 +51,14 @@ def showHelp():
   hH         - Show this help text
   qQ         - Exit
   rR         - Reset serial connection
+  <CTRL>x    - grbl soft reset
   cC         - Clear screen
 
   ?          - Force status re-query
   sS         - Show current status (short/LONG)
-  gG         - Send raw GCode command
+  gG$        - Send raw GCode command
   mM         - Macro (submenu)
   tT         - Tests (submenu)
-
-  <F12>      - Copy MPos to SPos
 
   Rapids
   ---------------------------------------------------------------------
@@ -72,7 +71,7 @@ def showHelp():
   Settings
   ---------------------------------------------------------------------
   -+         - Set rapid increment (XY) (-/+)
-  <CTRL>x/y  - Set rapid increment (XY)
+  ?????????  - Set rapid increment (XY)
 
   zZ         - Set rapid increment (Z) (-/+)
   <CTRL>z    - Set rapid increment (Z)
@@ -86,13 +85,13 @@ def showMachineStatus():
 
   ui.logBlock(
   """
-  Current status:
+  Current status: [{:}]
 
-  Machine {:}
-  LastMsg [{:s}]
-  MPos    {:s}
-  WPos    {:s}
-  SPos    {:s}
+  Alarm   [{:s}]
+  Msg     [{:s}]
+
+  MPos    [{:s}]
+  WPos    [{:s}]
 
   Software config:
   RapidIncrement_XY = {:}
@@ -100,10 +99,10 @@ def showMachineStatus():
   VerboseLevel      = {:d}/{:d} ({:s})
   """.format(
       mch.getColoredMachineStateStr(),
-      mch.lastMessage,
+      ui.setStrColor(mch.getAlarm(), 'ui.errorMsg'),
+      ui.setStrColor(mch.getMessage(), 'ui.msg'),
       mch.getMachinePosStr(),
       mch.getWorkPosStr(),
-      mch.getSoftwarePosStr(),
       ui.coordStr(tbl.getRI_XY()),
       ui.coordStr(tbl.getRI_Z()),
       ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
@@ -111,36 +110,7 @@ def showMachineStatus():
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showMachineLongStatus():
-  machineStatus = mch.getMachineStatus()
-
-  ui.logBlock(
-  """
-  Current status (LONG version):
-
-  Machine {:}
-  MPos    {:s}
-  WPos    {:s}
-  SPos    {:s}
-
-  Machine FULL status:
-  {:}
-
-  Software config:
-  RapidIncrement_XY = {:}
-  RapidIncrement_Z  = {:}
-  VerboseLevel      = {:d}/{:d} ({:s})
-
-  """.format(
-      mch.getColoredMachineStateStr(),
-      mch.getMachinePosStr(),
-      mch.getWorkPosStr(),
-      mch.getSoftwarePosStr(),
-      pprint.pformat(machineStatus, indent=4, width=uiCfg['maxLineLen']),
-      ui.coordStr(tbl.getRI_XY()),
-      ui.coordStr(tbl.getRI_Z()),
-      ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
-    )
-
+  showMachineStatus()
   mcr.run(mcrCfg['machineLongStatus'], silent=True)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -204,9 +174,8 @@ def processUserInput():
 
     if(key == 999999):
       pass
-      ui.keyPressMessage('<F12> - Copy MPos to SPos', key, char)
-      mch.refreshSoftwarePos()
     elif(key == kb.F12):
+      pass
 
     else:  # Rest of keys
       processed = False
@@ -271,10 +240,10 @@ def processUserInput():
       else:
         ui.keyPressMessage('Unknown command', key, char)
 
-    elif(char in 'gG'):
-      ui.keyPressMessage('gG - Send raw GCode command', key, char)
+    elif(char in 'gG$'):
+      ui.keyPressMessage('gG$ - Send raw GCode command', key, char)
       ui.inputMsg('Enter GCode command...')
-      userCommand=input()
+      userCommand = char + input(char)
       mch.sendCommand(userCommand)
       mch.waitForMachineIdle()
 
@@ -468,14 +437,17 @@ def processUserInput():
       ui.keyPressMessage('- - Set rapid increment (XY)-', key, char)
       tbl.changeRI_XY(-1)
 
-      ui.keyPressMessage('<CTRL>x/y - Set rapid increment (XY)', key, char)
-      tbl.setRI_XY(
-        ui.getUserInput(
-          'Increment ({:})'.format(tbl.getRI_XY()),
-          float,
-          tbl.getRI_XY()))
-      showMachineStatus()
     # elif(key in [kb.CTRL_X, kb.CTRL_Y]):
+      # ui.keyPressMessage('<CTRL>x/y - Set rapid increment (XY)', key, char)
+      # tbl.setRI_XY(
+      #   ui.getUserInput(
+      #     'Increment ({:})'.format(tbl.getRI_XY()),
+      #     float,
+      #     tbl.getRI_XY()))
+      # showMachineStatus()
+    elif(key == kb.CTRL_X):
+      ui.keyPressMessage('<CTRL>x - grbl soft reset', key, char)
+      mch.softReset()
 
     elif(char == 'Z'):
       ui.keyPressMessage('Z - Set rapid increment (Z)+', key, char)
@@ -538,16 +510,13 @@ def main():
   ui.logTitle('Grbl connection')
   mch.start()
 
-  mch.viewBuildInfo()
-
   # ui.logTitle('Sending startup macro')
   # mcr.run(mcrCfg['startup'], silent=True)
 
-  mch.viewGCodeParserState()
-  ui.log('System ready!', color='ui.msg')
+  ui.log('System ready!', color='ui.successMsg')
 
   showMachineStatus()
-  ui.log('Type [hH?] for help', color='ui.msg')
+  ui.log('Type [hH] for help', color='ui.msg')
 
   readyMsg()
 

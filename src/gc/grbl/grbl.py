@@ -16,8 +16,17 @@ from .. import keyboard as kb
 from .. import table as tbl
 
 from . import serialport
+from . import dict
+
+
+# ------------------------------------------------------------------
+# Constants
+CTRL_X = 24
 
 STATUSQUERY_INTERVAL = 5
+PROCESS_SLEEP = 0.2
+WAITRESPONSE_SLEEP = 0.2
+
 
 # ------------------------------------------------------------------
 # Grbl class
@@ -39,8 +48,11 @@ class Grbl:
     self.statusQuerySent = False
     self.waitingMachineStatus = False
     self.lastStatusStr = ''
-    self.status = {}
     self.lastMessage = ''
+    self.alarm = ''
+    self.status = {
+      'settings': {}
+    }
 
     self.sp = serialport.SerialPort(cfg)
 
@@ -52,19 +64,13 @@ class Grbl:
     self.sp.open()
 
     if self.sp.isOpen():
-      ui.log('Serial port open, waiting for startup message...')
+      ui.log('Serial port open.', color='ui.successMsg')
       ui.log()
 
-      self.waitingStartup = True
-      while self.waitingStartup:
-        self.process()
-
-      ui.log()
-      ui.log('Startup message received, machine ready', color='ui.msg')
-      ui.log()
-
-      # Give some time for informational messages
-      self.sleep(0.5)
+      self.waitForStartup()
+      self.viewBuildInfo()
+      self.viewGrblConfig()
+      self.viewGCodeParserState()
 
       # else:
       #   ui.log('ERROR: startup message error, exiting program', color='ui.errorMsg', v='ERROR')
@@ -72,6 +78,20 @@ class Grbl:
     else:
       ui.log('ERROR opening serial port, exiting program', color='ui.errorMsg', v='ERROR')
       quit()
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def waitForStartup(self):
+    ''' Wait for grblShield startup
+    '''
+    ui.log('Waiting for startup message...')
+    self.alarm = ''
+    self.waitingStartup = True
+    while self.waitingStartup:
+      self.sleep(WAITRESPONSE_SLEEP)
+
+    ui.log('Startup message received, machine ready', color='ui.successMsg')
+    ui.log()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -89,6 +109,14 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def softReset(self):
+    ''' grblShield soft reset
+    '''
+    self.sp.write('%c' % CTRL_X)
+    self.waitForStartup()
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def sleep(self, seconds):
     ''' grbl-aware sleep
     '''
@@ -101,9 +129,21 @@ class Grbl:
   def process(self):
     ''' Call this method frequently to give Grbl some processing time
     '''
-    line = self.sp.readline()
-    self.parse(line)
 
+    # Read all available serial lines
+    line = self.sp.readline()
+    while line:
+      self.parse(line)
+      line = self.sp.readline()
+
+    # Manage alarm state
+    if self.alarm:
+      if self.waitingResponse:
+        self.waitingResponse = False
+      if self.waitingMachineStatus:
+        self.waitingMachineStatus = False
+
+    # Automatic periodic status queries
     sendQuery = False
 
     if self.waitingMachineStatus and not self.statusQuerySent:
@@ -115,7 +155,8 @@ class Grbl:
     if sendQuery:
       self.queryMachineStatus()
 
-    time.sleep(0.1)
+    # Give some time for the processor to do other stuff
+    time.sleep(PROCESS_SLEEP)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -127,8 +168,11 @@ class Grbl:
       if self.waitingResponse:
         self.response.append(line)
 
+      showLine = True
       isResponse = False
       isStatus = False
+      isAlarm = False
+      errorCode = ''
 
       if self.waitingStartup:
         if line[:5] == 'Grbl ' and line[-15:] == " ['$' for help]":
@@ -137,6 +181,12 @@ class Grbl:
       if line == 'ok':
         isResponse = True
       elif line[:6] == "error:":
+        errorCode = line[6:]
+        isResponse = True
+      elif line[:6] == "ALARM:":
+        self.alarm = line[6:]
+        self.status['machineState'] = 'Alarm'
+        isAlarm = True
         isResponse = True
       elif line[:1] == '>' and line[-3:] == ':ok':
         line = line[:-3]
@@ -152,12 +202,13 @@ class Grbl:
         if self.waitingResponse:
           self.waitingResponse = False
         else:
-          ui.log('UNEXPECTED MACHINE RESPONSE',c='red+',v='WARNING')
+          ui.log('[WARNING] Unexpected machine response',c='ui.msg',v='DETAIL')
 
       # Status
       if line[:1] == '<' and line[-1:] == '>':
         self.lastStatusStr = line
         isStatus = True
+        showLine = False
         try:
           self.parseMachineStatus(self.lastStatusStr)
           # self.lastMachineStatusReceptionTimestamp
@@ -171,8 +222,32 @@ class Grbl:
       elif line[:5] == "[MSG:":
         self.lastMessage = line[5:-1]
 
-      if not isStatus:
+      # User-defined startup line
+      elif line[:2] == "$N":
+        pass
+
+      # Settings
+      elif line[:1] == "$":
+        components = line[1:].split('=')
+        setting = components[0]
+        value = components[1]
+        self.status['settings'][setting] = {
+          'desc': dict.settings[setting],
+          'val': value,
+        }
+        showLine = False
+        ui.log('<<<<< {:} ({:})'.format(line, dict.settings[setting]), color='comms.recv')
+
+      # Display
+      if showLine:
         ui.log('<<<<< {:}'.format(line), color='comms.recv')
+
+      if errorCode:
+        ui.log('ERROR [{:}]: {:}'.format(errorCode, dict.errors[errorCode]), color='ui.errorMsg')
+
+      if isAlarm:
+        ui.log('ALARM [{:}]: {:}'.format(self.alarm, self.getAlarm()), color='ui.errorMsg')
+
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -226,13 +301,13 @@ class Grbl:
       elif paramName == 'Ln':
         self.status[paramName] = {
           'desc': 'lineNumber',
-          'value': paramValue
+          'val': paramValue
         }
 
       elif paramName == 'F':
         self.status[paramName] = {
           'desc': 'feed',
-          'value': int(paramValue)
+          'val': int(paramValue)
         }
 
       elif paramName == 'FS':
@@ -242,18 +317,18 @@ class Grbl:
 
         self.status['F'] = {
           'desc': 'feed',
-          'value': int(feed)
+          'val': int(feed)
         }
 
         self.status['S'] = {
           'desc': 'speed',
-          'value': int(speed)
+          'val': int(speed)
         }
 
       elif paramName == 'Pn':
         self.status[paramName] = {
           'desc': 'inputPinState',
-          'value': paramValue
+          'val': paramValue
         }
 
       elif paramName == 'Ov':
@@ -271,13 +346,13 @@ class Grbl:
       elif paramName == 'A':
         self.status[paramName] = {
           'desc': 'accesoryState',
-          'value': paramValue
+          'val': paramValue
         }
 
       else:
         self.status[paramName] = {
           'desc': 'UNKNOWN',
-          'value': paramValue
+          'val': paramValue
         }
 
 
@@ -299,7 +374,7 @@ class Grbl:
     startTime = time.time()
 
     while( (time.time() - startTime) < self.spCfg['responseTimeout'] ):
-      self.process()
+      self.sleep(WAITRESPONSE_SLEEP)
       if not self.waitingMachineStatus:
         ui.log('Successfully received machine status', v='DEBUG')
         break
@@ -316,7 +391,6 @@ class Grbl:
   def sendCommand(self, command, responseTimeout=None, verbose='BASIC'):
     ''' Send a command
     '''
-
     self.sp.sendCommand(command)
     return self.readResponse(responseTimeout=responseTimeout,verbose=verbose)
 
@@ -336,7 +410,7 @@ class Grbl:
     self.waitingResponse = True
 
     while (time.time() - startTime) < responseTimeout:
-      self.process()
+      self.sleep(WAITRESPONSE_SLEEP)
       if not self.waitingResponse:
         ui.log(  'readResponse() - Successfully received {:d} data lines from serial'.format(
           len(self.response)), v='SUPER')
@@ -354,9 +428,9 @@ class Grbl:
   def getSimpleMachineStatusStr(self):
     ''' TODO: comment
     '''
-    return '[{:}] - MPos {:}'.format(
+    return '[{:}] - WPos[{:}]'.format(
       self.getColoredMachineStateStr(),
-      self.getMachinePosStr()
+      self.getWorkPosStr()
     )
 
 
@@ -387,27 +461,27 @@ class Grbl:
   def getWorkPosStr(self):
     ''' TODO: comment
     '''
-    wPos = self.status['WPos'] if 'WPos' in self.status else None
-    return ui.xyzStr(wPos['x'], wPos['y'], wPos['z']) if wPos else '<NONE>'
-
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def getSoftwarePosStr(self):
-    ''' TODO: comment
-    '''
     return ui.xyzStr(
-      self.status['WCO']['x'],
-      self.status['WCO']['y'],
-      self.status['WCO']['z'])
+      self.status['MPos']['x'] - self.status['WCO']['x'],
+      self.status['MPos']['y'] - self.status['WCO']['y'],
+      self.status['MPos']['z'] - self.status['WCO']['z'])
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def refreshSoftwarePos(self):
+  def getMessage(self):
     ''' TODO: comment
     '''
-    tbl.setX(self.status['MPos']['x'])
-    tbl.setY(self.status['MPos']['y'])
-    tbl.setZ(self.status['MPos']['z'])
+    return self.lastMessage
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getAlarm(self):
+    ''' TODO: comment
+    '''
+    if self.alarm:
+      return dict.alarms[self.alarm]
+    else:
+      return ''
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -417,28 +491,36 @@ class Grbl:
     ui.log('Waiting for machine operation to finish...', v='SUPER')
     self.queryMachineStatus()
     while self.waitingMachineStatus:
-      self.process()
+      self.sleep(WAITRESPONSE_SLEEP)
 
     showStatus = ((verbose != 'NONE') and (ui.getVerboseLevel() >= ui.getVerboseLevelIndex(verbose)))
-    showedOnce = False
+    currPosShown = False
+
+    def showCurrentPosition():
+      ui.clearLine()
+      stateStr = self.getColoredMachineStateStr()
+      posStr = 'W[{:}] M[{:}] F[{:}]'.format(
+        self.getWorkPosStr(),
+        self.getMachinePosStr(),
+        self.status['F']['val']
+        )
+      posStr = ui.setStrColor(posStr, 'ui.onlineMachinePos')
+      displayStr = '[{:}] {:}'.format(
+        stateStr,
+        posStr
+        )
+      ui.log('\r{:}'.format(displayStr), end='')
 
     # Valid states types: Idle, Run, Hold, Jog, Alarm, Door, Check, Home, Sleep
     while self.status['machineState'] == 'Run':
       self.queryMachineStatus()
       if showStatus:
-        ui.clearLine()
-        coloredMachineStatusStr = ui.setStrColor(self.lastStatusStr, 'ui.onlineMachineStatus')
-        ui.log('\r[{:}] {:}'.format(self.getColoredMachineStateStr(), coloredMachineStatusStr), end='')
-        showedOnce = True
-      self.process()
+        showCurrentPosition()
+        currPosShown = True
+      self.sleep(WAITRESPONSE_SLEEP)
 
-    if showedOnce:
-      if showStatus:
-        ui.clearLine()
-        coloredMachineStatusStr = ui.setStrColor(self.lastStatusStr, 'ui.onlineMachineStatus')
-        ui.log('\r[{:}] {:}'.format(self.getColoredMachineStateStr(), coloredMachineStatusStr), end='')
-
-      ui.log(' - SPos {:}'.format(self.getSoftwarePosStr()), v=verbose)
+    if currPosShown:
+      showCurrentPosition()
 
     ui.log('Machine operation finished', v='SUPER')
 
