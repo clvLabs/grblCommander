@@ -153,40 +153,40 @@ def processUserInput():
   key = kb.readKey()
   char=chr(key)
 
-  if(key == 0):  # Combined code 0+x
+  if(key == kb.COMBO_0X):  # Combined code 0+x
     key = kb.readKey()
     char=chr(key)
 
     if(key == 999999):
       pass
-    elif(key == 59): # <F1>
+    elif(key == kb.F1):
       if mcrCfg['hotKeys']['F1']:
         mcr.run(mcrCfg['hotKeys']['F1'], silent=True)
-    elif(key == 60): # <F2>
+    elif(key == kb.F2):
       if mcrCfg['hotKeys']['F2']:
         mcr.run(mcrCfg['hotKeys']['F2'], silent=True)
-    elif(key == 61): # <F3>
+    elif(key == kb.F3):
       if mcrCfg['hotKeys']['F3']:
         mcr.run(mcrCfg['hotKeys']['F3'], silent=True)
-    elif(key == 62): # <F4>
+    elif(key == kb.F4):
       if mcrCfg['hotKeys']['F4']:
         mcr.run(mcrCfg['hotKeys']['F4'], silent=True)
-    elif(key == 63): # <F5>
+    elif(key == kb.F5):
       if mcrCfg['hotKeys']['F5']:
         mcr.run(mcrCfg['hotKeys']['F5'], silent=True)
-    elif(key == 64): # <F6>
+    elif(key == kb.F6):
       if mcrCfg['hotKeys']['F6']:
         mcr.run(mcrCfg['hotKeys']['F6'], silent=True)
-    elif(key == 65): # <F7>
+    elif(key == kb.F7):
       if mcrCfg['hotKeys']['F7']:
         mcr.run(mcrCfg['hotKeys']['F7'], silent=True)
-    elif(key == 66): # <F8>
+    elif(key == kb.F8):
       if mcrCfg['hotKeys']['F8']:
         mcr.run(mcrCfg['hotKeys']['F8'], silent=True)
-    elif(key == 67): # <F9>
+    elif(key == kb.F9):
       if mcrCfg['hotKeys']['F9']:
         mcr.run(mcrCfg['hotKeys']['F9'], silent=True)
-    elif(key == 68): # <F10>
+    elif(key == kb.F10):
       if mcrCfg['hotKeys']['F10']:
         mcr.run(mcrCfg['hotKeys']['F10'], silent=True)
 
@@ -198,15 +198,15 @@ def processUserInput():
         pass
         #ui.keyPressMessage('Unknown command', key, char)
 
-  elif(key == 224):  # Combined code 224+x
+  elif(key == kb.COMBO_224X):  # Combined code 224+x
     key = kb.readKey()
     char=chr(key)
 
     if(key == 999999):
       pass
-    elif(key == 134): # <F12>
       ui.keyPressMessage('<F12> - Copy MPos to SPos', key, char)
       mch.refreshSoftwarePos()
+    elif(key == kb.F12):
 
     else:  # Rest of keys
       processed = False
@@ -468,7 +468,6 @@ def processUserInput():
       ui.keyPressMessage('- - Set rapid increment (XY)-', key, char)
       tbl.changeRI_XY(-1)
 
-    elif(key in [24, 25]):  # <CTRL>x/y
       ui.keyPressMessage('<CTRL>x/y - Set rapid increment (XY)', key, char)
       tbl.setRI_XY(
         ui.getUserInput(
@@ -476,6 +475,7 @@ def processUserInput():
           float,
           tbl.getRI_XY()))
       showMachineStatus()
+    # elif(key in [kb.CTRL_X, kb.CTRL_Y]):
 
     elif(char == 'Z'):
       ui.keyPressMessage('Z - Set rapid increment (Z)+', key, char)
@@ -485,7 +485,7 @@ def processUserInput():
       ui.keyPressMessage('z - Set rapid increment (Z)-', key, char)
       tbl.changeRI_Z(-1)
 
-    elif(key == 26):  # <CTRL>z
+    elif(key == kb.CTRL_Z):
       ui.keyPressMessage('<CTRL>z - Set rapid increment (Z)', key, char)
       tbl.setRI_Z(
         ui.getUserInput(
