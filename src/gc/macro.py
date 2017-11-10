@@ -29,6 +29,7 @@ gGRBL = None
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def setGrbl(grbl):
+  global gGRBL
   gGRBL = grbl
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -215,9 +216,9 @@ def _run(name, silent=False, isSubCall=False):
           ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
           return False
       else:
-        grbl.sendCommand(cmdName)
+        gGRBL.sendCommand(cmdName)
         if not silent:
-          grbl.waitForMachineIdle()
+          gGRBL.waitForMachineIdle()
 
     if kb.keyPressed():
       if kb.readKey() == 27:  # <ESC>
