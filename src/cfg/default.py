@@ -71,33 +71,34 @@ cfg = {
   # ---[Interface configuration]--------------------------------------
   'ui': {
     'verboseLevel': 'WARNING',
-    'maxLineLen': 80,
+    'maxLineLen': 100,
     'clearScreenLines': 100,
     'inputTitleWidth': 45,
-    'readyMsg': '==================[ Ready ]==================',
-    'coordFormat': '{:.3f}',
-    'xyzFormat': '[{:}/{:}/{:}]',
+    'readyMsg': '===========[ Ready ]===========',
+    'coordFormat': '{:8.3f}',
+    'xyzFormat': '{:}/{:}/{:}',
     'msgSeparatorChar': '-',
     'titleSeparatorChar': '-',
     'blockSeparatorChar': '*',
 
     'colors': {
       'ui': {
-        '':                     'white',    # Default
-        'title':                'white+',
-        'subtitle':             'white+',
-        'header':               'cyan+',
-        'onlineMachineStatus':  'yellow+',
-        'info':                 'white',
-        'msg':                  'yellow+',
-        'keyPressMsg':          'cyan+',
-        'readyMsg':             'yellow+, magenta',
-        'inputMsg':             'yellow+, magenta',
-        'errorMsg':             'yellow+, red',
-        'cancelMsg':            'white+, red',
-        'confirmMsg':           'magenta+',
-        'finishedMsg':          'white+, green',
-        'waiting':              'cyan+',
+        '':                  'white',    # Default
+        'title':             'white+',
+        'subtitle':          'white+',
+        'header':            'cyan+',
+        'onlineMachinePos':  'yellow+',
+        'info':              'white',
+        'msg':               'yellow+',
+        'keyPressMsg':       'cyan+',
+        'readyMsg':          'yellow+, magenta',
+        'inputMsg':          'yellow+, magenta',
+        'successMsg':        'green+',
+        'errorMsg':          'yellow+, red',
+        'cancelMsg':         'white+, red',
+        'confirmMsg':        'magenta+',
+        'finishedMsg':       'white+, green',
+        'waiting':           'cyan+',
       },
 
       'macro': {
