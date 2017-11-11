@@ -166,7 +166,7 @@ modalGroups = {
   'feed': {
     'F': 'feedRate',
   },
-  'spindleSpeed': {
+  'speed': {
     'S': 'RPM',
   },
 }
