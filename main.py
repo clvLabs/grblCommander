@@ -74,8 +74,8 @@ def showHelp():
   <numpad>   - Relative rapid (XY) (including diagonals)
   -+         - Relative rapid (Z) (up/down)
 
-  0          - Safe go to X0Y0Z0
   .          - Absolute rapid (XY) to table position (submenu)
+  0               - Safe go to machine home
 
   Settings
   ---------------------------------------------------------------------
@@ -330,9 +330,9 @@ def processUserInput():
       mch.rapidRelative(x=0,y=0,z=gZJog*-1)
 
     elif(char == '0'):
-      ui.keyPressMessage('0 - Safe go to X0Y0Z0', key, char)
-      ui.log('TEMPORARILY DISABLED', c='ui.msg')
-      # mch.rapidAbsolute(x=0,y=0,z=0)
+      ui.keyPressMessage('0 - Safe go to machine home', key, char)
+      mch.goToMachineHome_Z()
+      mch.goToMachineHome_XY()
 
     elif(char == '1'):
       ui.keyPressMessage('1 - Relative rapid - [DL]', key, char)

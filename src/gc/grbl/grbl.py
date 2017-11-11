@@ -640,12 +640,46 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def rapidAbsolute(self,x=None, y=None, z=None, verbose='WARNING'):
+  def goToMachineHome_Z(self):
+    ''' TODO: comment
+    '''
+    # '27': "Homing switch pull-off distance, millimeters"
+    pullOff = float(self.status['settings']['27']['val'])
+
+    self.rapidAbsolute(z=pullOff*-1, machineCoords=True)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def goToMachineHome_XY(self):
+    ''' TODO: comment
+    '''
+    # '27': "Homing switch pull-off distance, millimeters"
+    pullOff = float(self.status['settings']['27']['val'])
+
+    self.rapidAbsolute(x=pullOff*-1, y=pullOff*-1, machineCoords=True)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def translateToMachinePos(self,coordName,val):
+    ''' Translate a WCO coordinate into MPos
+    '''
+    if val is None:
+      return None
+
+    return val - ( float(self.status['WCO'][coordName]) )
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def rapidAbsolute(self,x=None, y=None, z=None, machineCoords=False, verbose='WARNING'):
     ''' TODO: comment
     '''
     cmd = 'G0 '
 
-    if( x != None ):
+    if machineCoords:
+      x = self.translateToMachinePos('x', x)
+      y = self.translateToMachinePos('y', y)
+      z = self.translateToMachinePos('z', z)
+
       cmd += 'X{:} '.format(ui.coordStr(x))
 
     if( y != None ):
