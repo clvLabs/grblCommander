@@ -320,7 +320,13 @@ def processUserInput():
       ui.keyPressMessage('gG$ - Send raw GCode command', key, char)
       ui.inputMsg('Enter GCode command...')
       userCommand = char + input(char)
-      mch.sendCommand(userCommand)
+
+      # Special case for homing ($H)
+      responseTimeout=None
+      if userCommand.rstrip(' ').upper() == '$H':
+        responseTimeout=float(mchCfg['homingTimeout'])
+
+      mch.sendCommand(userCommand, responseTimeout=responseTimeout)
       mch.waitForMachineIdle()
 
     elif(char == 's'):

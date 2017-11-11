@@ -34,6 +34,7 @@ cfg = {
     'zJogMm': 3.0,
     'seekSpeed': 2000,
     'feedSpeed': 50,
+    'homingTimeout': 20,
   },
 
   # ---[Macro configuration]--------------------------------------
