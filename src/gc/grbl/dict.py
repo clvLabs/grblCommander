@@ -121,3 +121,52 @@ options = {
   'W': "Force sync upon work coordinate offset change",
   'L': "Homing initialization auto-lock",
 }
+
+# See: https://www.shapeoko.com/wiki/index.php/G-Code
+# [GC:G1 G54 G17 G21 G90 G94 M5 M9 T0 F400 S0]
+modalGroups = {
+  'motion': {
+    'G0': 'rapid',
+    'G1': 'linear',
+  },
+  'wcs': {
+    'G54': '1(G54)',
+    'G55': '2(G55)',
+    'G56': '3(G56)',
+    'G57': '4(G57)',
+    'G58': '5(G58)',
+    'G59': '6(G59)',
+  },
+  'plane': {
+    'G17': 'XY',
+    'G18': 'XZ',
+    'G19': 'YZ',
+  },
+  'units': {
+    'G20': 'inches',
+    'G21': 'mm',
+  },
+  'distanceMode': {
+    'G90': 'absolute',
+    'G91': 'incremental',
+  },
+  'feedRateMode': {
+    'G93': 'inverseTime',
+    'G94': 'unitsPerMinute',
+  },
+  'spindle': {
+    'M3': 'clockwise',
+    'M4': 'counterClockwise',
+    'M5': 'off',
+  },
+  'coolant': {
+    'M8': 'on',
+    'M9': 'off',
+  },
+  'feed': {
+    'F': 'feedRate',
+  },
+  'spindleSpeed': {
+    'S': 'RPM',
+  },
+}
