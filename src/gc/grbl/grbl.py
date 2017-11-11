@@ -459,6 +459,21 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getWorkCoordinatesStr(self):
+    ''' TODO: comment
+    '''
+    wco = self.status['WCO'] if 'WCO' in self.status else None
+
+    if not wco:
+      return '<NONE>'
+
+    return ui.xyzStr(
+      wco['x'],
+      wco['y'],
+      wco['z'])
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getMachinePosStr(self):
     ''' TODO: comment
     '''
