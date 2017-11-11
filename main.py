@@ -40,7 +40,7 @@ gMAX_Y = mchCfg['max']['Y']
 gMIN_Z = 0.0
 gMAX_Z = mchCfg['max']['Z']
 
-# Rapid Increment
+# Jog distance
 gXYJog = mchCfg['xyJogMm']
 gZJog = mchCfg['zJogMm']
 
@@ -69,18 +69,20 @@ def showHelp():
   mM         - Macro (submenu)
   tT         - Tests (submenu)
 
-  Rapids
+  Jog
   ---------------------------------------------------------------------
-  <numpad>   - Relative rapid (XY) (including diagonals)
-  -+         - Relative rapid (Z) (up/down)
+  <numpad>        - XY jog (including diagonals)
+  SHIFT+<numpad>  - XY jog (double distance)
+  CTRL+<numpad>   - XY jog (half distance)
+  -+              - Z jog (up/down)
 
-  .          - Absolute rapid (XY) to table position (submenu)
   0               - Safe go to machine home
+  .               - Absolute rapid (XY) to table position (submenu)
 
   Settings
   ---------------------------------------------------------------------
-  xX         - Set rapid increment (XY)
-  zZ         - Set rapid increment (Z)
+  xX         - Set jog distance (XY)
+  zZ         - Set jog distance (Z)
   vV         - Set verbose level (-/+) (loop)
   """)
 
@@ -164,6 +166,71 @@ def processUserInput():
     elif(key == kb.F10):
       if mcrCfg['hotKeys']['F10']:
         mcr.run(mcrCfg['hotKeys']['F10'], silent=True)
+
+    elif(key == kb.KP_END):
+      ui.keyPressMessage('End - Jog - [DL] [*2]', key, char)
+      mch.rapidRelative(x=gXYJog*-2,y=gXYJog*-2)
+
+    elif(key == kb.KP_DOWN):
+      ui.keyPressMessage('Down - Jog - [D] [*2]', key, char)
+      mch.rapidRelative(y=gXYJog*-2)
+
+    elif(key == kb.KP_PGDN):
+      ui.keyPressMessage('Pgdn - Jog - [DR] [*2]', key, char)
+      mch.rapidRelative(x=gXYJog*2,y=gXYJog*-2)
+
+    elif(key == kb.KP_LEFT):
+      ui.keyPressMessage('Left - Jog - [L] [*2]', key, char)
+      mch.rapidRelative(x=gXYJog*-2)
+
+    elif(key == kb.KP_RIGHT):
+      ui.keyPressMessage('Right - Jog - [R] [*2]', key, char)
+      mch.rapidRelative(x=gXYJog*2)
+
+    elif(key == kb.KP_HOME):
+      ui.keyPressMessage('Home - Jog - [UL] [*2]', key, char)
+      mch.rapidRelative(x=gXYJog*-2,y=gXYJog*2)
+
+    elif(key == kb.KP_UP):
+      ui.keyPressMessage('Up - Jog - [U] [*2]', key, char)
+      mch.rapidRelative(y=gXYJog*2)
+
+    elif(key == kb.KP_PGUP):
+      ui.keyPressMessage('Pgup - Jog - [UR] [*2]', key, char)
+      mch.rapidRelative(x=gXYJog*2,y=gXYJog*2)
+
+
+    elif(key == kb.CTRL_KP_END):
+      ui.keyPressMessage('End - Jog - [DL] [/2]', key, char)
+      mch.rapidRelative(x=(gXYJog/2)*-1,y=(gXYJog/2)*-1)
+
+    elif(key == kb.CTRL_KP_DOWN):
+      ui.keyPressMessage('Down - Jog - [D] [/2]', key, char)
+      mch.rapidRelative(y=(gXYJog/2)*-1)
+
+    elif(key == kb.CTRL_KP_PGDN):
+      ui.keyPressMessage('Pgdn - Jog - [DR] [/2]', key, char)
+      mch.rapidRelative(x=gXYJog/2,y=(gXYJog/2)*-1)
+
+    elif(key == kb.CTRL_KP_LEFT):
+      ui.keyPressMessage('Left - Jog - [L] [/2]', key, char)
+      mch.rapidRelative(x=(gXYJog/2)*-1)
+
+    elif(key == kb.CTRL_KP_RIGHT):
+      ui.keyPressMessage('Right - Jog - [R] [/2]', key, char)
+      mch.rapidRelative(x=gXYJog/2)
+
+    elif(key == kb.CTRL_KP_HOME):
+      ui.keyPressMessage('Home - Jog - [UL] [/2]', key, char)
+      mch.rapidRelative(x=(gXYJog/2)*-1,y=gXYJog/2)
+
+    elif(key == kb.CTRL_KP_UP):
+      ui.keyPressMessage('Up - Jog - [U] [/2]', key, char)
+      mch.rapidRelative(y=gXYJog/2)
+
+    elif(key == kb.CTRL_KP_PGUP):
+      ui.keyPressMessage('Pgup - Jog - [UR] [/2]', key, char)
+      mch.rapidRelative(x=gXYJog/2,y=gXYJog/2)
 
     else:  # Rest of keys
       processed = False
@@ -322,11 +389,11 @@ def processUserInput():
         ui.keyPressMessage('Unknown command', key, char)
 
     elif(char == '-'):
-      ui.keyPressMessage('- - Relative rapid (Z) up', key, char)
+      ui.keyPressMessage('- - Jog (Z) up', key, char)
       mch.rapidRelative(x=0,y=0,z=gZJog)
 
     elif(char == '+'):
-      ui.keyPressMessage('+ - Relative rapid (Z) down', key, char)
+      ui.keyPressMessage('+ - Jog (Z) down', key, char)
       mch.rapidRelative(x=0,y=0,z=gZJog*-1)
 
     elif(char == '0'):
@@ -335,35 +402,35 @@ def processUserInput():
       mch.goToMachineHome_XY()
 
     elif(char == '1'):
-      ui.keyPressMessage('1 - Relative rapid - [DL]', key, char)
+      ui.keyPressMessage('1 - Jog - [DL]', key, char)
       mch.rapidRelative(x=gXYJog*-1,y=gXYJog*-1)
 
     elif(char == '2'):
-      ui.keyPressMessage('2 - Relative rapid - [D]', key, char)
+      ui.keyPressMessage('2 - Jog - [D]', key, char)
       mch.rapidRelative(y=gXYJog*-1)
 
     elif(char == '3'):
-      ui.keyPressMessage('3 - Relative rapid - [DR]', key, char)
+      ui.keyPressMessage('3 - Jog - [DR]', key, char)
       mch.rapidRelative(x=gXYJog,y=gXYJog*-1)
 
     elif(char == '4'):
-      ui.keyPressMessage('4 - Relative rapid - [L]', key, char)
+      ui.keyPressMessage('4 - Jog - [L]', key, char)
       mch.rapidRelative(x=gXYJog*-1)
 
     elif(char == '6'):
-      ui.keyPressMessage('6 - Relative rapid - [R]', key, char)
+      ui.keyPressMessage('6 - Jog - [R]', key, char)
       mch.rapidRelative(x=gXYJog)
 
     elif(char == '7'):
-      ui.keyPressMessage('7 - Relative rapid - [UL]', key, char)
+      ui.keyPressMessage('7 - Jog - [UL]', key, char)
       mch.rapidRelative(x=gXYJog*-1,y=gXYJog)
 
     elif(char == '8'):
-      ui.keyPressMessage('8 - Relative rapid - [U]', key, char)
+      ui.keyPressMessage('8 - Jog - [U]', key, char)
       mch.rapidRelative(y=gXYJog)
 
     elif(char == '9'):
-      ui.keyPressMessage('9 - Relative rapid - [UR]', key, char)
+      ui.keyPressMessage('9 - Jog - [UR]', key, char)
       mch.rapidRelative(x=gXYJog,y=gXYJog)
 
     elif(char == '.'):
@@ -442,19 +509,19 @@ def processUserInput():
         ui.keyPressMessage('Unknown command', key, char)
 
     elif(char in 'xX'):
-      ui.keyPressMessage('xX - Set rapid increment (XY)', key, char)
+      ui.keyPressMessage('xX - Set jog distance (XY)', key, char)
       global gXYJog
       gXYJog = ui.getUserInput(
-        'Increment ({:})'.format(gXYJog),
+        'Distance ({:})'.format(gXYJog),
         float,
         gXYJog)
       showMachineStatus()
 
     elif(char in 'zZ'):
-      ui.keyPressMessage('<CTRL>z - Set rapid increment (Z)', key, char)
+      ui.keyPressMessage('<CTRL>z - Set jog distance (Z)', key, char)
       global gZJog
       gZJog = ui.getUserInput(
-        'Increment ({:})'.format(gZJog),
+        'Distance ({:})'.format(gZJog),
         float,
         gZJog)
       showMachineStatus()
