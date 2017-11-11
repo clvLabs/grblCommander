@@ -179,6 +179,8 @@ def processUserInput():
 
     if(key == 999999):
       pass
+    elif(key == kb.F11):
+      pass
     elif(key == kb.F12):
       pass
 
