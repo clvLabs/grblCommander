@@ -246,7 +246,7 @@ class Grbl:
         ui.log('ERROR [{:}]: {:}'.format(errorCode, dict.errors[errorCode]), color='ui.errorMsg')
 
       if isAlarm:
-        ui.log('ALARM [{:}]: {:}'.format(self.alarm, self.getAlarm()), color='ui.errorMsg')
+        ui.log('ALARM [{:}]: {:}'.format(self.alarm, self.getAlarmStr()), color='ui.errorMsg')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -477,14 +477,14 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def getMessage(self):
+  def getLastMessage(self):
     ''' TODO: comment
     '''
     return self.lastMessage
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def getAlarm(self):
+  def getAlarmStr(self):
     ''' TODO: comment
     '''
     if self.alarm:

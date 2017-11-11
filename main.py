@@ -104,8 +104,8 @@ def showMachineStatus():
   VerboseLevel      = {:d}/{:d} ({:s})
   """.format(
       mch.getColoredMachineStateStr(),
-      ui.setStrColor(mch.getAlarm(), 'ui.errorMsg'),
-      ui.setStrColor(mch.getMessage(), 'ui.msg'),
+      ui.setStrColor(mch.getAlarmStr(), 'ui.errorMsg'),
+      ui.setStrColor(mch.getLastMessage(), 'ui.msg'),
       mch.getMachinePosStr(),
       mch.getWorkPosStr(),
       ui.coordStr(gXYJog),
