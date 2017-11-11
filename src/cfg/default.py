@@ -30,8 +30,8 @@ cfg = {
       'Y': 280.0,            # Change to fit your machine
       'Z': 80.0,             # Change to fit your machine
     },
-    'xyJogMm': 25.0,
-    'zJogMm': 10.0,
+    'xyJogMm': 10.0,
+    'zJogMm': 3.0,
     'seekSpeed': 2000,
     'feedSpeed': 50,
   },
