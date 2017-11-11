@@ -49,7 +49,10 @@ class Grbl:
     self.lastMessage = ''
     self.alarm = ''
     self.status = {
-      'settings': {}
+      'settings': {},
+      'MPos': {'x':0, 'y':0, 'z':0},
+      'WPos': {'x':0, 'y':0, 'z':0},
+      'WCO': {'x':0, 'y':0, 'z':0},
     }
 
     self.sp = serialport.SerialPort(cfg)
@@ -280,10 +283,23 @@ class Grbl:
           'z':z
         }
 
+        # From: https://github.com/gnea/grbl/wiki/Grbl-v1.1-Interface
+        #  If WPos: is given, use MPos = WPos + WCO.
+        #  If MPos: is given, use WPos = MPos - WCO.
         if paramName == 'MPos':
           self.status[paramName]['desc'] = 'machinePos'
+          self.status['WPos'] = {
+            'x': self.status[paramName]['x'] - self.status['WCO']['x'],
+            'y': self.status[paramName]['y'] - self.status['WCO']['y'],
+            'z': self.status[paramName]['z'] - self.status['WCO']['z']
+          }
         elif paramName == 'WPos':
           self.status[paramName]['desc'] = 'workPos'
+          self.status['MPos'] = {
+            'x': self.status[paramName]['x'] + self.status['WCO']['x'],
+            'y': self.status[paramName]['y'] + self.status['WCO']['y'],
+            'z': self.status[paramName]['z'] + self.status['WCO']['z']
+          }
         elif paramName == 'WCO':
           self.status[paramName]['desc'] = 'workCoordinates'
 
