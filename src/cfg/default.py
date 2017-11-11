@@ -33,7 +33,7 @@ cfg = {
     'xyJogMm': 10.0,
     'zJogMm': 3.0,
     'seekSpeed': 2000,
-    'feedSpeed': 50,
+    'feedSpeed': 400,
     'homingTimeout': 20,
   },
 

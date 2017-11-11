@@ -687,7 +687,7 @@ class Test:
 
     def drill():
       sendCmd('G0 Z1.5')
-      sendCmd('G1 Z0 F400')
+      sendCmd('G1 Z0 F200')
       goToSafeZ()
 
     # - [Main process]- - - - - - - - - - - - - - - - - -
