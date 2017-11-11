@@ -18,10 +18,11 @@ from . import dict
 
 # ------------------------------------------------------------------
 # Constants
-GRBL_SOFT_RESET = 24
+GRBL_SOFT_RESET = '%c' % 24
 GRBL_QUERY_MACHINE_STATUS = '?'
+GRBL_QUERY_GCODE_PARSER_STATE = '$G\n'
 
-STATUSQUERY_INTERVAL = 5
+PERIODIC_QUERY_INTERVAL = 2
 PROCESS_SLEEP = 0.05
 WAITIDLE_SLEEP = 0.15
 WAITSTARTUP_TIME = 2
@@ -45,20 +46,25 @@ class Grbl:
     self.waitingStartup = True
     self.waitingResponse = False
     self.response = []
-    self.lastStatusQuery = 0
+    self.lastMachineStatusQuery = 0
+    self.lastParserStateQuery = 0
     self.statusQuerySent = False
     self.waitingMachineStatus = False
-    self.lastStatusStr = ''
+    self.showNextMachineStatus = True
+    ui.log('[DBG] showNextMachineStatus = True (init)',c='red+',v='DETAIL')
+    self.showNextParserState = True
+    self.ignoreNextLine = False
     self.lastMessage = ''
     self.alarm = ''
     self.status = {
+      'str': '',
+      'MPos': {'desc':'machinePos', 'x':0, 'y':0, 'z':0},
+      'WPos': {'desc':'workPos', 'x':0, 'y':0, 'z':0},
+      'WCO': {'desc':'workCoords', 'x':0, 'y':0, 'z':0},
       'settings': {},
       'parserState': {
         'str': '',
       },
-      'MPos': {'desc':'machinePos', 'x':0, 'y':0, 'z':0},
-      'WPos': {'desc':'workPos', 'x':0, 'y':0, 'z':0},
-      'WCO': {'desc':'workCoords', 'x':0, 'y':0, 'z':0},
     }
 
     self.sp = serialport.SerialPort(cfg)
@@ -113,7 +119,7 @@ class Grbl:
       ui.log('Startup message received, machine ready', color='ui.successMsg')
       ui.log()
     else:
-      self.lastStatusStr = ''
+      self.status['str'] = ''
       ui.log('TIMEOUT Waiting for startup', v='WARNING')
       ui.log()
 
@@ -136,7 +142,7 @@ class Grbl:
   def softReset(self):
     ''' grblShield soft reset
     '''
-    self.sp.write('%c' % GRBL_SOFT_RESET)
+    self.sp.write(GRBL_SOFT_RESET)
     self.waitForStartup()
 
 
@@ -168,22 +174,31 @@ class Grbl:
     # Manage alarm state
     if self.alarm:
       ui.log('Alarm detected, resetting wait flags', c='ui.msg', v='DETAIL')
-      if self.waitingResponse:
-        self.waitingResponse = False
-      if self.waitingMachineStatus:
-        self.waitingMachineStatus = False
+      self.waitingResponse = False
+      self.waitingMachineStatus = False
 
     # Automatic periodic status queries
-    sendQuery = False
+    sendStatusQuery = False
 
     if self.waitingMachineStatus and not self.statusQuerySent:
-      sendQuery = True
+      sendStatusQuery = True
 
-    if (time.time() - self.lastStatusQuery) > STATUSQUERY_INTERVAL:
-      sendQuery = True
+    if (time.time() - self.lastMachineStatusQuery) > PERIODIC_QUERY_INTERVAL:
+      sendStatusQuery = True
 
-    if sendQuery:
+    if sendStatusQuery:
       self.queryMachineStatus()
+      self.showNextMachineStatus = False
+      ui.log('[DBG] showNextMachineStatus = False (periodicQuery)',c='red+',v='DETAIL')
+
+    sendParserStateQuery = False
+
+    if (time.time() - self.lastParserStateQuery) > PERIODIC_QUERY_INTERVAL:
+      sendParserStateQuery = True
+
+    if sendParserStateQuery:
+      self.queryGCodeParserState()
+      self.showNextParserState = False
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -191,6 +206,10 @@ class Grbl:
     ''' Parse a text line
     '''
     if line:
+      if self.ignoreNextLine:
+        self.ignoreNextLine = False
+        return
+
       originalLine = line
 
       if self.waitingResponse:
@@ -225,14 +244,16 @@ class Grbl:
       # Status
       if line[:1] == '<' and line[-1:] == '>':
         isStatus = True
-        showLine = False
+        if not self.showNextMachineStatus:
+          self.showNextMachineStatus = True
+          ui.log('[DBG] showNextMachineStatus = True (cancel@parse)',c='red+',v='DETAIL')
+          showLine = False
         try:
           self.parseMachineStatus(line)
-          self.lastStatusStr = line
+          self.status['str'] = line
           # self.lastMachineStatusReceptionTimestamp
-          if self.waitingMachineStatus:
-            self.waitingMachineStatus = False
-            self.statusQuerySent = False
+          self.waitingMachineStatus = False
+          self.statusQuerySent = False
         except:
           ui.log("UNKNOWN machine data [{:}]".format(line), color='ui.errorMsg', v='ERROR')
 
@@ -250,9 +271,16 @@ class Grbl:
 
       # gcode parser state
       elif line[:4] == "[GC:":
+        if not self.showNextParserState:
+          self.showNextParserState = True
+          showLine = False
+          self.ignoreNextLine = True
         parserState = line[4:-1]
         self.status['parserState']['str'] = parserState
         self.parseParserState(parserState)
+        # 'trick' to avoid showing the 'ok' for periodic calls
+        if self.waitingResponse:
+          self.waitingResponse = False
 
       # User-defined startup line
       elif line[:2] == "$N":
@@ -271,6 +299,12 @@ class Grbl:
         ui.log('<<<<< {:} ({:})'.format(line, self.dct.settings[setting]), color='comms.recv')
 
       # Display
+      if isResponse:
+        if self.waitingResponse:
+          self.waitingResponse = False
+        else:
+          ui.log('[WARNING] Unexpected machine response',c='ui.msg',v='DETAIL')
+
       if showLine:
         ui.log('<<<<< {:}'.format(originalLine), color='comms.recv')
 
@@ -281,12 +315,6 @@ class Grbl:
         ui.log('ALARM [{:}]: {:}'.format(self.alarm, self.getAlarmStr()), color='ui.errorMsg')
         if self.waitingResponse:
           self.waitingResponse = False
-
-      if isResponse:
-        if self.waitingResponse:
-          self.waitingResponse = False
-        else:
-          ui.log('[WARNING] Unexpected machine response',c='ui.msg',v='DETAIL')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -431,7 +459,20 @@ class Grbl:
     self.sp.write(GRBL_QUERY_MACHINE_STATUS)
     self.statusQuerySent = True
     self.waitingMachineStatus = True
-    self.lastStatusQuery = time.time()
+    self.lastMachineStatusQuery = time.time()
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def viewMachineStatus(self):
+    ''' TODO: comment
+    '''
+    ui.logTitle('Requesting machine status')
+    ui.log('Sending command [?]...', v='DETAIL')
+    self.sendCommand('?')
+    self.statusQuerySent = True
+    self.waitingMachineStatus = True
+    self.lastMachineStatusQuery = time.time()
+    ui.log()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -447,7 +488,6 @@ class Grbl:
     if not self.waitingMachineStatus:
       ui.log('Successfully received machine status', v='DEBUG')
     else:
-      self.lastStatusStr = ''
       ui.log('TIMEOUT Waiting for machine status', v='WARNING')
       self.waitingMachineStatus = False
       self.statusQuerySent = False
@@ -459,7 +499,18 @@ class Grbl:
   def sendCommand(self, command, responseTimeout=None, verbose='BASIC'):
     ''' Send a command
     '''
-    self.sp.sendCommand(command)
+    command = command.rstrip().rstrip('\n').rstrip('\r')
+    upperCommand = command.upper()
+
+    if upperCommand == '$G':
+      self.showNextParserState = True
+    elif upperCommand == '?':
+      self.showNextMachineStatus = True
+      ui.log('[DBG] showNextMachineStatus = True (MANUAL!)',c='red+',v='DETAIL')
+
+    ui.log('>>>>> {:}'.format(command), color='comms.send' ,v=verbose)
+    self.sp.write(command+'\n')
+
     return self.readResponse(responseTimeout=responseTimeout,verbose=verbose)
 
 
@@ -626,12 +677,22 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def queryGCodeParserState(self):
+    ''' TODO: comment
+    '''
+    ui.log('Querying gcode parser state...', v='DEBUG')
+    self.sp.write(GRBL_QUERY_GCODE_PARSER_STATE)
+    self.lastParserStateQuery = time.time()
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def viewGCodeParserState(self):
     ''' TODO: comment
     '''
     ui.logTitle('Requesting GCode parser state')
     ui.log('Sending command [$G]...', v='DETAIL')
     self.sendCommand('$G')
+    self.lastParserStateQuery = time.time()
     ui.log()
 
 

@@ -72,15 +72,6 @@ class SerialPort:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def sendCommand(self,command, responseTimeout=None, verbose='BASIC'):
-    ''' Send a command
-    '''
-    command = command.rstrip()
-    ui.log('>>>>> {:}'.format(command), color='comms.send' ,v=verbose)
-    self.write(command+'\n')
-
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def readline(self):
     ''' Read a text line
     '''
