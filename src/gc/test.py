@@ -471,12 +471,6 @@ def tableProbingScan():
   outFile.write('\n')
   outFile.write('TimeStamp: {:d}/{:02d}/{:02d} {:02d}:{:02d}:{:02d}\n'.format(t.tm_year,t.tm_mon,t.tm_mday,t.tm_hour,t.tm_min,t.tm_sec) )
   outFile.write('\n')
-  outFile.write(
-  """  Software config:
-    RapidIncrement_XY = {:.2f}
-    RapidIncrement_Z  = {:.2f}
-  """.format(tbl.getRI_XY(), tbl.getRI_Z()) )
-  outFile.write('\n')
 
   outFile.write('Test results (real Z):\n')
   outFile.write('----------------------\n')
