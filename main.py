@@ -289,7 +289,7 @@ def processUserInput():
 
     elif(char in '?'):
       ui.keyPressMessage('? - Force status re-query', key, char)
-      mch.queryMachineStatus()
+      mch.viewMachineStatus()
 
     elif(char in 'mM'):
       ui.keyPressMessage('mM - Macro', key, char)
