@@ -50,7 +50,7 @@ class Grbl:
     self.lastParserStateQuery = 0
     self.statusQuerySent = False
     self.waitingMachineStatus = False
-    self.showNextMachineStatus = True
+    self.showNextMachineStatus = False
     self.showNextParserState = True
     self.ignoreNextLine = False
     self.lastMessage = ''
@@ -243,7 +243,6 @@ class Grbl:
       if line[:1] == '<' and line[-1:] == '>':
         isStatus = True
         if not self.showNextMachineStatus:
-          self.showNextMachineStatus = True
           showLine = False
         try:
           self.parseMachineStatus(line)
