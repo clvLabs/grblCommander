@@ -74,7 +74,7 @@ cfg = {
     'maxLineLen': 100,
     'clearScreenLines': 100,
     'inputTitleWidth': 45,
-    'readyMsg': '===========[ Ready ]===========',
+    'readyMsg': '=======================[ Ready ]=======================',
     'coordFormat': '{:8.3f}',
     'xyzFormat': '{:}/{:}/{:}',
     'msgSeparatorChar': '-',

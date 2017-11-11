@@ -635,13 +635,13 @@ class Grbl:
 
     cmd = 'G1 '
 
-    if( x != None ):
+    if x != None:
       cmd += 'X{:} '.format(ui.coordStr(x))
 
-    if( y != None ):
+    if y != None:
       cmd += 'Y{:} '.format(ui.coordStr(y))
 
-    if( z != None ):
+    if z != None:
       cmd += 'Z{:} '.format(ui.coordStr(z))
 
     cmd += 'F{:} '.format(speed)
@@ -695,12 +695,13 @@ class Grbl:
       y = self.translateToMachinePos('y', y)
       z = self.translateToMachinePos('z', z)
 
+    if x != None:
       cmd += 'X{:} '.format(ui.coordStr(x))
 
-    if( y != None ):
+    if y != None:
       cmd += 'Y{:} '.format(ui.coordStr(y))
 
-    if( z != None ):
+    if z != None:
       cmd += 'Z{:} '.format(ui.coordStr(z))
 
     cmd = cmd.rstrip()
@@ -715,7 +716,7 @@ class Grbl:
   def rapidRelative(self,x=None, y=None, z=None, verbose='WARNING'):
     ''' TODO: comment
     '''
-    if( x is None and y is None and z is None ):
+    if x is None and y is None and z is None:
       ui.log('No parameters provided, doing nothing', v=verbose)
       return
 

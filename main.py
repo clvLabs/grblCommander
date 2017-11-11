@@ -57,14 +57,14 @@ def showHelp():
   """
   Available commands
   ---------------------------------------------------------------------
-  hH         - Show this help text
-  qQ         - Exit
+  qQ         - Quit
   rR         - Reset serial connection
   <CTRL>x    - grbl soft reset
-  cC         - Clear screen
-
   ?          - Force status re-query
-  sS         - Show current status (short/LONG)
+
+  cC         - Clear screen
+  hH         - Show this help text
+  s/S        - Show current status (short/LONG)
   gG$        - Send raw GCode command
   mM         - Macro (submenu)
   tT         - Tests (submenu)
@@ -74,10 +74,10 @@ def showHelp():
   <numpad>        - XY jog (including diagonals)
   SHIFT+<numpad>  - XY jog (double distance)
   CTRL+<numpad>   - XY jog (half distance)
-  -+              - Z jog (up/down)
+  <numpad>-/+     - Z jog (up/down)
 
-  0               - Safe go to machine home
-  .               - Absolute rapid (XY) to table position (submenu)
+  <numpad>0       - Safe go to machine home
+  <numpad>.       - Absolute rapid (XY) to table position (submenu)
 
   Settings
   ---------------------------------------------------------------------
@@ -264,7 +264,7 @@ def processUserInput():
   else:  # Standard keys
 
     if(char in 'qQ'):
-      ui.keyPressMessage('qQ - Exit', key, char)
+      ui.keyPressMessage('qQ - Quit', key, char)
       return False
 
     elif(char in 'hH'):
