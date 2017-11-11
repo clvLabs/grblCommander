@@ -60,6 +60,13 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getConfig(self):
+    ''' Get working configuration
+    '''
+    return self.cfg
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def start(self):
     ''' Start connection with grblShield
     '''

@@ -13,7 +13,7 @@ import src.gc.utils as ut
 import src.gc.ui as ui
 import src.gc.keyboard as kb
 import src.gc.grbl.grbl as grbl
-import src.gc.macro as mcr
+import src.gc.macro as macro
 import src.gc.test as test
 from src.gc.config import cfg, loadedCfg
 
@@ -28,7 +28,7 @@ gVERSION = '0.5.0'
 
 # grbl machine manager
 mch = grbl.Grbl(cfg)
-mcr.setGrbl(mch)
+mcr = macro.Macro(mch)
 
 # Table limits
 gMIN_X = 0.0
