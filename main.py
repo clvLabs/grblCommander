@@ -29,6 +29,7 @@ gVERSION = '0.5.0'
 # grbl machine manager
 mch = grbl.Grbl(cfg)
 mcr = macro.Macro(mch)
+tst = test.Test(mch)
 
 # Table limits
 gMIN_X = 0.0
@@ -371,27 +372,27 @@ def processUserInput():
 
       if(char in 'pP'):
         ui.keyPressMessage('pP - Point probe', key, char)
-        test.pointProbe()
+        tst.pointProbe()
 
       elif(char in 'tT'):
         ui.keyPressMessage('tT - Table probing scan', key, char)
-        test.tableProbingScan()
+        tst.tableProbingScan()
 
       elif(char in 'sS'):
         ui.keyPressMessage('sS - Table position scan', key, char)
-        test.tablePositionScan()
+        tst.tablePositionScan()
 
       elif(char in 'lL'):
         ui.keyPressMessage('lL - Base levelling holes', key, char)
-        test.baseLevelingHoles()
+        tst.baseLevelingHoles()
 
       elif(char in 'zZ'):
         ui.keyPressMessage('zZ - Zig-zag pattern', key, char)
-        test.zigZagPattern()
+        tst.zigZagPattern()
 
       elif(char == '*'):
         ui.keyPressMessage('* - DUMMY Test', key, char)
-        test.dummy()
+        tst.dummy()
 
       else:
         ui.keyPressMessage('Unknown command', key, char)
