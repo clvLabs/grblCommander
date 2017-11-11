@@ -170,3 +170,41 @@ modalGroups = {
     'S': 'RPM',
   },
 }
+
+# ------------------------------------------------------------------
+# Dict class
+
+class Dict:
+
+  def __init__(self):
+    ''' Construct a Dict object.
+    '''
+    self.errors = errors
+    self.alarms = alarms
+    self.settings = settings
+    self.options = options
+    self.modalGroups = modalGroups
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getModalGroup(self, command):
+    ''' Get modal group name for gcode command
+    '''
+    for groupName in self.modalGroups:
+      group = self.modalGroups[groupName]
+      if command in group:
+        return groupName
+
+    return ''
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getModalCommandName(self, command):
+    ''' Get modal group name for gcode command
+    '''
+    for groupName in self.modalGroups:
+      group = self.modalGroups[groupName]
+      if command in group:
+        return group[command]
+
+    return ''

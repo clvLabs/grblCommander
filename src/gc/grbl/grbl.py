@@ -40,6 +40,8 @@ class Grbl:
     self.mchCfg = cfg['machine']
     self.mcrCfg = cfg['macro']
 
+    self.dct = dict.Dict()
+
     self.waitingStartup = True
     self.waitingResponse = False
     self.response = []
@@ -253,18 +255,18 @@ class Grbl:
         setting = components[0]
         value = components[1]
         self.status['settings'][setting] = {
-          'desc': dict.settings[setting],
+          'desc': self.dct.settings[setting],
           'val': value,
         }
         showLine = False
-        ui.log('<<<<< {:} ({:})'.format(line, dict.settings[setting]), color='comms.recv')
+        ui.log('<<<<< {:} ({:})'.format(line, self.dct.settings[setting]), color='comms.recv')
 
       # Display
       if showLine:
         ui.log('<<<<< {:}'.format(originalLine), color='comms.recv')
 
       if errorCode:
-        ui.log('ERROR [{:}]: {:}'.format(errorCode, dict.errors[errorCode]), color='ui.errorMsg')
+        ui.log('ERROR [{:}]: {:}'.format(errorCode, self.dct.errors[errorCode]), color='ui.errorMsg')
 
       if isAlarm:
         ui.log('ALARM [{:}]: {:}'.format(self.alarm, self.getAlarmStr()), color='ui.errorMsg')
@@ -536,7 +538,7 @@ class Grbl:
     ''' TODO: comment
     '''
     if self.alarm:
-      return dict.alarms[self.alarm]
+      return self.dct.alarms[self.alarm]
     else:
       return ''
 
