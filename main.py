@@ -67,6 +67,7 @@ def showHelp():
   hH         - Show this help text
   s/S        - Show current status (short/LONG)
   gG$        - Send raw GCode command
+  @          - Show current status (FULL)
   mM         - Macro (submenu)
   tT         - Tests (submenu)
 
@@ -122,6 +123,20 @@ def showMachineStatus():
 def showMachineLongStatus():
   showMachineStatus()
   mcr.run(mcrCfg['machineLongStatus'], silent=True)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def showMachineFullStatus():
+  machineStatus=mch.getMachineStatus()
+
+  ui.logBlock(
+  """
+  Machine FULL status: [{:}]
+
+  {:s}
+  """.format(
+      mch.getColoredMachineStateStr(),
+      pprint.pformat(machineStatus, indent=2, width=uiCfg['maxLineLen'])
+    ))
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def processUserInput():
@@ -337,6 +352,10 @@ def processUserInput():
     elif(char == 'S'):
       ui.keyPressMessage('S - Show current status (LONG)', key, char)
       showMachineLongStatus()
+
+    elif(char == '@'):
+      ui.keyPressMessage('@ - Show current status (FULL)', key, char)
+      showMachineFullStatus()
 
     elif(char in 'rR'):
       ui.keyPressMessage('rR - Reset serial connection', key, char)
