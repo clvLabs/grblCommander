@@ -230,7 +230,7 @@ class Macro:
           if cmdName.lower() == 'pause':
             ui.inputMsg('Paused, press <ENTER> to continue / <ESC> to exit ...')
             key=0
-            while( key != 13 and key != 10 and key != 27 ):
+            while key != 13 and key != 10 and key != 27:
               key=kb.readKey()
 
             if key == 27:  # <ESC>

@@ -12,12 +12,11 @@ import sys
 import time
 import math
 
-from . import utils as ut
 from . import ui as ui
 from . import keyboard as kb
 
 # ------------------------------------------------------------------
-if not ut.isWindows():
+if not 'win' in sys.platform:
   from . import rpigpio as gpio
   gpio.setup()
 
@@ -161,7 +160,7 @@ class Test:
       z = self.grbl.status['WPos']['z']
 
       ui.logTitle('Iteration {:d}'.format(curIteration+1))
-      while(not exit and not self.testCancelled):
+      while not exit and not self.testCancelled:
         ui.log('Seeking CONTACT point (Z={:})\r'.format(ui.coordStr(z)), end='')
 
         self.grbl.feedAbsolute(z=z)
@@ -185,7 +184,7 @@ class Test:
         exit = False
         lastZ = z
 
-        while(not exit and not self.testCancelled):
+        while not exit and not self.testCancelled:
           z += upStep
           ui.log('Seeking RELEASE point (Z={:})\r'.format(ui.coordStr(z)), end='')
 
@@ -270,7 +269,7 @@ class Test:
 
       ui.inputMsg('<ENTER>:stop / <SPACE>:continue / <ESC>:exit ...')
       key=0
-      while( key != 13 and key != 10 and key != 32 and key != 27 ):
+      while key != 13 and key != 10 and key != 32 and key != 27:
         key=kb.readKey()
 
       if key == 27:  # <ESC>
@@ -302,7 +301,7 @@ class Test:
         ui.log('PHASE2 : Seeking RELEASE point')
         ui.inputMsg('<ENTER>:stop / <SPACE>:continue / <ESC>:exit ...')
         key=0
-        while( key != 13 and key != 10 and key != 32 and key != 27 ):
+        while key != 13 and key != 10 and key != 32 and key != 27:
           key=kb.readKey()
 
         if key == 27:  # <ESC>
@@ -351,14 +350,14 @@ class Test:
     On Windows, it will try to do a manual probe test
     """)
 
-    if not ut.isWindows():
+    if not 'win' in sys.platform:
       iterations=ui.getUserInput('Number of auto probing iterations ({:})'.format(self.tstCfg['autoProbeIterations']),
         int, self.tstCfg['autoProbeIterations'])
 
     if not self.userConfirm():
       return
 
-    if ut.isWindows():
+    if 'win' in sys.platform:
       self.manualProbe()
     else:
       self.automaticProbe(iterations)
@@ -448,7 +447,7 @@ class Test:
         curGridPoint+=1
 
         # Make a probe
-        if ut.isWindows():
+        if 'win' in sys.platform:
           testResult = self.manualProbe()
         else:
           testResult = self.automaticProbe()
@@ -680,7 +679,7 @@ class Test:
       self.checkTestCancelled()
 
     def goTo(x, y):
-      sendCmd('G0 X{0} Y{1}'.format(x, y))
+      sendCmd('G0 X{:} Y{:}'.format(x, y))
 
     def goToSafeZ():
       sendCmd('G0 Z3')

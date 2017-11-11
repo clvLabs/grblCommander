@@ -51,7 +51,6 @@ class Grbl:
     self.statusQuerySent = False
     self.waitingMachineStatus = False
     self.showNextMachineStatus = True
-    ui.log('[DBG] showNextMachineStatus = True (init)',c='red+',v='DETAIL')
     self.showNextParserState = True
     self.ignoreNextLine = False
     self.lastMessage = ''
@@ -189,7 +188,6 @@ class Grbl:
     if sendStatusQuery:
       self.queryMachineStatus()
       self.showNextMachineStatus = False
-      ui.log('[DBG] showNextMachineStatus = False (periodicQuery)',c='red+',v='DETAIL')
 
     sendParserStateQuery = False
 
@@ -246,7 +244,6 @@ class Grbl:
         isStatus = True
         if not self.showNextMachineStatus:
           self.showNextMachineStatus = True
-          ui.log('[DBG] showNextMachineStatus = True (cancel@parse)',c='red+',v='DETAIL')
           showLine = False
         try:
           self.parseMachineStatus(line)
@@ -482,7 +479,7 @@ class Grbl:
     self.queryMachineStatus()
     startTime = time.time()
 
-    while( self.waitingMachineStatus and (time.time() - startTime) < self.spCfg['responseTimeout'] ):
+    while self.waitingMachineStatus and (time.time() - startTime) < self.spCfg['responseTimeout']:
       self.process()
 
     if not self.waitingMachineStatus:
@@ -506,7 +503,6 @@ class Grbl:
       self.showNextParserState = True
     elif upperCommand == '?':
       self.showNextMachineStatus = True
-      ui.log('[DBG] showNextMachineStatus = True (MANUAL!)',c='red+',v='DETAIL')
 
     ui.log('>>>>> {:}'.format(command), color='comms.send' ,v=verbose)
     self.sp.write(command+'\n')

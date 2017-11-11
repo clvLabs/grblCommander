@@ -9,11 +9,13 @@ if __name__ == '__main__':
   print('This file is a module, it should not be executed directly')
 
 import time
+import sys
 from . import kbhit
-from . import utils as ut
 
-if(ut.isWindows()):      import msvcrt
-if(not ut.isWindows()):  import getch
+if 'win' in sys.platform:
+  import msvcrt
+else:
+  import getch
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Keyboard manager
@@ -25,7 +27,7 @@ def keyPressed():
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def readKey():
-  if(ut.isWindows()):
+  if 'win' in sys.platform:
     return ord(msvcrt.getch())
   else:
     return ord(getch.getch())

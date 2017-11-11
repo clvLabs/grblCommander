@@ -12,10 +12,6 @@ import sys
 from . import ui as ui
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def isWindows():
-  return( 'win' in sys.platform )
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def genericValueChanger(value, direction, min, max, loop=False, valueName='', valueFormatter=None):
   newValue = 0
   increment = 0

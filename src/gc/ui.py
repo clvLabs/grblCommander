@@ -82,11 +82,11 @@ def fillLogParams(kwargs):
   verboseStr = 'BASIC'
   color = None
 
-  while( 'verbose' in kwargs ):   verboseStr = kwargs.pop('verbose')
-  while( 'v' in kwargs ):         verboseStr = kwargs.pop('v')
+  while 'verbose' in kwargs:   verboseStr = kwargs.pop('verbose')
+  while 'v' in kwargs:         verboseStr = kwargs.pop('v')
 
-  while( 'color' in kwargs ):     color = kwargs.pop('color')
-  while( 'c' in kwargs ):         color = kwargs.pop('c')
+  while 'color' in kwargs:     color = kwargs.pop('color')
+  while 'c' in kwargs:         color = kwargs.pop('c')
 
   # Write values back
   kwargs['verbose'] = verboseStr
@@ -116,11 +116,11 @@ def log(message='', **kwargs):
 def logBlock(message, **kwargs):
   separator = gBLOCK_SEPARATOR
 
-  while( 'separator' in kwargs ):   separator = kwargs.pop('separator')
-  while( 's' in kwargs ):           separator = kwargs.pop('s')
+  while 'separator' in kwargs:   separator = kwargs.pop('separator')
+  while 's' in kwargs:           separator = kwargs.pop('s')
 
   message = message.rstrip(' ').strip('\r\n')
-  log('\n{0}\n{1}\n{2}'.format(separator, message, separator), **kwargs)
+  log('\n{:}\n{:}\n{:}'.format(separator, message, separator), **kwargs)
   log('', **kwargs)  # Additional separator line NOT colored!
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -160,12 +160,12 @@ def charLine(char, widthMultiplier=1):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def clearLine():
-  log('\r{0}'.format(charLine(' ')), end='')
+  log('\r{:}'.format(charLine(' ')), end='')
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def getUserInput(description, dataType='str', default=None):
   titleWidth = uiCfg['inputTitleWidth']
-  inputMsg('Enter {0}:'.format(description)[:titleWidth].ljust(titleWidth), end='')
+  inputMsg('Enter {:}:'.format(description)[:titleWidth].ljust(titleWidth), end='')
   userInput=input()
   try:
     userInput=dataType(userInput)
