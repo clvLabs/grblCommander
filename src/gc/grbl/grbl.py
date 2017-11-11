@@ -22,7 +22,7 @@ GRBL_SOFT_RESET = 24
 GRBL_QUERY_MACHINE_STATUS = '?'
 
 STATUSQUERY_INTERVAL = 5
-PROCESS_SLEEP = 0.2
+PROCESS_SLEEP = 0.1
 WAITRESPONSE_SLEEP = 0.2
 
 
@@ -123,6 +123,9 @@ class Grbl:
     while (time.time() - startTime) < seconds:
       self.process()
 
+      # Give some time for the processor to do other stuff
+      time.sleep(PROCESS_SLEEP)
+
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def process(self):
@@ -154,8 +157,6 @@ class Grbl:
     if sendQuery:
       self.queryMachineStatus()
 
-    # Give some time for the processor to do other stuff
-    time.sleep(PROCESS_SLEEP)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
