@@ -176,6 +176,7 @@ class Grbl:
     ''' Parse a text line
     '''
     if line:
+      originalLine = line
 
       if self.waitingResponse:
         self.response.append(line)
@@ -252,7 +253,7 @@ class Grbl:
 
       # Display
       if showLine:
-        ui.log('<<<<< {:}'.format(line), color='comms.recv')
+        ui.log('<<<<< {:}'.format(originalLine), color='comms.recv')
 
       if errorCode:
         ui.log('ERROR [{:}]: {:}'.format(errorCode, dict.errors[errorCode]), color='ui.errorMsg')
