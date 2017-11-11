@@ -62,20 +62,16 @@ def showHelp():
 
   Rapids
   ---------------------------------------------------------------------
-  <numpad>   - Safe relative rapid (XY) (including diagonals)
-  */         - Relative rapid (Z) (-/+)
+  <numpad>   - Relative rapid (XY) (including diagonals)
+  -+         - Relative rapid (Z) (up/down)
 
   0          - Safe go to X0Y0Z0
-  .          - Safe absolute rapid (XY) to table position (submenu)
+  .          - Absolute rapid (XY) to table position (submenu)
 
   Settings
   ---------------------------------------------------------------------
-  -+         - Set rapid increment (XY) (-/+)
-  ?????????  - Set rapid increment (XY)
-
-  zZ         - Set rapid increment (Z) (-/+)
-  <CTRL>z    - Set rapid increment (Z)
-
+  xX         - Set rapid increment (XY)
+  zZ         - Set rapid increment (Z)
   vV         - Set verbose level (-/+) (loop)
   """)
 
@@ -260,6 +256,10 @@ def processUserInput():
       mch.resetConnection()
       mch.queryMachineStatus()
 
+    elif(key == kb.CTRL_X):
+      ui.keyPressMessage('<CTRL>x - grbl soft reset', key, char)
+      mch.softReset()
+
     elif(char in 'cC'):
       ui.keyPressMessage('cC - Clear screen', key, char)
       ui.clearScreen()
@@ -310,52 +310,53 @@ def processUserInput():
       else:
         ui.keyPressMessage('Unknown command', key, char)
 
-    elif(char == '/'):
-      ui.keyPressMessage('/ - Relative rapid (Z)+', key, char)
-      mch.safeRapidRelative(x=0,y=0,z=tbl.getRI_Z())
+    elif(char == '-'):
+      ui.keyPressMessage('- - Relative rapid (Z) up', key, char)
+      mch.rapidRelative(x=0,y=0,z=tbl.getRI_Z())
 
-    elif(char == '*'):
-      ui.keyPressMessage('* - Relative rapid (Z)-', key, char)
-      mch.safeRapidRelative(x=0,y=0,z=tbl.getRI_Z()*-1)
+    elif(char == '+'):
+      ui.keyPressMessage('+ - Relative rapid (Z) down', key, char)
+      mch.rapidRelative(x=0,y=0,z=tbl.getRI_Z()*-1)
 
     elif(char == '0'):
       ui.keyPressMessage('0 - Safe go to X0Y0Z0', key, char)
-      mch.safeRapidAbsolute(x=0,y=0,z=0)
+      ui.log('TEMPORARILY DISABLED', c='ui.msg')
+      # mch.rapidAbsolute(x=0,y=0,z=0)
 
     elif(char == '1'):
-      ui.keyPressMessage('1 - Safe relative rapid - [DL]', key, char)
-      mch.safeRapidRelative(x=tbl.getRI_XY()*-1,y=tbl.getRI_XY()*-1)
+      ui.keyPressMessage('1 - Relative rapid - [DL]', key, char)
+      mch.rapidRelative(x=tbl.getRI_XY()*-1,y=tbl.getRI_XY()*-1)
 
     elif(char == '2'):
-      ui.keyPressMessage('2 - Safe relative rapid - [D]', key, char)
-      mch.safeRapidRelative(y=tbl.getRI_XY()*-1)
+      ui.keyPressMessage('2 - Relative rapid - [D]', key, char)
+      mch.rapidRelative(y=tbl.getRI_XY()*-1)
 
     elif(char == '3'):
-      ui.keyPressMessage('3 - Safe relative rapid - [DR]', key, char)
-      mch.safeRapidRelative(x=tbl.getRI_XY(),y=tbl.getRI_XY()*-1)
+      ui.keyPressMessage('3 - Relative rapid - [DR]', key, char)
+      mch.rapidRelative(x=tbl.getRI_XY(),y=tbl.getRI_XY()*-1)
 
     elif(char == '4'):
-      ui.keyPressMessage('4 - Safe relative rapid - [L]', key, char)
-      mch.safeRapidRelative(x=tbl.getRI_XY()*-1)
+      ui.keyPressMessage('4 - Relative rapid - [L]', key, char)
+      mch.rapidRelative(x=tbl.getRI_XY()*-1)
 
     elif(char == '6'):
-      ui.keyPressMessage('6 - Safe relative rapid - [R]', key, char)
-      mch.safeRapidRelative(x=tbl.getRI_XY())
+      ui.keyPressMessage('6 - Relative rapid - [R]', key, char)
+      mch.rapidRelative(x=tbl.getRI_XY())
 
     elif(char == '7'):
-      ui.keyPressMessage('7 - Safe relative rapid - [UL]', key, char)
-      mch.safeRapidRelative(x=tbl.getRI_XY()*-1,y=tbl.getRI_XY())
+      ui.keyPressMessage('7 - Relative rapid - [UL]', key, char)
+      mch.rapidRelative(x=tbl.getRI_XY()*-1,y=tbl.getRI_XY())
 
     elif(char == '8'):
-      ui.keyPressMessage('8 - Safe relative rapid - [U]', key, char)
-      mch.safeRapidRelative(y=tbl.getRI_XY())
+      ui.keyPressMessage('8 - Relative rapid - [U]', key, char)
+      mch.rapidRelative(y=tbl.getRI_XY())
 
     elif(char == '9'):
-      ui.keyPressMessage('9 - Safe relative rapid - [UR]', key, char)
-      mch.safeRapidRelative(x=tbl.getRI_XY(),y=tbl.getRI_XY())
+      ui.keyPressMessage('9 - Relative rapid - [UR]', key, char)
+      mch.rapidRelative(x=tbl.getRI_XY(),y=tbl.getRI_XY())
 
     elif(char == '.'):
-      ui.keyPressMessage('. - Safe absolute rapid to table position', key, char)
+      ui.keyPressMessage('. - Absolute rapid to table position', key, char)
 
       ui.logBlock(
       """
@@ -385,79 +386,60 @@ def processUserInput():
         char=chr(key)
 
         if(char == '2'):
-          ui.keyPressMessage('2 - ONE AXIS ONLY - Safe absolute rapid to axis limits - [B]', key, char)
-          mch.safeRapidAbsolute(y=0)
+          ui.keyPressMessage('2 - ONE AXIS ONLY - Absolute rapid to axis limits - [B]', key, char)
+          mch.rapidAbsolute(y=0)
         elif(char == '4'):
-          ui.keyPressMessage('4 - ONE AXIS ONLY - Safe absolute rapid to axis limits - [L]', key, char)
-          mch.safeRapidAbsolute(x=0)
+          ui.keyPressMessage('4 - ONE AXIS ONLY - Absolute rapid to axis limits - [L]', key, char)
+          mch.rapidAbsolute(x=0)
         elif(char == '6'):
-          ui.keyPressMessage('6 - ONE AXIS ONLY - Safe absolute rapid to axis limits - [R]', key, char)
-          mch.safeRapidAbsolute(x=tbl.getMaxX())
+          ui.keyPressMessage('6 - ONE AXIS ONLY - Absolute rapid to axis limits - [R]', key, char)
+          mch.rapidAbsolute(x=tbl.getMaxX())
         elif(char == '8'):
-          ui.keyPressMessage('8 - ONE AXIS ONLY - Safe absolute rapid to axis limits - [U]', key, char)
-          mch.safeRapidAbsolute(y=tbl.getMaxY())
+          ui.keyPressMessage('8 - ONE AXIS ONLY - Absolute rapid to axis limits - [U]', key, char)
+          mch.rapidAbsolute(y=tbl.getMaxY())
         else:
           ui.keyPressMessage('Unknown command', key, char)
 
       elif(char == '1'):
-        ui.keyPressMessage('1 - Safe absolute rapid to table position - [BL]', key, char)
-        mch.safeRapidAbsolute(x=0,y=0)
+        ui.keyPressMessage('1 - Absolute rapid to table position - [BL]', key, char)
+        mch.rapidAbsolute(x=0,y=0)
       elif(char == '2'):
-        ui.keyPressMessage('2 - Safe absolute rapid to table position - [BC]', key, char)
-        mch.safeRapidAbsolute(x=tbl.getMaxX()/2,y=0)
+        ui.keyPressMessage('2 - Absolute rapid to table position - [BC]', key, char)
+        mch.rapidAbsolute(x=tbl.getMaxX()/2,y=0)
       elif(char == '3'):
-        ui.keyPressMessage('3 - Safe absolute rapid to table position - [BR]', key, char)
-        mch.safeRapidAbsolute(x=tbl.getMaxX(),y=0)
+        ui.keyPressMessage('3 - Absolute rapid to table position - [BR]', key, char)
+        mch.rapidAbsolute(x=tbl.getMaxX(),y=0)
       elif(char == '4'):
-        ui.keyPressMessage('4 - Safe absolute rapid to table position - [CL]', key, char)
-        mch.safeRapidAbsolute(x=0,y=tbl.getMaxY()/2)
+        ui.keyPressMessage('4 - Absolute rapid to table position - [CL]', key, char)
+        mch.rapidAbsolute(x=0,y=tbl.getMaxY()/2)
       elif(char == '5'):
-        ui.keyPressMessage('5 - Safe absolute rapid to table position - [CC]', key, char)
-        mch.safeRapidAbsolute(x=tbl.getMaxX()/2,y=tbl.getMaxY()/2)
+        ui.keyPressMessage('5 - Absolute rapid to table position - [CC]', key, char)
+        mch.rapidAbsolute(x=tbl.getMaxX()/2,y=tbl.getMaxY()/2)
       elif(char == '6'):
-        ui.keyPressMessage('6 - Safe absolute rapid to table position - [CR]', key, char)
-        mch.safeRapidAbsolute(x=tbl.getMaxX(),y=tbl.getMaxY()/2)
+        ui.keyPressMessage('6 - Absolute rapid to table position - [CR]', key, char)
+        mch.rapidAbsolute(x=tbl.getMaxX(),y=tbl.getMaxY()/2)
       elif(char == '7'):
-        ui.keyPressMessage('7 - Safe absolute rapid to table position - [UL]', key, char)
-        mch.safeRapidAbsolute(x=0,y=tbl.getMaxY())
+        ui.keyPressMessage('7 - Absolute rapid to table position - [UL]', key, char)
+        mch.rapidAbsolute(x=0,y=tbl.getMaxY())
       elif(char == '8'):
-        ui.keyPressMessage('8 - Safe absolute rapid to table position - [UC]', key, char)
-        mch.safeRapidAbsolute(x=tbl.getMaxX()/2,y=tbl.getMaxY())
+        ui.keyPressMessage('8 - Absolute rapid to table position - [UC]', key, char)
+        mch.rapidAbsolute(x=tbl.getMaxX()/2,y=tbl.getMaxY())
       elif(char == '9'):
-        ui.keyPressMessage('9 - Safe absolute rapid to table position - [UR]', key, char)
-        mch.safeRapidAbsolute(x=tbl.getMaxX(),y=tbl.getMaxY())
+        ui.keyPressMessage('9 - Absolute rapid to table position - [UR]', key, char)
+        mch.rapidAbsolute(x=tbl.getMaxX(),y=tbl.getMaxY())
       else:
         ui.keyPressMessage('Unknown command', key, char)
 
-    elif(char == '+'):
-      ui.keyPressMessage('+ - Set rapid increment (XY)+', key, char)
-      tbl.changeRI_XY(+1)
+    elif(char in 'xX'):
+      ui.keyPressMessage('xX - Set rapid increment (XY)', key, char)
+      tbl.setRI_XY(
+        ui.getUserInput(
+          'Increment ({:})'.format(tbl.getRI_XY()),
+          float,
+          tbl.getRI_XY()))
+      showMachineStatus()
 
-    elif(char == '-'):
-      ui.keyPressMessage('- - Set rapid increment (XY)-', key, char)
-      tbl.changeRI_XY(-1)
-
-    # elif(key in [kb.CTRL_X, kb.CTRL_Y]):
-      # ui.keyPressMessage('<CTRL>x/y - Set rapid increment (XY)', key, char)
-      # tbl.setRI_XY(
-      #   ui.getUserInput(
-      #     'Increment ({:})'.format(tbl.getRI_XY()),
-      #     float,
-      #     tbl.getRI_XY()))
-      # showMachineStatus()
-    elif(key == kb.CTRL_X):
-      ui.keyPressMessage('<CTRL>x - grbl soft reset', key, char)
-      mch.softReset()
-
-    elif(char == 'Z'):
-      ui.keyPressMessage('Z - Set rapid increment (Z)+', key, char)
-      tbl.changeRI_Z(+1)
-
-    elif(char == 'z'):
-      ui.keyPressMessage('z - Set rapid increment (Z)-', key, char)
-      tbl.changeRI_Z(-1)
-
-    elif(key == kb.CTRL_Z):
+    elif(char in 'zZ'):
       ui.keyPressMessage('<CTRL>z - Set rapid increment (Z)', key, char)
       tbl.setRI_Z(
         ui.getUserInput(

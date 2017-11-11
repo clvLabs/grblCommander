@@ -10,10 +10,7 @@ if __name__ == '__main__':
 
 import time
 
-from .. import utils as ut
 from .. import ui as ui
-from .. import keyboard as kb
-from .. import table as tbl
 
 from . import serialport
 from . import dict
@@ -21,7 +18,8 @@ from . import dict
 
 # ------------------------------------------------------------------
 # Constants
-CTRL_X = 24
+GRBL_SOFT_RESET = 24
+GRBL_QUERY_MACHINE_STATUS = '?'
 
 STATUSQUERY_INTERVAL = 5
 PROCESS_SLEEP = 0.2
@@ -112,7 +110,7 @@ class Grbl:
   def softReset(self):
     ''' grblShield soft reset
     '''
-    self.sp.write('%c' % CTRL_X)
+    self.sp.write('%c' % GRBL_SOFT_RESET)
     self.waitForStartup()
 
 
@@ -124,6 +122,7 @@ class Grbl:
 
     while (time.time() - startTime) < seconds:
       self.process()
+
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def process(self):
@@ -249,7 +248,6 @@ class Grbl:
         ui.log('ALARM [{:}]: {:}'.format(self.alarm, self.getAlarm()), color='ui.errorMsg')
 
 
-
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def parseMachineStatus(self,status):
     ''' TODO: Comment
@@ -361,10 +359,11 @@ class Grbl:
     ''' TODO: Comment
     '''
     ui.log('Querying machine status...', v='DEBUG')
-    self.sp.write('?')
+    self.sp.write(GRBL_QUERY_MACHINE_STATUS)
     self.statusQuerySent = True
     self.waitingMachineStatus = True
     self.lastStatusQuery = time.time()
+
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getMachineStatus(self):
@@ -458,13 +457,22 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getWorkPos(self):
+    ''' TODO: comment
+    '''
+    return {
+      'x': self.status['MPos']['x'] - self.status['WCO']['x'],
+      'y': self.status['MPos']['y'] - self.status['WCO']['y'],
+      'z': self.status['MPos']['z'] - self.status['WCO']['z']
+    }
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getWorkPosStr(self):
     ''' TODO: comment
     '''
-    return ui.xyzStr(
-      self.status['MPos']['x'] - self.status['WCO']['x'],
-      self.status['MPos']['y'] - self.status['WCO']['y'],
-      self.status['MPos']['z'] - self.status['WCO']['z'])
+    wpos = self.getWorkPos()
+    return ui.xyzStr(wpos['x'], wpos['y'], wpos['z'])
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -523,6 +531,7 @@ class Grbl:
       showCurrentPosition()
 
     ui.log('Machine operation finished', v='SUPER')
+    ui.log()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -583,3 +592,128 @@ class Grbl:
     ui.log('Sending command [$SLP]...', v='DETAIL')
     self.sendCommand('$SLP')
     ui.log()
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def feedAbsolute(self,x=None, y=None, z=None, speed=None, verbose='WARNING'):
+    ''' TODO: comment
+    '''
+    if speed is None:
+      speed = self.mchCfg['feedSpeed']
+
+    cmd = 'G1 '
+
+    if( x != None ):
+      cmd += 'X{:} '.format(ui.coordStr(x))
+
+    if( y != None ):
+      cmd += 'Y{:} '.format(ui.coordStr(y))
+
+    if( z != None ):
+      cmd += 'Z{:} '.format(ui.coordStr(z))
+
+    cmd += 'F{:} '.format(speed)
+
+    cmd = cmd.rstrip()
+
+    ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
+    self.sendCommand(cmd, verbose=verbose)
+    self.waitForMachineIdle(verbose=verbose)
+    return
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def rapidAbsolute(self,x=None, y=None, z=None, verbose='WARNING'):
+    ''' TODO: comment
+    '''
+    cmd = 'G0 '
+
+    if( x != None ):
+      cmd += 'X{:} '.format(ui.coordStr(x))
+
+    if( y != None ):
+      cmd += 'Y{:} '.format(ui.coordStr(y))
+
+    if( z != None ):
+      cmd += 'Z{:} '.format(ui.coordStr(z))
+
+    cmd = cmd.rstrip()
+
+    ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
+    self.sendCommand(cmd, verbose=verbose)
+    self.waitForMachineIdle(verbose=verbose)
+    return
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def rapidRelative(self,x=None, y=None, z=None, verbose='WARNING'):
+    ''' TODO: comment
+    '''
+    if( x is None and y is None and z is None ):
+      ui.log('No parameters provided, doing nothing', v=verbose)
+      return
+
+    wpos = self.getWorkPos()
+
+    cmd = 'G0 '
+
+    minX = 0.0
+    minY = 0.0
+    minZ = 0.0
+    maxX = self.mchCfg['max']['X']
+    maxY = self.mchCfg['max']['Y']
+    maxZ = self.mchCfg['max']['Z']
+    curX = wpos['x']
+    curY = wpos['y']
+    curZ = wpos['z']
+
+    if x:
+      newX = curX + x
+      if newX<minX:
+        ui.log('Adjusting X to MinX ({:})'.format(minX), v='DETAIL')
+        newX=minX
+      elif newX>maxX:
+        ui.log('Adjusting X to MaxX ({:})'.format(maxX), v='DETAIL')
+        newX=maxX
+
+      if newX == curX:
+        ui.log('X value unchanged, skipping', v='DETAIL')
+      else:
+        cmd += 'X{:} '.format(ui.coordStr(newX))
+
+    if y:
+      newY = curY + y
+      if newY<minY:
+        ui.log('Adjusting Y to MinY ({:})'.format(minY), v='DETAIL')
+        newY=minY
+      elif newY>maxY:
+        ui.log('Adjusting Y to MaxY ({:})'.format(maxY), v='DETAIL')
+        newY=maxY
+
+      if newY == curY:
+        ui.log('Y value unchanged, skipping', v='DETAIL')
+      else:
+        cmd += 'Y{:} '.format(ui.coordStr(newY))
+
+    if z:
+      newZ = curZ + z
+      if newZ<minZ:
+        ui.log('Adjusting Z to MinZ ({:})'.format(minZ), v='DETAIL')
+        newZ=minZ
+      elif newZ>maxZ:
+        ui.log('Adjusting Z to MaxZ ({:})'.format(maxZ), v='DETAIL')
+        newZ=maxZ
+
+      if newZ == curZ:
+        ui.log('Z value unchanged, skipping', v='DETAIL')
+      else:
+        cmd += 'Z{:} '.format(ui.coordStr(newZ))
+
+    cmd = cmd.rstrip()
+
+    ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
+    self.sendCommand(cmd, verbose=verbose)
+    self.waitForMachineIdle(verbose=verbose)
+    return
+
+
