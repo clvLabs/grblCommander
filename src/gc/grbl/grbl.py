@@ -152,6 +152,7 @@ class Grbl:
 
     # Manage alarm state
     if self.alarm:
+      ui.log('Alarm detected, resetting wait flags', c='ui.msg', v='DETAIL')
       if self.waitingResponse:
         self.waitingResponse = False
       if self.waitingMachineStatus:
