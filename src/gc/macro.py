@@ -149,16 +149,30 @@ def run(name, silent=False, isSubCall=False):
   return success
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def isMacro(name):
+  for macroName in gMACROS:
+    if macroName.lower() == name.lower():
+      return True
+  return False
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def getMacro(name):
+  for macroName in gMACROS:
+    if macroName.lower() == name.lower():
+      return gMACROS[macroName]
+  return None
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def _run(name, silent=False, isSubCall=False):
   if mcrCfg['autoReload']:
     load(silent=True)
 
-  if not name in gMACROS:
+  macro = getMacro(name)
+  if not macro:
     ui.log('ERROR: Macro [{:}] does not exist, please check config file.'.format(name),
       color='ui.errorMsg')
     return False
 
-  macro = gMACROS[name]
   commands = macro['commands']
 
   if not silent:
@@ -176,22 +190,20 @@ def _run(name, silent=False, isSubCall=False):
         return False
 
   for command in commands:
-    cmdName = command[0].upper() if len(command) > 0 else ''
+    cmdName = command[0] if len(command) > 0 else ''
     cmdComment = command[1] if len(command) > 1 else ''
-    isReservedName = cmdName in mcrCfg['reservedNames']
-    isMacroCall = cmdName in gMACROS
+    isReservedName = cmdName.lower() in mcrCfg['reservedNames']
+    isMacroCall = isMacro(cmdName)
 
     if cmdComment:
       # if not silent:
       ui.logTitle(cmdComment, color='macro.macroCall' if isMacroCall else 'macro.comment')
 
     if cmdName:
-      if cmdName[:5] == 'SLEEP':
-        isReservedName = True
-
       if isReservedName:
         ui.logTitle(cmdName, color='macro.reservedName')
-        if cmdName == 'PAUSE':
+
+        if cmdName.lower() == 'pause':
           ui.inputMsg('Paused, press <ENTER> to continue / <ESC> to exit ...')
           key=0
           while( key != 13 and key != 10 and key != 27 ):
@@ -203,11 +215,11 @@ def _run(name, silent=False, isSubCall=False):
           elif key == 13 or key == 10:  # <ENTER>
             continue
 
-        elif cmdName == 'STARTUP':
+        elif cmdName.lower() == 'startup':
           cmdName = mcrCfg['startup']
-          isMacroCall = cmdName in gMACROS
+          isMacroCall = isMacro(cmdName)
 
-        elif cmdName[:5] == 'SLEEP':
+        elif cmdName[:5].lower() == 'sleep':
           time.sleep(float(cmdName[5:]))
           continue
 
@@ -241,12 +253,12 @@ def show(name, avoidReload=False):
   if mcrCfg['autoReload'] and not avoidReload:
     load(silent=True)
 
-  if not name in gMACROS:
+  macro = getMacro(name)
+  if not macro:
     ui.log('ERROR: Macro [{:}] does not exist, check config file.'.format(name),
       color='ui.errorMsg')
     return
 
-  macro = gMACROS[name]
   title = macro['title'] if 'title' in macro else ''
 
   commands = macro['commands']
@@ -269,8 +281,8 @@ def show(name, avoidReload=False):
   for command in commands:
     cmdName = command[0] if len(command) > 0 else ''
     cmdComment = command[1] if len(command) > 1 else ''
-    isMacroCall = cmdName in gMACROS
-    isReservedName = cmdName in mcrCfg['reservedNames']
+    isMacroCall = isMacro(cmdName)
+    isReservedName = cmdName.lower() in mcrCfg['reservedNames']
     cmdColor = 'macro.macroCall' if isMacroCall else 'macro.reservedName' if isReservedName else 'macro.command'
 
     block += '{:}   {:}\n'.format(

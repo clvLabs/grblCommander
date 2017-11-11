@@ -42,7 +42,7 @@ cfg = {
     'autoReload': True,
     'startup': 'def.start',
     'machineLongStatus': 'def.mls',
-    'reservedNames': [ 'PAUSE', 'STARTUP' ],
+    'reservedNames': [ 'pause', 'startup', 'sleep' ],
     'blackList': [ ],
     'hotKeys': {
       'F1': '',
@@ -107,7 +107,7 @@ cfg = {
         'command':      'white+',
         'comment':      'green+',
         'macroCall':    'white+, blue',
-        'reservedName': 'yellow+, blue',
+        'reservedName': 'green+, blue',
         'subCallStart': 'white+, green',
         'subCallEnd':   'white+, red',
       },
