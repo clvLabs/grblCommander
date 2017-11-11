@@ -66,8 +66,8 @@ def showHelp():
   cC         - Clear screen
   hH         - Show this help text
   s/S        - Show current status (short/LONG)
-  gG$        - Send raw GCode command
   @          - Show current status (FULL)
+  gG$[space] - Send raw GCode command
   mM         - Macro (submenu)
   tT         - Tests (submenu)
 
@@ -332,9 +332,11 @@ def processUserInput():
       else:
         ui.keyPressMessage('Unknown command', key, char)
 
-    elif(char in 'gG$'):
-      ui.keyPressMessage('gG$ - Send raw GCode command', key, char)
+    elif(char in 'gG$ '):
+      ui.keyPressMessage('gG$[space] - Send raw GCode command', key, char)
       ui.inputMsg('Enter GCode command...')
+      if char == ' ':
+        char = ''
       userCommand = char + input(char)
 
       # Special case for homing ($H)
