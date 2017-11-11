@@ -53,9 +53,12 @@ class Grbl:
     self.alarm = ''
     self.status = {
       'settings': {},
-      'MPos': {'x':0, 'y':0, 'z':0},
-      'WPos': {'x':0, 'y':0, 'z':0},
-      'WCO': {'x':0, 'y':0, 'z':0},
+      'parserState': {
+        'str': '',
+      },
+      'MPos': {'desc':'machinePos', 'x':0, 'y':0, 'z':0},
+      'WPos': {'desc':'workPos', 'x':0, 'y':0, 'z':0},
+      'WCO': {'desc':'workCoords', 'x':0, 'y':0, 'z':0},
     }
 
     self.sp = serialport.SerialPort(cfg)
@@ -79,9 +82,12 @@ class Grbl:
       ui.log()
 
       self.waitForStartup()
+
+      self.queryMachineStatus()
       self.viewBuildInfo()
       self.viewGrblConfig()
       self.viewGCodeParserState()
+      self.viewGCodeParameters()
 
       # else:
       #   ui.log('ERROR: startup message error, exiting program', color='ui.errorMsg', v='ERROR')
@@ -180,7 +186,6 @@ class Grbl:
       self.queryMachineStatus()
 
 
-
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def parse(self, line):
     ''' Parse a text line
@@ -210,40 +215,44 @@ class Grbl:
         self.alarm = line[6:]
         self.status['machineState'] = 'Alarm'
         isAlarm = True
-        isResponse = True
       elif line[:1] == '>' and line[-3:] == ':ok':
         line = line[:-3]
-        isResponse = True
       elif line[:1] == '>' and line[-8:-1] == ':error:':
         line = line[:-8]
-        isResponse = True
       elif line[:1] == '>' and line[-9:-2] == ':error:':
         line = line[:-9]
-        isResponse = True
-
-      if isResponse:
-        if self.waitingResponse:
-          self.waitingResponse = False
-        else:
-          ui.log('[WARNING] Unexpected machine response',c='ui.msg',v='DETAIL')
 
       # Status
       if line[:1] == '<' and line[-1:] == '>':
-        self.lastStatusStr = line
         isStatus = True
         showLine = False
         try:
-          self.parseMachineStatus(self.lastStatusStr)
+          self.parseMachineStatus(line)
+          self.lastStatusStr = line
           # self.lastMachineStatusReceptionTimestamp
           if self.waitingMachineStatus:
             self.waitingMachineStatus = False
             self.statusQuerySent = False
         except:
-          ui.log("UNKNOWN machine data [{:}]".format(self.lastStatusStr), color='ui.errorMsg', v='ERROR')
+          ui.log("UNKNOWN machine data [{:}]".format(line), color='ui.errorMsg', v='ERROR')
 
       # Messages
       elif line[:5] == "[MSG:":
         self.lastMessage = line[5:-1]
+
+      # Version info
+      elif line[:5] == "[VER:":
+        self.status['version'] = line[5:-1]
+
+      # Build options
+      elif line[:5] == "[OPT:":
+        self.status['buildOptions'] = line[5:-1]
+
+      # gcode parser state
+      elif line[:4] == "[GC:":
+        parserState = line[4:-1]
+        self.status['parserState']['str'] = parserState
+        self.parseParserState(parserState)
 
       # User-defined startup line
       elif line[:2] == "$N":
@@ -270,6 +279,39 @@ class Grbl:
 
       if isAlarm:
         ui.log('ALARM [{:}]: {:}'.format(self.alarm, self.getAlarmStr()), color='ui.errorMsg')
+        if self.waitingResponse:
+          self.waitingResponse = False
+
+      if isResponse:
+        if self.waitingResponse:
+          self.waitingResponse = False
+        else:
+          ui.log('[WARNING] Unexpected machine response',c='ui.msg',v='DETAIL')
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def parseParserState(self,state):
+    ''' TODO: Comment
+    '''
+    # Split modal commands
+    commands = state.split(' ')
+
+    for command in commands:
+      modalGroup = self.dct.getModalGroup(command)
+      if modalGroup:
+        commandName = self.dct.getModalCommandName(command)
+        self.status['parserState'][modalGroup] = {}
+        self.status['parserState'][modalGroup]['val'] = command
+        self.status['parserState'][modalGroup]['desc'] = commandName
+      else:
+        value=command[1:]
+        command=command[:1]
+        modalGroup = self.dct.getModalGroup(command)
+        if modalGroup:
+          commandName = self.dct.getModalCommandName(command)
+          self.status['parserState'][modalGroup] = {}
+          self.status['parserState'][modalGroup]['val'] = value
+          self.status['parserState'][modalGroup]['desc'] = commandName
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -297,31 +339,21 @@ class Grbl:
         y = float(coords[1])
         z = float(coords[2])
 
-        self.status[paramName] = {
-          'x':x,
-          'y':y,
-          'z':z
-        }
+        self.status[paramName]['x'] = x
+        self.status[paramName]['y'] = y
+        self.status[paramName]['z'] = z
 
         # From: https://github.com/gnea/grbl/wiki/Grbl-v1.1-Interface
         #  If WPos: is given, use MPos = WPos + WCO.
         #  If MPos: is given, use WPos = MPos - WCO.
         if paramName == 'MPos':
-          self.status[paramName]['desc'] = 'machinePos'
-          self.status['WPos'] = {
-            'x': self.status[paramName]['x'] - self.status['WCO']['x'],
-            'y': self.status[paramName]['y'] - self.status['WCO']['y'],
-            'z': self.status[paramName]['z'] - self.status['WCO']['z']
-          }
+          self.status['WPos']['x'] = x - self.status['WCO']['x']
+          self.status['WPos']['y'] = y - self.status['WCO']['y']
+          self.status['WPos']['z'] = z - self.status['WCO']['z']
         elif paramName == 'WPos':
-          self.status[paramName]['desc'] = 'workPos'
-          self.status['MPos'] = {
-            'x': self.status[paramName]['x'] + self.status['WCO']['x'],
-            'y': self.status[paramName]['y'] + self.status['WCO']['y'],
-            'z': self.status[paramName]['z'] + self.status['WCO']['z']
-          }
-        elif paramName == 'WCO':
-          self.status[paramName]['desc'] = 'workCoordinates'
+          self.status['MPos']['x'] = x + self.status['WCO']['x']
+          self.status['MPos']['y'] = y + self.status['WCO']['y']
+          self.status['MPos']['z'] = z + self.status['WCO']['z']
 
       elif paramName == 'Bf':
         blocks = paramValue.split(',')
