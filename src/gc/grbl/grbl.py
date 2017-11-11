@@ -22,8 +22,9 @@ GRBL_SOFT_RESET = 24
 GRBL_QUERY_MACHINE_STATUS = '?'
 
 STATUSQUERY_INTERVAL = 5
-PROCESS_SLEEP = 0.1
-WAITRESPONSE_SLEEP = 0.2
+PROCESS_SLEEP = 0.05
+WAITIDLE_SLEEP = 0.15
+WAITSTARTUP_TIME = 2
 
 
 # ------------------------------------------------------------------
@@ -88,11 +89,18 @@ class Grbl:
     ui.log('Waiting for startup message...')
     self.alarm = ''
     self.waitingStartup = True
-    while self.waitingStartup:
-      self.sleep(WAITRESPONSE_SLEEP)
+    startTime = time.time()
 
-    ui.log('Startup message received, machine ready', color='ui.successMsg')
-    ui.log()
+    while self.waitingStartup and (time.time() - startTime) < WAITSTARTUP_TIME:
+      self.process()
+
+    if not self.waitingStartup:
+      ui.log('Startup message received, machine ready', color='ui.successMsg')
+      ui.log()
+    else:
+      self.lastStatusStr = ''
+      ui.log('TIMEOUT Waiting for startup', v='WARNING')
+      ui.log()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -127,6 +135,7 @@ class Grbl:
       self.process()
 
       # Give some time for the processor to do other stuff
+      ui.log('SLEEP[1] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<',v='SUPER')
       time.sleep(PROCESS_SLEEP)
 
 
@@ -389,11 +398,11 @@ class Grbl:
     self.queryMachineStatus()
     startTime = time.time()
 
-    while( (time.time() - startTime) < self.spCfg['responseTimeout'] ):
-      self.sleep(WAITRESPONSE_SLEEP)
-      if not self.waitingMachineStatus:
-        ui.log('Successfully received machine status', v='DEBUG')
-        break
+    while( self.waitingMachineStatus and (time.time() - startTime) < self.spCfg['responseTimeout'] ):
+      self.process()
+
+    if not self.waitingMachineStatus:
+      ui.log('Successfully received machine status', v='DEBUG')
     else:
       self.lastStatusStr = ''
       ui.log('TIMEOUT Waiting for machine status', v='WARNING')
@@ -425,15 +434,14 @@ class Grbl:
     self.response=[]
     self.waitingResponse = True
 
-    while (time.time() - startTime) < responseTimeout:
-      self.sleep(WAITRESPONSE_SLEEP)
-      if not self.waitingResponse:
-        ui.log(  'readResponse() - Successfully received {:d} data lines from serial'.format(
-          len(self.response)), v='SUPER')
-        break
+    while self.waitingResponse and (time.time() - startTime) < responseTimeout:
+      self.process()
+
+    if not self.waitingResponse:
+      ui.log(  'readResponse() - Successfully received {:d} data lines from serial'.format(
+        len(self.response)), v='SUPER')
     else:
-      ui.log('TIMEOUT Waiting for machine response', v='WARNING')
-      ui.log('readResponse() - TIMEOUT Waiting for data from serial', color='ui.errorMsg', v='ERROR')
+      ui.log('readResponse() - TIMEOUT Waiting for response from serial', color='ui.errorMsg', v='ERROR')
       self.response = []
       self.waitingResponse = False
 
@@ -529,9 +537,7 @@ class Grbl:
     ''' TODO: comment
     '''
     ui.log('Waiting for machine operation to finish...', v='SUPER')
-    self.queryMachineStatus()
-    while self.waitingMachineStatus:
-      self.sleep(WAITRESPONSE_SLEEP)
+    self.getMachineStatus()
 
     showStatus = ((verbose != 'NONE') and (ui.getVerboseLevel() >= ui.getVerboseLevelIndex(verbose)))
     currPosShown = False
@@ -557,7 +563,7 @@ class Grbl:
       if showStatus:
         showCurrentPosition()
         currPosShown = True
-      self.sleep(WAITRESPONSE_SLEEP)
+      self.sleep(WAITIDLE_SLEEP)
 
     if currPosShown:
       showCurrentPosition()
