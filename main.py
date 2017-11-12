@@ -154,6 +154,7 @@ def processUserInput():
     return True
 
   processed = True
+  ps = mch.status['parserState']
 
   key = kb.readKey()
   char=chr(key)
@@ -196,68 +197,68 @@ def processUserInput():
         mcr.run(mcrCfg['hotKeys']['F10'], silent=True)
 
     elif key == kb.KP_END:
-      ui.keyPressMessage('End - Jog - [DL] [*2]', key, char)
+      ui.keyPressMessage('End - Jog - [DL] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
       mch.moveRelative(x=gXYJog*-2,y=gXYJog*-2)
 
     elif key == kb.KP_DOWN:
-      ui.keyPressMessage('Down - Jog - [D] [*2]', key, char)
+      ui.keyPressMessage('Down - Jog - [D] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
       mch.moveRelative(y=gXYJog*-2)
 
     elif key == kb.KP_PGDN:
-      ui.keyPressMessage('Pgdn - Jog - [DR] [*2]', key, char)
+      ui.keyPressMessage('Pgdn - Jog - [DR] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
       mch.moveRelative(x=gXYJog*2,y=gXYJog*-2)
 
     elif key == kb.KP_LEFT:
-      ui.keyPressMessage('Left - Jog - [L] [*2]', key, char)
+      ui.keyPressMessage('Left - Jog - [L] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
       mch.moveRelative(x=gXYJog*-2)
 
     elif key == kb.KP_RIGHT:
-      ui.keyPressMessage('Right - Jog - [R] [*2]', key, char)
+      ui.keyPressMessage('Right - Jog - [R] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
       mch.moveRelative(x=gXYJog*2)
 
     elif key == kb.KP_HOME:
-      ui.keyPressMessage('Home - Jog - [UL] [*2]', key, char)
+      ui.keyPressMessage('Home - Jog - [UL] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
       mch.moveRelative(x=gXYJog*-2,y=gXYJog*2)
 
     elif key == kb.KP_UP:
-      ui.keyPressMessage('Up - Jog - [U] [*2]', key, char)
+      ui.keyPressMessage('Up - Jog - [U] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
       mch.moveRelative(y=gXYJog*2)
 
     elif key == kb.KP_PGUP:
-      ui.keyPressMessage('Pgup - Jog - [UR] [*2]', key, char)
+      ui.keyPressMessage('Pgup - Jog - [UR] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
       mch.moveRelative(x=gXYJog*2,y=gXYJog*2)
 
 
     elif key == kb.CTRL_KP_END:
-      ui.keyPressMessage('End - Jog - [DL] [/2]', key, char)
+      ui.keyPressMessage('End - Jog - [DL] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
       mch.moveRelative(x=(gXYJog/2)*-1,y=(gXYJog/2)*-1)
 
     elif key == kb.CTRL_KP_DOWN:
-      ui.keyPressMessage('Down - Jog - [D] [/2]', key, char)
+      ui.keyPressMessage('Down - Jog - [D] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
       mch.moveRelative(y=(gXYJog/2)*-1)
 
     elif key == kb.CTRL_KP_PGDN:
-      ui.keyPressMessage('Pgdn - Jog - [DR] [/2]', key, char)
+      ui.keyPressMessage('Pgdn - Jog - [DR] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
       mch.moveRelative(x=gXYJog/2,y=(gXYJog/2)*-1)
 
     elif key == kb.CTRL_KP_LEFT:
-      ui.keyPressMessage('Left - Jog - [L] [/2]', key, char)
+      ui.keyPressMessage('Left - Jog - [L] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
       mch.moveRelative(x=(gXYJog/2)*-1)
 
     elif key == kb.CTRL_KP_RIGHT:
-      ui.keyPressMessage('Right - Jog - [R] [/2]', key, char)
+      ui.keyPressMessage('Right - Jog - [R] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
       mch.moveRelative(x=gXYJog/2)
 
     elif key == kb.CTRL_KP_HOME:
-      ui.keyPressMessage('Home - Jog - [UL] [/2]', key, char)
+      ui.keyPressMessage('Home - Jog - [UL] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
       mch.moveRelative(x=(gXYJog/2)*-1,y=gXYJog/2)
 
     elif key == kb.CTRL_KP_UP:
-      ui.keyPressMessage('Up - Jog - [U] [/2]', key, char)
+      ui.keyPressMessage('Up - Jog - [U] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
       mch.moveRelative(y=gXYJog/2)
 
     elif key == kb.CTRL_KP_PGUP:
-      ui.keyPressMessage('Pgup - Jog - [UR] [/2]', key, char)
+      ui.keyPressMessage('Pgup - Jog - [UR] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
       mch.moveRelative(x=gXYJog/2,y=gXYJog/2)
 
     else:  # Rest of keys
@@ -429,11 +430,11 @@ def processUserInput():
         ui.keyPressMessage('Unknown command', key, char)
 
     elif char == '-':
-      ui.keyPressMessage('- - Jog (Z) up', key, char)
+      ui.keyPressMessage('- - Jog (Z) up ({:} {:})'.format(gZJog, ps['units']['desc']), key, char)
       mch.moveRelative(x=0,y=0,z=gZJog)
 
     elif char == '+':
-      ui.keyPressMessage('+ - Jog (Z) down', key, char)
+      ui.keyPressMessage('+ - Jog (Z) down ({:} {:})'.format(gZJog, ps['units']['desc']), key, char)
       mch.moveRelative(x=0,y=0,z=gZJog*-1)
 
     elif char == '0':
@@ -441,35 +442,35 @@ def processUserInput():
       mch.goToMachineHome()
 
     elif char == '1':
-      ui.keyPressMessage('1 - Jog - [DL]', key, char)
+      ui.keyPressMessage('1 - Jog - [DL] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
       mch.moveRelative(x=gXYJog*-1,y=gXYJog*-1)
 
     elif char == '2':
-      ui.keyPressMessage('2 - Jog - [D]', key, char)
+      ui.keyPressMessage('2 - Jog - [D] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
       mch.moveRelative(y=gXYJog*-1)
 
     elif char == '3':
-      ui.keyPressMessage('3 - Jog - [DR]', key, char)
+      ui.keyPressMessage('3 - Jog - [DR] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
       mch.moveRelative(x=gXYJog,y=gXYJog*-1)
 
     elif char == '4':
-      ui.keyPressMessage('4 - Jog - [L]', key, char)
+      ui.keyPressMessage('4 - Jog - [L] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
       mch.moveRelative(x=gXYJog*-1)
 
     elif char == '6':
-      ui.keyPressMessage('6 - Jog - [R]', key, char)
+      ui.keyPressMessage('6 - Jog - [R] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
       mch.moveRelative(x=gXYJog)
 
     elif char == '7':
-      ui.keyPressMessage('7 - Jog - [UL]', key, char)
+      ui.keyPressMessage('7 - Jog - [UL] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
       mch.moveRelative(x=gXYJog*-1,y=gXYJog)
 
     elif char == '8':
-      ui.keyPressMessage('8 - Jog - [U]', key, char)
+      ui.keyPressMessage('8 - Jog - [U] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
       mch.moveRelative(y=gXYJog)
 
     elif char == '9':
-      ui.keyPressMessage('9 - Jog - [UR]', key, char)
+      ui.keyPressMessage('9 - Jog - [UR] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
       mch.moveRelative(x=gXYJog,y=gXYJog)
 
     elif char == '.':
