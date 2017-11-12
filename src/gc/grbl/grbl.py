@@ -643,21 +643,10 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def getWorkPos(self):
-    ''' TODO: comment
-    '''
-    return {
-      'x': self.status['MPos']['x'] - self.status['WCO']['x'],
-      'y': self.status['MPos']['y'] - self.status['WCO']['y'],
-      'z': self.status['MPos']['z'] - self.status['WCO']['z']
-    }
-
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getWorkPosStr(self):
     ''' TODO: comment
     '''
-    wpos = self.getWorkPos()
+    wpos = self.status['WPos']
     return ui.xyzStr(wpos['x'], wpos['y'], wpos['z'])
 
 
@@ -863,7 +852,7 @@ class Grbl:
     cmd = ''
 
     absolute = self.status['parserState']['distanceMode']['val'] == 'G90'
-    wpos = self.getWorkPos()
+    wpos = self.status['WPos']
     curX = wpos['x']
     curY = wpos['y']
     curZ = wpos['z']
@@ -997,7 +986,7 @@ class Grbl:
     cmd = ''
 
     absolute = self.status['parserState']['distanceMode']['val'] == 'G90'
-    wpos = self.getWorkPos()
+    wpos = self.status['WPos']
     curX = wpos['x']
     curY = wpos['y']
     curZ = wpos['z']
