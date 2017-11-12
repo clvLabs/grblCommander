@@ -30,6 +30,16 @@ cfg = {
       'Y': 280.0,            # Change to fit your machine
       'Z': 80.0,             # Change to fit your machine
     },
+    'preferredParserState': {
+      'coolant': 'M9',          # Change to fit your preferences
+      'distanceMode': 'G90',    # Change to fit your preferences
+      'feedRateMode': 'G94',    # Change to fit your preferences
+      'motion': 'G0',           # Change to fit your preferences
+      'plane': 'G17',           # Change to fit your preferences
+      'spindle': 'M5',          # Change to fit your preferences
+      'units': 'G21',           # Change to fit your preferences
+      'wcs': 'G54',             # Change to fit your preferences
+    },
     'xyJogMm': 10.0,
     'zJogMm': 3.0,
     'seekSpeed': 2000,
@@ -75,7 +85,13 @@ cfg = {
     'maxLineLen': 100,
     'clearScreenLines': 100,
     'inputTitleWidth': 45,
-    'readyMsg': '=======================[ Ready ]=======================',
+    'readyMsg': '==========================[ Ready ]==========================',
+    'simpleParserState': {
+      'distanceMode': 'G90',    # Change to fit your preferences
+      'motion': 'G0',           # Change to fit your preferences
+      'units': 'G21',           # Change to fit your preferences
+      'wcs': 'G54',             # Change to fit your preferences
+    },
     'coordFormat': '{:8.3f}',
     'xyzFormat': '{:}/{:}/{:}',
     'msgSeparatorChar': '-',

@@ -130,12 +130,12 @@ modalGroups = {
     'G1': 'linear',
   },
   'wcs': {
-    'G54': '1(G54)',
-    'G55': '2(G55)',
-    'G56': '3(G56)',
-    'G57': '4(G57)',
-    'G58': '5(G58)',
-    'G59': '6(G59)',
+    'G54': 'G54',
+    'G55': 'G55',
+    'G56': 'G56',
+    'G57': 'G57',
+    'G58': 'G58',
+    'G59': 'G59',
   },
   'plane': {
     'G17': 'XY',
@@ -155,13 +155,13 @@ modalGroups = {
     'G94': 'unitsPerMinute',
   },
   'spindle': {
-    'M3': 'clockwise',
-    'M4': 'counterClockwise',
-    'M5': 'off',
+    'M3': 'spindleCW',
+    'M4': 'spindleCCW',
+    'M5': 'spindleOFF',
   },
   'coolant': {
-    'M8': 'on',
-    'M9': 'off',
+    'M8': 'coolantON',
+    'M9': 'coolantOFF',
   },
   'feed': {
     'F': 'feedRate',

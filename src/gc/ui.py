@@ -139,10 +139,11 @@ def inputMsg(text, **kwargs):
   log('{:}'.format(text), **kwargs)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def readyMsg(extraInfo=''):
-  log('\n{:} {:}'.format(
-    setStrColor(uiCfg['readyMsg'], 'ui.readyMsg'),
-    extraInfo))
+def readyMsg(extraInfo=None):
+  log()
+  if extraInfo:
+    log('{:}'.format(extraInfo))
+  log('{:}'.format(setStrColor(uiCfg['readyMsg'], 'ui.readyMsg')))
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def keyPressMessage(message, key, char):

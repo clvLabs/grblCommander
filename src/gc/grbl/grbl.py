@@ -40,6 +40,7 @@ class Grbl:
     self.spCfg = cfg['serial']
     self.mchCfg = cfg['machine']
     self.mcrCfg = cfg['macro']
+    self.uiCfg = cfg['ui']
 
     self.dct = dict.Dict()
 
@@ -538,12 +539,49 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getSimpleSettingsStr(self):
+    ''' TODO: comment
+    '''
+    settingsStr = ''
+
+    # Configured
+    for modalGroupName in self.uiCfg['simpleParserState']:
+      val = self.status['parserState'][modalGroupName]['val']
+      desc = self.status['parserState'][modalGroupName]['desc']
+      preferred = val
+      display = val
+      color='ui.successMsg'
+
+      if modalGroupName in self.mchCfg['preferredParserState']:
+        preferred = self.mchCfg['preferredParserState'][modalGroupName]
+
+      if val != preferred:
+        color='ui.errorMsg'
+        display = '{:}({:})'.format(val, desc)
+
+      settingsStr += '{:} '.format(ui.setStrColor(display, color))
+
+    # The rest if != preferred
+    for modalGroupName in self.mchCfg['preferredParserState']:
+      if not modalGroupName in self.uiCfg['simpleParserState']:
+        desc = self.status['parserState'][modalGroupName]['desc']
+        val = self.status['parserState'][modalGroupName]['val']
+        preferred = self.mchCfg['preferredParserState'][modalGroupName]
+        if val != preferred:
+          color='ui.errorMsg'
+          display = '{:}({:})'.format(val, desc)
+          settingsStr += '{:} '.format(ui.setStrColor(display, color))
+
+    return settingsStr.rstrip()
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getSimpleMachineStatusStr(self):
     ''' TODO: comment
     '''
-    return '[{:}] - WPos[{:}]'.format(
+    return '[{:}] - WPos[{:}] [{:}]'.format(
       self.getColoredMachineStateStr(),
-      self.getWorkPosStr()
+      self.getWorkPosStr(),
+      self.getSimpleSettingsStr()
     )
 
 
