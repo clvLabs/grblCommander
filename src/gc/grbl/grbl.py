@@ -42,6 +42,13 @@ class Grbl:
     self.mcrCfg = cfg['macro']
     self.uiCfg = cfg['ui']
 
+    self.minX = 0.0
+    self.minY = 0.0
+    self.minZ = 0.0
+    self.maxX = self.mchCfg['max']['X']
+    self.maxY = self.mchCfg['max']['Y']
+    self.maxZ = self.mchCfg['max']['Z']
+
     self.dct = dict.Dict()
 
     self.waitingStartup = True
@@ -278,7 +285,7 @@ class Grbl:
         self.status['parserState']['str'] = parserState
         self.parseParserState(parserState)
         # Check for changes!
-        if self.lastParserStateStr and self.lastParserStateStr != self.getSimpleSettingsStr():
+        if self.lastParserStateStr and self.lastParserStateStr != parserState:
           for event in self.onParserStateChanged:
             event()
         self.lastParserStateStr=parserState
@@ -821,62 +828,32 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def rapidRelative(self,x=None, y=None, z=None, verbose='WARNING'):
-    cmd = self.getRapidRelativeCmd(x,y,z,verbose)
-    ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
-    self.sendWait(cmd, verbose=verbose)
+    cmd = self.getMoveRelativeStr(x,y,z,verbose)
+    if cmd:
+      cmd = 'G0 {:}'.format(cmd)
+      ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
+      self.sendWait(cmd, verbose=verbose)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def feedRelative(self,x=None, y=None, z=None, speed=None, verbose='WARNING'):
-    cmd = self.getFeedRelativeCmd(x,y,z,speedverbose)
-    ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
-    self.sendWait(cmd, verbose=verbose)
+    cmd = self.getMoveRelativeStr(x,y,z,speed,verbose)
+    if cmd:
+      cmd = 'G1 {:} {:}'.format(cmd, 'F'+speed if speed else '')
+      ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
+      self.sendWait(cmd, verbose=verbose)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def moveRelative(self,x=None, y=None, z=None, verbose='WARNING'):
-    cmd = self.getMoveRelativeCmd(x,y,z,verbose)
-    if not cmd:
-      return
-
-    ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
-    self.sendWait(cmd, verbose=verbose)
+    cmd = self.getMoveRelativeStr(x,y,z,verbose)
+    if cmd:
+      ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
+      self.sendWait(cmd, verbose=verbose)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def getRapidRelativeCmd(self,x=None, y=None, z=None, verbose='WARNING'):
-    ''' TODO: comment
-    '''
-    moveCmd = self.getMoveRelativeCmd(x,y,z,verbose)
-
-    if not moveCmd:
-      return ''
-
-    cmd = 'G0 ' + moveCmd
-    cmd = cmd.rstrip()
-    return cmd
-
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def getFeedRelativeCmd(self,x=None, y=None, z=None, speed=None, verbose='WARNING'):
-    ''' TODO: comment
-    '''
-    if speed is None:
-      speed = self.mchCfg['feedSpeed']
-
-    moveCmd = self.getMoveRelativeCmd(x,y,z,verbose)
-
-    if not moveCmd:
-      return ''
-
-    cmd = 'G1 ' + moveCmd
-    cmd += 'F{:} '.format(speed)
-    cmd = cmd.rstrip()
-    return cmd
-
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def getMoveRelativeCmd(self,x=None, y=None, z=None, verbose='WARNING'):
+  def getMoveRelativeStr(self,x=None, y=None, z=None, verbose='WARNING'):
     ''' TODO: comment
     '''
     if x is None and y is None and z is None:
@@ -885,28 +862,22 @@ class Grbl:
 
     cmd = ''
 
-    wpos = self.getWorkPos()
     absolute = self.status['parserState']['distanceMode']['val'] == 'G90'
-
-    minX = 0.0
-    minY = 0.0
-    minZ = 0.0
-    maxX = self.mchCfg['max']['X']
-    maxY = self.mchCfg['max']['Y']
-    maxZ = self.mchCfg['max']['Z']
+    wpos = self.getWorkPos()
     curX = wpos['x']
     curY = wpos['y']
     curZ = wpos['z']
 
+    # ---[ ABSOLUTE MODE ]-----------------------------------------
     if absolute:
       if x:
         newX = curX + x
-        if newX<minX:
-          ui.log('Adjusting X to MinX ({:})'.format(minX), v='DETAIL')
-          newX=minX
-        elif newX>maxX:
-          ui.log('Adjusting X to MaxX ({:})'.format(maxX), v='DETAIL')
-          newX=maxX
+        if newX<self.minX:
+          ui.log('Adjusting X to MinX ({:})'.format(self.minX), v='DETAIL')
+          newX=self.minX
+        elif newX>self.maxX:
+          ui.log('Adjusting X to MaxX ({:})'.format(self.maxX), v='DETAIL')
+          newX=self.maxX
 
         if newX == curX:
           ui.log('X value unchanged, skipping', v='DETAIL')
@@ -915,12 +886,12 @@ class Grbl:
 
       if y:
         newY = curY + y
-        if newY<minY:
-          ui.log('Adjusting Y to MinY ({:})'.format(minY), v='DETAIL')
-          newY=minY
-        elif newY>maxY:
-          ui.log('Adjusting Y to MaxY ({:})'.format(maxY), v='DETAIL')
-          newY=maxY
+        if newY<self.minY:
+          ui.log('Adjusting Y to MinY ({:})'.format(self.minY), v='DETAIL')
+          newY=self.minY
+        elif newY>self.maxY:
+          ui.log('Adjusting Y to MaxY ({:})'.format(self.maxY), v='DETAIL')
+          newY=self.maxY
 
         if newY == curY:
           ui.log('Y value unchanged, skipping', v='DETAIL')
@@ -929,27 +900,61 @@ class Grbl:
 
       if z:
         newZ = curZ + z
-        if newZ<minZ:
-          ui.log('Adjusting Z to MinZ ({:})'.format(minZ), v='DETAIL')
-          newZ=minZ
-        elif newZ>maxZ:
-          ui.log('Adjusting Z to MaxZ ({:})'.format(maxZ), v='DETAIL')
-          newZ=maxZ
+        if newZ<self.minZ:
+          ui.log('Adjusting Z to MinZ ({:})'.format(self.minZ), v='DETAIL')
+          newZ=self.minZ
+        elif newZ>self.maxZ:
+          ui.log('Adjusting Z to MaxZ ({:})'.format(self.maxZ), v='DETAIL')
+          newZ=self.maxZ
 
         if newZ == curZ:
           ui.log('Z value unchanged, skipping', v='DETAIL')
         else:
           cmd += 'Z{:} '.format(ui.coordStr(newZ))
+
+    # ---[ RELATIVE MODE ]-----------------------------------------
     else:
       if x:
         newX = x
-        cmd += 'X{:} '.format(ui.coordStr(newX))
+        if curX+newX<self.minX:
+          ui.log('Adjusting X to MinX ({:})'.format(self.minX), v='DETAIL')
+          newX=self.minX-curX
+        elif curX+newX>self.maxX:
+          ui.log('Adjusting X to MaxX ({:})'.format(self.maxX), v='DETAIL')
+          newX=self.maxX-curX
+
+        if newX == 0:
+          ui.log('X value unchanged, skipping', v='DETAIL')
+        else:
+          cmd += 'X{:} '.format(ui.coordStr(newX))
+
       if y:
         newY = y
-        cmd += 'Y{:} '.format(ui.coordStr(newY))
+        if curY+newY<self.minY:
+          ui.log('Adjusting Y to MinY ({:})'.format(self.minY), v='DETAIL')
+          newY=self.minY-curY
+        elif curY+newY>self.maxY:
+          ui.log('Adjusting Y to MaxY ({:})'.format(self.maxY), v='DETAIL')
+          newY=self.maxY-curY
+
+        if newY == 0:
+          ui.log('Y value unchanged, skipping', v='DETAIL')
+        else:
+          cmd += 'Y{:} '.format(ui.coordStr(newY))
+
       if z:
         newZ = z
-        cmd += 'Z{:} '.format(ui.coordStr(newZ))
+        if curZ+newZ<self.minZ:
+          ui.log('Adjusting Z to MinZ ({:})'.format(self.minZ), v='DETAIL')
+          newZ=self.minZ-curZ
+        elif curZ+newZ>self.maxZ:
+          ui.log('Adjusting Z to MaxZ ({:})'.format(self.maxZ), v='DETAIL')
+          newZ=self.maxZ-curZ
+
+        if newZ == 0:
+          ui.log('Z value unchanged, skipping', v='DETAIL')
+        else:
+          cmd += 'Z{:} '.format(ui.coordStr(newZ))
 
     cmd = cmd.rstrip()
     return cmd
@@ -957,55 +962,76 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def rapidAbsolute(self,x=None, y=None, z=None, machineCoords=False, verbose='WARNING'):
+    cmd = self.getMoveAbsoluteStr(x,y,z,machineCoords,verbose)
+    if cmd:
+      cmd = 'G0 {:}'.format(cmd)
+      ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
+      self.sendWait(cmd, verbose=verbose)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def feedAbsolute(self,x=None, y=None, z=None, machineCoords=False, speed=None, verbose='WARNING'):
+    cmd = self.getMoveAbsoluteStr(x,y,z,machineCoords,speed,verbose)
+    if cmd:
+      cmd = 'G1 {:} {:}'.format(cmd, 'F'+speed if speed else '')
+      ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
+      self.sendWait(cmd, verbose=verbose)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def moveAbsolute(self,x=None, y=None, z=None, machineCoords=False, verbose='WARNING'):
+    cmd = self.getMoveAbsoluteStr(x,y,z,machineCoords,verbose)
+    if cmd:
+      ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
+      self.sendWait(cmd, verbose=verbose)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getMoveAbsoluteStr(self,x=None, y=None, z=None, machineCoords=False, verbose='WARNING'):
     ''' TODO: comment
     '''
-    cmd = 'G0 '
+    if x is None and y is None and z is None:
+      ui.log('No parameters provided, doing nothing', v=verbose)
+      return ''
+
+    cmd = ''
+
+    absolute = self.status['parserState']['distanceMode']['val'] == 'G90'
+    wpos = self.getWorkPos()
+    curX = wpos['x']
+    curY = wpos['y']
+    curZ = wpos['z']
 
     if machineCoords:
       x = self.translateToMachinePos('x', x)
       y = self.translateToMachinePos('y', y)
       z = self.translateToMachinePos('z', z)
 
-    if x != None:
-      cmd += 'X{:} '.format(ui.coordStr(x))
+    # ---[ ABSOLUTE MODE ]-----------------------------------------
+    if absolute:
+      if x != None:
+        cmd += 'X{:} '.format(ui.coordStr(x))
 
-    if y != None:
-      cmd += 'Y{:} '.format(ui.coordStr(y))
+      if y != None:
+        cmd += 'Y{:} '.format(ui.coordStr(y))
 
-    if z != None:
-      cmd += 'Z{:} '.format(ui.coordStr(z))
+      if z != None:
+        cmd += 'Z{:} '.format(ui.coordStr(z))
 
-    cmd = cmd.rstrip()
+    # ---[ RELATIVE MODE ]-----------------------------------------
+    else:
+      if x != None:
+        x = x - curX
+        cmd += 'X{:} '.format(ui.coordStr(x))
 
-    ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
-    self.sendWait(cmd, verbose=verbose)
-    return
+      if y != None:
+        y = y - curY
+        cmd += 'Y{:} '.format(ui.coordStr(y))
 
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def feedAbsolute(self,x=None, y=None, z=None, speed=None, verbose='WARNING'):
-    ''' TODO: comment
-    '''
-    if speed is None:
-      speed = self.mchCfg['feedSpeed']
-
-    cmd = 'G1 '
-
-    if x != None:
-      cmd += 'X{:} '.format(ui.coordStr(x))
-
-    if y != None:
-      cmd += 'Y{:} '.format(ui.coordStr(y))
-
-    if z != None:
-      cmd += 'Z{:} '.format(ui.coordStr(z))
-
-    cmd += 'F{:} '.format(speed)
+      if z != None:
+        z = z - curZ
+        cmd += 'Z{:} '.format(ui.coordStr(z))
 
     cmd = cmd.rstrip()
 
-    ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
-    self.sendWait(cmd, verbose=verbose)
-    return
-
-
+    return cmd
