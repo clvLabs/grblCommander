@@ -113,27 +113,6 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def waitForStartup(self):
-    ''' Wait for grblShield startup
-    '''
-    ui.log('Waiting for startup message...')
-    self.alarm = ''
-    self.waitingStartup = True
-    startTime = time.time()
-
-    while self.waitingStartup and (time.time() - startTime) < WAITSTARTUP_TIME:
-      self.process()
-
-    if not self.waitingStartup:
-      ui.log('Startup message received, machine ready', color='ui.successMsg')
-      ui.log()
-    else:
-      self.status['str'] = ''
-      ui.log('TIMEOUT Waiting for startup', v='WARNING')
-      ui.log()
-
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def stop(self):
     ''' Stop connection with grblShield
     '''
@@ -207,6 +186,81 @@ class Grbl:
     if sendParserStateQuery:
       self.queryGCodeParserState()
       self.showNextParserState = False
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def sendWait(self, command, responseTimeout=None, verbose='BASIC'):
+    ''' Send a command
+    '''
+    self.send(command=command, responseTimeout=responseTimeout, verbose=verbose)
+    self.waitForMachineIdle(verbose=verbose)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def send(self, command, responseTimeout=None, verbose='BASIC'):
+    ''' Send a command
+    '''
+    command = command.rstrip().rstrip('\n').rstrip('\r')
+    upperCommand = command.upper()
+
+    if upperCommand == '$G':
+      self.showNextParserState = True
+    elif upperCommand == '?':
+      self.showNextMachineStatus = True
+
+    ui.log('>>>>> {:}'.format(command), color='comms.send' ,v=verbose)
+    self.sp.write(command+'\n')
+
+    return self.readResponse(responseTimeout=responseTimeout,verbose=verbose)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def readResponse(self,responseTimeout=None, verbose='BASIC'):
+    ''' Read a command's response
+    '''
+    if responseTimeout is None:
+      responseTimeout = self.spCfg['responseTimeout']
+
+    ui.log('readResponse() - Waiting for response from serial...', v='SUPER')
+
+    startTime = time.time()
+    receivedLines = 0
+    self.response=[]
+    self.waitingResponse = True
+
+    while self.waitingResponse and (time.time() - startTime) < responseTimeout:
+      self.process()
+
+    if not self.waitingResponse:
+      ui.log(  'readResponse() - Successfully received {:d} data lines from serial'.format(
+        len(self.response)), v='SUPER')
+    else:
+      ui.log('readResponse() - TIMEOUT Waiting for response from serial', color='ui.errorMsg', v='ERROR')
+      self.response = []
+      self.waitingResponse = False
+
+    return self.response
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def waitForStartup(self):
+    ''' Wait for grblShield startup
+    '''
+    ui.log('Waiting for startup message...')
+    self.alarm = ''
+    self.waitingStartup = True
+    startTime = time.time()
+
+    while self.waitingStartup and (time.time() - startTime) < WAITSTARTUP_TIME:
+      self.process()
+
+    if not self.waitingStartup:
+      ui.log('Startup message received, machine ready', color='ui.successMsg')
+      ui.log()
+    else:
+      self.status['str'] = ''
+      ui.log('TIMEOUT Waiting for startup', v='WARNING')
+      ui.log()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -504,60 +558,6 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def sendWait(self, command, responseTimeout=None, verbose='BASIC'):
-    ''' Send a command
-    '''
-    self.send(command=command, responseTimeout=responseTimeout, verbose=verbose)
-    self.waitForMachineIdle(verbose=verbose)
-
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def send(self, command, responseTimeout=None, verbose='BASIC'):
-    ''' Send a command
-    '''
-    command = command.rstrip().rstrip('\n').rstrip('\r')
-    upperCommand = command.upper()
-
-    if upperCommand == '$G':
-      self.showNextParserState = True
-    elif upperCommand == '?':
-      self.showNextMachineStatus = True
-
-    ui.log('>>>>> {:}'.format(command), color='comms.send' ,v=verbose)
-    self.sp.write(command+'\n')
-
-    return self.readResponse(responseTimeout=responseTimeout,verbose=verbose)
-
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def readResponse(self,responseTimeout=None, verbose='BASIC'):
-    ''' Read a command's response
-    '''
-    if responseTimeout is None:
-      responseTimeout = self.spCfg['responseTimeout']
-
-    ui.log('readResponse() - Waiting for response from serial...', v='SUPER')
-
-    startTime = time.time()
-    receivedLines = 0
-    self.response=[]
-    self.waitingResponse = True
-
-    while self.waitingResponse and (time.time() - startTime) < responseTimeout:
-      self.process()
-
-    if not self.waitingResponse:
-      ui.log(  'readResponse() - Successfully received {:d} data lines from serial'.format(
-        len(self.response)), v='SUPER')
-    else:
-      ui.log('readResponse() - TIMEOUT Waiting for response from serial', color='ui.errorMsg', v='ERROR')
-      self.response = []
-      self.waitingResponse = False
-
-    return self.response
-
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getSimpleSettingsStr(self):
     ''' TODO: comment
     '''
@@ -593,6 +593,7 @@ class Grbl:
 
     return settingsStr.rstrip()
 
+
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getSimpleMachineStatusStr(self):
     ''' TODO: comment
@@ -617,14 +618,9 @@ class Grbl:
     ''' TODO: comment
     '''
     wco = self.status['WCO'] if 'WCO' in self.status else None
-
     if not wco:
       return '<NONE>'
-
-    return ui.xyzStr(
-      wco['x'],
-      wco['y'],
-      wco['z'])
+    return ui.xyzStr(wco['x'],wco['y'],wco['z'])
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -632,21 +628,18 @@ class Grbl:
     ''' TODO: comment
     '''
     mPos = self.status['MPos'] if 'MPos' in self.status else None
-
     if not mPos:
       return '<NONE>'
-
-    return ui.xyzStr(
-      mPos['x'],
-      mPos['y'],
-      mPos['z'])
+    return ui.xyzStr(mPos['x'],mPos['y'],mPos['z'])
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getWorkPosStr(self):
     ''' TODO: comment
     '''
-    wpos = self.status['WPos']
+    wpos = self.status['WPos'] if 'WPos' in self.status else None
+    if not mPos:
+      return '<NONE>'
     return ui.xyzStr(wpos['x'], wpos['y'], wpos['z'])
 
 
