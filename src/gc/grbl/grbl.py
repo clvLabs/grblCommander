@@ -850,6 +850,9 @@ class Grbl:
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def moveRelative(self,x=None, y=None, z=None, verbose='WARNING'):
     cmd = self.getMoveRelativeCmd(x,y,z,verbose)
+    if not cmd:
+      return
+
     ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
     self.sendCommand(cmd, verbose=verbose)
     self.waitForMachineIdle(verbose=verbose)
@@ -859,7 +862,13 @@ class Grbl:
   def getRapidRelativeCmd(self,x=None, y=None, z=None, verbose='WARNING'):
     ''' TODO: comment
     '''
-    cmd = 'G0 ' + self.getMoveRelativeCmd(x,y,z,verbose)
+    moveCmd = self.getMoveRelativeCmd(x,y,z,verbose)
+
+    if not moveCmd:
+      return ''
+
+    cmd = 'G0 ' + moveCmd
+    return cmd
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -873,6 +882,7 @@ class Grbl:
     cmd = ''
 
     wpos = self.getWorkPos()
+    absolute = self.status['parserState']['distanceMode']['val'] == 'G90'
 
     minX = 0.0
     minY = 0.0
@@ -884,46 +894,57 @@ class Grbl:
     curY = wpos['y']
     curZ = wpos['z']
 
-    if x:
-      newX = curX + x
-      if newX<minX:
-        ui.log('Adjusting X to MinX ({:})'.format(minX), v='DETAIL')
-        newX=minX
-      elif newX>maxX:
-        ui.log('Adjusting X to MaxX ({:})'.format(maxX), v='DETAIL')
-        newX=maxX
+    if absolute:
+      if x:
+        newX = curX + x
+        if newX<minX:
+          ui.log('Adjusting X to MinX ({:})'.format(minX), v='DETAIL')
+          newX=minX
+        elif newX>maxX:
+          ui.log('Adjusting X to MaxX ({:})'.format(maxX), v='DETAIL')
+          newX=maxX
 
-      if newX == curX:
-        ui.log('X value unchanged, skipping', v='DETAIL')
-      else:
+        if newX == curX:
+          ui.log('X value unchanged, skipping', v='DETAIL')
+        else:
+          cmd += 'X{:} '.format(ui.coordStr(newX))
+
+      if y:
+        newY = curY + y
+        if newY<minY:
+          ui.log('Adjusting Y to MinY ({:})'.format(minY), v='DETAIL')
+          newY=minY
+        elif newY>maxY:
+          ui.log('Adjusting Y to MaxY ({:})'.format(maxY), v='DETAIL')
+          newY=maxY
+
+        if newY == curY:
+          ui.log('Y value unchanged, skipping', v='DETAIL')
+        else:
+          cmd += 'Y{:} '.format(ui.coordStr(newY))
+
+      if z:
+        newZ = curZ + z
+        if newZ<minZ:
+          ui.log('Adjusting Z to MinZ ({:})'.format(minZ), v='DETAIL')
+          newZ=minZ
+        elif newZ>maxZ:
+          ui.log('Adjusting Z to MaxZ ({:})'.format(maxZ), v='DETAIL')
+          newZ=maxZ
+
+        if newZ == curZ:
+          ui.log('Z value unchanged, skipping', v='DETAIL')
+        else:
+          cmd += 'Z{:} '.format(ui.coordStr(newZ))
+    else:
+      if x:
+        newX = x
         cmd += 'X{:} '.format(ui.coordStr(newX))
-
-    if y:
-      newY = curY + y
-      if newY<minY:
-        ui.log('Adjusting Y to MinY ({:})'.format(minY), v='DETAIL')
-        newY=minY
-      elif newY>maxY:
-        ui.log('Adjusting Y to MaxY ({:})'.format(maxY), v='DETAIL')
-        newY=maxY
-
-      if newY == curY:
-        ui.log('Y value unchanged, skipping', v='DETAIL')
-      else:
+      if y:
+        newY = y
         cmd += 'Y{:} '.format(ui.coordStr(newY))
-
-    if z:
-      newZ = curZ + z
-      if newZ<minZ:
-        ui.log('Adjusting Z to MinZ ({:})'.format(minZ), v='DETAIL')
-        newZ=minZ
-      elif newZ>maxZ:
-        ui.log('Adjusting Z to MaxZ ({:})'.format(maxZ), v='DETAIL')
-        newZ=maxZ
-
-      if newZ == curZ:
-        ui.log('Z value unchanged, skipping', v='DETAIL')
-      else:
+      if z:
+        newZ = z
         cmd += 'Z{:} '.format(ui.coordStr(newZ))
 
     cmd = cmd.rstrip()
