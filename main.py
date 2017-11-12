@@ -95,7 +95,7 @@ def showHelp():
   ---------------------------------------------------------------------
   xX         - Set jog distance (XY)
   zZ         - Set jog distance (Z)
-  vV         - Set verbose level (-/+) (loop)
+  v/V        - Set verbose level (-/+) (loop)
   """)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
