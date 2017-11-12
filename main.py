@@ -28,6 +28,7 @@ gVERSION = '0.5.0'
 
 # grbl machine manager
 mch = grbl.Grbl(cfg)
+
 mcr = macro.Macro(mch)
 tst = test.Test(mch)
 
@@ -51,6 +52,13 @@ def readyMsg(extraInfo=None):
     extraInfo = mch.getSimpleMachineStatusStr()
 
   ui.readyMsg(extraInfo)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def onParserStateChanged():
+  ui.log(mch.getSimpleMachineStatusStr())
+
+# Register
+mch.onParserStateChanged.append(onParserStateChanged)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showHelp():

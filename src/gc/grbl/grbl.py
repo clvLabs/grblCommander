@@ -49,6 +49,8 @@ class Grbl:
     self.response = []
     self.lastMachineStatusQuery = 0
     self.lastParserStateQuery = 0
+    self.lastParserStateStr = ''
+    self.onParserStateChanged = []
     self.statusQuerySent = False
     self.waitingMachineStatus = False
     self.showNextMachineStatus = False
@@ -275,6 +277,11 @@ class Grbl:
         parserState = line[4:-1]
         self.status['parserState']['str'] = parserState
         self.parseParserState(parserState)
+        # Check for changes!
+        if self.lastParserStateStr and self.lastParserStateStr != self.getSimpleSettingsStr():
+          for event in self.onParserStateChanged:
+            event()
+        self.lastParserStateStr=self.getSimpleSettingsStr()
         # 'trick' to avoid showing the 'ok' for periodic calls
         if self.waitingResponse:
           self.waitingResponse = False
