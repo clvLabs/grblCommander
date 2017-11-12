@@ -252,7 +252,7 @@ class Macro:
             ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
             return False
         else:
-          self.grbl.sendCommand(cmdName)
+          self.grbl.send(cmdName)
           if not silent:
             self.grbl.waitForMachineIdle()
 

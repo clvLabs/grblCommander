@@ -16,11 +16,6 @@ from . import ui as ui
 from . import keyboard as kb
 
 # ------------------------------------------------------------------
-if not 'win' in sys.platform:
-  from . import rpigpio as gpio
-  gpio.setup()
-
-# ------------------------------------------------------------------
 # Test class
 
 class Test:
@@ -32,6 +27,9 @@ class Test:
     self.cfg = self.grbl.getConfig()
     self.mchCfg = self.cfg['machine']
     self.tstCfg = self.cfg['test']
+    self.mpos = self.grbl.status['MPos']
+    self.wpos = self.grbl.status['WPos']
+    self.parserState = self.grbl.status['parserState']
 
     self.testCancelled = False
 
@@ -46,6 +44,31 @@ class Test:
     ''' Get working configuration
     '''
     return self.cfg
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def sendCommand(cmd):
+    ''' Send a move command to the grblShield (wait for machine idle)
+    '''
+    self.grbl.sendWait(cmd)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def mchFeed(self,x=None, y=None, z=None, speed=None):
+    ''' TODO: comment
+    '''
+    if not self.testCancelled:
+      self.grbl.feedAbsolute(x=x, y=y, z=z, speed=speed)
+      self.checkTestCancelled()
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def mchRapid(self,x=None, y=None, z=None):
+    ''' TODO: comment
+    '''
+    if not self.testCancelled:
+      self.grbl.rapidAbsolute(x=x, y=y, z=z)
+      self.checkTestCancelled()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -112,494 +135,8 @@ class Test:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def mchFeed(self,x=None, y=None, z=None, speed=None):
-    ''' TODO: comment
-    '''
-    if not self.testCancelled:
-      self.grbl.feedAbsolute(x=x, y=y, z=z, speed=speed)
-      self.checkTestCancelled()
-
-
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def mchRapid(self,x=None, y=None, z=None):
-    ''' TODO: comment
-    '''
-    if not self.testCancelled:
-      self.grbl.rapidAbsolute(x=x, y=y, z=z)
-      self.checkTestCancelled()
-
-
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def automaticProbe(self,iterations=None):
-    ''' TODO: comment
-    '''
-    if iterations is None:
-      iterations = tstCfg['autoProbeIterations']
-
-    self.testCancelled = False
-
-    ui.log('Saving original Z')
-    savedZ = self.grbl.status['WPos']['z']
-
-    downStep = 0.1
-    upStep = 0.01
-    touchZList = []
-    nextStartPoint = 0
-    touchZ = 0
-
-    ui.log('Starting automatic probe ({:d} iterations)...'.format(iterations))
-
-    for curIteration in range(iterations):
-
-      # Prepare Z position
-      ui.log('Moving to Z to last known touch point +1 step to start test...')
-      self.grbl.feedAbsolute(z=nextStartPoint, speed=self.mchCfg['seekSpeed'])
-
-      # Step down until contact
-      exit = False
-      z = self.grbl.status['WPos']['z']
-
-      ui.logTitle('Iteration {:d}'.format(curIteration+1))
-      while not exit and not self.testCancelled:
-        ui.log('Seeking CONTACT point (Z={:})\r'.format(ui.coordStr(z)), end='')
-
-        self.grbl.feedAbsolute(z=z)
-
-        if self.checkTestCancelled():
-          break
-
-        if gpio.isProbeContactActive():
-          ui.log()
-          exit = True
-          touchZ = z
-          nextStartPoint = touchZ+downStep
-          break
-
-        z -= downStep
-
-      # Step up until contact lost
-      if self.testCancelled:
-        break
-      else:
-        exit = False
-        lastZ = z
-
-        while not exit and not self.testCancelled:
-          z += upStep
-          ui.log('Seeking RELEASE point (Z={:})\r'.format(ui.coordStr(z)), end='')
-
-          self.grbl.feedAbsolute(z=z)
-
-          if self.checkTestCancelled():
-            break
-
-          if not gpio.isProbeContactActive():
-            ui.log()
-            ui.log('TOUCH POINT @Z={:}'.format(ui.coordStr(lastZ)), color='ui.finishedMsg')
-            exit = True
-            touchZ = lastZ
-            break
-
-          lastZ = z
-
-        touchZList.append(touchZ)
-
-      ui.log('---------------------------------------')
-
-    if self.testCancelled:
-      return False
-
-    ui.log('Restoring original Z...')
-    self.grbl.rapidAbsolute(z=savedZ)
-
-    averageTouchZ = float(sum(touchZList))/len(touchZList) if len(touchZList) > 0 else 0
-
-    minTouchZ = 9999
-    for tz in touchZList:
-      if tz < minTouchZ: minTouchZ = tz
-
-    maxTouchZ = -9999
-    for tz in touchZList:
-      if tz > maxTouchZ: maxTouchZ = tz
-
-    maxDevTouchZ = maxTouchZ - minTouchZ
-
-    ui.log('RESULTS:')
-    ui.log('--------')
-    ui.log('- TOUCH POINTS @Z={:}'.format(touchZList), color='ui.finishedMsg')
-    ui.log('- Average={:} - Min={:} - Max={:} - MaxDev={:}'.format(
-              ui.coordStr(averageTouchZ)
-            , ui.coordStr(minTouchZ)
-            , ui.coordStr(maxTouchZ)
-            , ui.coordStr(maxDevTouchZ))
-           )
-
-    return {
-      'z': averageTouchZ,
-      'iter': iterations,
-      'max': maxTouchZ,
-      'min': minTouchZ,
-      'dev': maxDevTouchZ,
-    }
-
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def manualProbe(self):
-    ''' TODO: comment
-    '''
-    self.testCancelled = False
-
-    ui.log('Saving original Z')
-    savedZ = self.grbl.status['WPos']['z']
-    ui.log('Moving to Z0 to start test...')
-    self.grbl.rapidAbsolute(z=0)
-
-    ui.log('Starting manual probe...')
-
-    # 0.1 step down until contact
-    exit = False
-    touchZ = 0
-    z = self.grbl.status['WPos']['z']
-
-    while not exit and not self.testCancelled:
-      z -= 0.1
-      ui.log('Seeking CONTACT point (Z={:})\r'.format(ui.coordStr(z)), end='')
-
-      self.grbl.feedAbsolute(z=z)
-
-      ui.inputMsg('<ENTER>:stop / <SPACE>:continue / <ESC>:exit ...')
-      key=0
-      while key != 13 and key != 10 and key != 32 and key != 27:
-        key=kb.readKey()
-
-      if key == 27:  # <ESC>
-        self.testCancelled = True
-        self.logTestCancelled()
-        break
-      elif key == 13 or key == 10:  # <ENTER>
-        ui.log('Stopping at Z={:}'.format(ui.coordStr(z)))
-        exit = True
-        touchZ = z
-        break
-      elif key == 32:  # <SPACE>
-        pass
-
-      if exit or self.testCancelled:
-        break
-
-    # 0.025 step up until contact lost
-    if not self.testCancelled:
-      exit = False
-      lastZ = z
-
-      while not exit and not self.testCancelled:
-        z += 0.025
-        ui.log('Seeking RELEASE point (Z={:})\r'.format(ui.coordStr(z)), end='')
-
-        self.grbl.feedAbsolute(z=z)
-
-        ui.log('PHASE2 : Seeking RELEASE point')
-        ui.inputMsg('<ENTER>:stop / <SPACE>:continue / <ESC>:exit ...')
-        key=0
-        while key != 13 and key != 10 and key != 32 and key != 27:
-          key=kb.readKey()
-
-        if key == 27:  # <ESC>
-          self.testCancelled = True
-          self.logTestCancelled()
-          break
-        elif key == 13 or key == 10:  # <ENTER>
-          ui.log('TOUCH POINT @Z={:}'.format(ui.coordStr(lastZ)), color='ui.finishedMsg')
-          exit = True
-          touchZ = lastZ
-          break
-        elif key == 32:  # <SPACE>
-          pass
-
-        if exit or self.testCancelled:
-          break
-
-        lastZ = z
-
-    if self.testCancelled:
-      return False
-
-    ui.log('Restoring original Z...')
-    self.grbl.rapidAbsolute(z=savedZ)
-
-    return {
-      'z': touchZ,
-      'iter': 1,
-      'max': touchZ,
-      'min': touchZ,
-      'dev': 0,
-    }
-
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def pointProbe(self):
-    ''' TODO: comment
-    '''
-    self.testCancelled = False
-
-    self.logTestHeader("""
-    This test will start a probing test to check a measuring attachment
-    or verify base level.
-
-    On Linux, it will try to do an automatic probe test (check gpio config)
-    On Windows, it will try to do a manual probe test
-    """)
-
-    if not 'win' in sys.platform:
-      iterations=ui.getUserInput('Number of auto probing iterations ({:})'.format(self.tstCfg['autoProbeIterations']),
-        int, self.tstCfg['autoProbeIterations'])
-
-    if not self.userConfirm():
-      return
-
-    if 'win' in sys.platform:
-      self.manualProbe()
-    else:
-      self.automaticProbe(iterations)
-
-    if self.testCancelled:
-      self.testCancelled = False
-    else:
-      self.logTestFinished()
-
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def tableProbingScan(self):
-    ''' TODO: comment
-    '''
-    self.testCancelled = False
-
-    self.logTestHeader("""
-    This test will start a series of probing tests
-    in a grid pattern to get a grid of level measurements
-    and save them on a file for further analysis.
-    """)
-
-    userLines=ui.getUserInput('Number of inner lines (0)', int, 0)
-    safeHeight=ui.getUserInput('Safe height (0)', float, 0)
-
-    if not self.userConfirm():
-      return
-
-    gridLines = int(userLines) + 2
-
-    result = [[None for i in range(gridLines)] for j in range(gridLines)]
-
-    ui.log('Saving original XYZ')
-    savedX, savedY, savedZ = self.grbl.status['WPos']['x'], self.grbl.status['WPos']['y'], self.grbl.status['WPos']['z']
-
-    if self.grbl.status['WPos']['z'] < safeHeight:
-      ui.log('Temporarily moving to safe Z...')
-      self.grbl.rapidAbsolute(z=safeHeight)
-
-    gridIncrementX = self.maxX / (gridLines-1)
-    gridIncrementY = self.maxY / (gridLines-1)
-
-    gridX = [gridIncrementX * pos for pos in range(gridLines)]
-    gridY = [gridIncrementY * pos for pos in range(gridLines)]
-
-    ui.log('self.maxX = [:]'.format(ui.coordStr(self.maxX)), v='DEBUG')
-    ui.log('self.maxY = [:]'.format(ui.coordStr(self.maxY)), v='DEBUG')
-    ui.log('gridIncrementX = [:]'.format(ui.coordStr(gridIncrementX)), v='DEBUG')
-    ui.log('gridIncrementY = [:]'.format(ui.coordStr(gridIncrementY)), v='DEBUG')
-    ui.log('gridX = [:s]'.format(repr(gridX)), v='DEBUG')
-    ui.log('gridY = [:s]'.format(repr(gridY)), v='DEBUG')
-
-    ui.log(  'Starting test ({:d}*{:d} lines / {:d} points)...'.format(
-              gridLines
-            , gridLines
-            , gridLines*gridLines )
-          )
-
-    curGridPoint = 0
-
-    rangeY = range(len(gridY))
-
-    for indexY in rangeY:
-      if indexY % 2 == 0:
-        rangeX = range(len(gridX))
-      else:
-        rangeX = range(len(gridX)-1,-1,-1)
-
-      for indexX in rangeX:
-        ui.logTitle('Testing[{:d}][{:d}] Y={:} X={:} ({:d}/{:d})'.format(
-          indexY
-        , indexX
-        , ui.coordStr(gridY[indexY])
-        , ui.coordStr(gridX[indexX])
-        , curGridPoint+1
-        , gridLines*gridLines ) )
-
-        ui.log('self.grbl.rapidAbsolute(Y={:} X={:})...'.format(
-            ui.coordStr(gridY[indexY]),
-            ui.coordStr(gridX[indexX])
-          ), v='DEBUG')
-        self.grbl.rapidAbsolute(y=gridY[indexY], x=gridX[indexX])
-
-        if self.checkTestCancelled():
-          break
-
-        curGridPoint+=1
-
-        # Make a probe
-        if 'win' in sys.platform:
-          testResult = self.manualProbe()
-        else:
-          testResult = self.automaticProbe()
-
-        if testResult is False:
-          self.testCancelled = True
-          break
-
-        result[indexY][indexX] = { 'X':gridX[indexX], 'Y':gridY[indexY], 'Z':testResult['z'], 'Zmaz':testResult['max'], 'Zmin':testResult['min'], 'Zdev':testResult['dev'] }
-
-      if self.testCancelled:
-        break
-
-    saveTestResults = not self.testCancelled
-
-    if self.testCancelled:
-      self.testCancelled = False
-    else:
-      self.logTestFinished()
-
-    ui.logTitle('Back home')
-    ui.log('Temporarily moving to safe Z...')
-    self.grbl.rapidAbsolute(z=safeHeight)
-    ui.log('Restoring original XYZ...')
-    self.grbl.rapidAbsolute(x=savedX, y=savedY)
-    self.grbl.rapidAbsolute(z=savedZ)
-
-    if not saveTestResults:
-      return
-
-    # Test results - normal
-    ui.logBlock('Test tesults (normalized)')
-
-    rangeY = range(len(gridY))
-    rangeX = range(len(gridX))
-
-    for indexY in rangeY:
-      for indexX in rangeX:
-        if result[indexY][indexX] is None:
-          ui.log(  'Y[{:02d}][{:07.3f}] X[{:02d}][{:07.3f}] Z[ERROR]'.format(
-                    indexY
-                  , 0.0
-                  , indexX
-                  , 0.0 )
-                )
-        else:
-          ui.log(  'Y[{:02d}][{:07.3f}] X[{:02d}][{:07.3f}] Z[{:07.3f}]-dev[{:07.3f}]'.format(
-                    indexY
-                  , result[indexY][indexX]['Y']
-                  , indexX
-                  , result[indexY][indexX]['X']
-                  , (result[indexY][indexX]['Z'] - result[0][0]['Z'])
-                  , result[indexY][indexX]['Zdev'] )
-                )
-
-
-    # Test results - Excel formatted
-    # Create output file
-    t=time.localtime()
-    fileName =  'logs/TableProbingScan {:d}{:02d}{:02d}{:02d}{:02d}{:02d}.txt'.format(t.tm_year,t.tm_mon,t.tm_mday,t.tm_hour,t.tm_min,t.tm_sec)
-    outFile = open(fileName, 'w')
-
-    outFile.write(' grblCommander Table Probing Scan \n')
-    outFile.write('=================================\n')
-    outFile.write('\n')
-    outFile.write('TimeStamp: {:d}/{:02d}/{:02d} {:02d}:{:02d}:{:02d}\n'.format(t.tm_year,t.tm_mon,t.tm_mday,t.tm_hour,t.tm_min,t.tm_sec) )
-    outFile.write('\n')
-
-    outFile.write('Test results (real Z):\n')
-    outFile.write('----------------------\n')
-    outFile.write('\n')
-
-    rangeY = range(len(gridY)-1,-1,-1)
-    rangeX = range(len(gridX))
-
-    for indexY in rangeY:
-      line = '{:07.3f}\t'.format(result[indexY][0]['Y'])
-
-      for indexX in rangeX:
-        if result[indexY][indexX] is None:
-          line += 'ERROR\t'
-        else:
-          line += '{:07.3f}\t'.format(result[indexY][indexX]['Z'])
-
-      outFile.write(line.rstrip('\t')+'\n')
-
-    line = '\t'
-
-    for indexX in rangeX:
-      line += '{:07.3f}\t'.format(result[0][indexX]['X'])
-
-    outFile.write(line.rstrip('\t')+'\n')
-    outFile.write('\n')
-
-
-    outFile.write('Test results (normalized Z):\n')
-    outFile.write('----------------------------\n')
-    outFile.write('\n')
-
-    rangeY = range(len(gridY)-1,-1,-1)
-    rangeX = range(len(gridX))
-
-    for indexY in rangeY:
-      line = '{:07.3f}\t'.format(result[indexY][0]['Y'])
-
-      for indexX in rangeX:
-        if result[indexY][indexX] is None:
-          line += 'ERROR\t'
-        else:
-          line += '{:07.3f}\t'.format((result[indexY][indexX]['Z'] - result[0][0]['Z']))
-
-      outFile.write(line.rstrip('\t')+'\n')
-
-    line = '\t'
-
-    for indexX in rangeX:
-      line += '{:07.3f}\t'.format(result[0][indexX]['X'])
-
-    outFile.write(line.rstrip('\t')+'\n')
-    outFile.write('\n')
-
-
-    outFile.write('Test results (Z deviations):\n')
-    outFile.write('----------------------------\n')
-    outFile.write('\n')
-
-    rangeY = range(len(gridY)-1,-1,-1)
-    rangeX = range(len(gridX))
-
-    for indexY in rangeY:
-      line = '{:07.3f}\t'.format(result[indexY][0]['Y'])
-
-      for indexX in rangeX:
-        if result[indexY][indexX] is None:
-          line += 'ERROR\t'
-        else:
-          line += '{:07.3f}\t'.format((result[0][0]['Zdev'],))
-
-      outFile.write(line.rstrip('\t')+'\n')
-
-    line = '\t'
-
-    for indexX in rangeX:
-      line += '{:07.3f}\t'.format(result[0][indexX]['X'])
-
-    outFile.write(line.rstrip('\t')+'\n')
-    outFile.write('\n')
-
-    outFile.close()
-
-    ui.logBlock('Excel version saved to {:s}'.format(fileName))
-
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def tablePositionScan(self):
@@ -622,11 +159,10 @@ class Test:
         return
 
       ui.logTitle('Going to [{:}]'.format(stepName))
-      self.grbl.rapidAbsolute(x=x,y=y)
-      self.checkTestCancelled()
+      self.mchRapid(x=x,y=y)
 
-    savedX = self.grbl.status['WPos']['x']
-    savedY = self.grbl.status['WPos']['y']
+    savedX = self.wpos['x']
+    savedY = self.wpos['y']
 
     tpsSingleStep('BL', x=0,y=0)
     tpsSingleStep('BC', x=self.maxX/2,y=0)
@@ -670,13 +206,9 @@ class Test:
 
     # - [Internal helpers]- - - - - - - - - - - - - - - - - -
     def sendCmd(cmd):
-      if self.testCancelled:
-        return
-
-      self.grbl.sendCommand(cmd)
-      self.grbl.waitForMachineIdle()
-
-      self.checkTestCancelled()
+      if not self.testCancelled:
+        self.sendCommand(cmd)
+        self.checkTestCancelled()
 
     def goTo(x, y):
       sendCmd('G0 X{:} Y{:}'.format(x, y))

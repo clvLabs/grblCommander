@@ -281,7 +281,7 @@ class Grbl:
         if self.lastParserStateStr and self.lastParserStateStr != self.getSimpleSettingsStr():
           for event in self.onParserStateChanged:
             event()
-        self.lastParserStateStr=self.getSimpleSettingsStr()
+        self.lastParserStateStr=parserState
 
       # User-defined startup line
       elif line[:2] == "$N":
@@ -469,7 +469,7 @@ class Grbl:
     '''
     ui.logTitle('Requesting machine status')
     ui.log('Sending command [?]...', v='DETAIL')
-    self.sendCommand('?')
+    self.send('?')
     self.statusQuerySent = True
     self.waitingMachineStatus = True
     self.lastMachineStatusQuery = time.time()
@@ -497,7 +497,15 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def sendCommand(self, command, responseTimeout=None, verbose='BASIC'):
+  def sendWait(self, command, responseTimeout=None, verbose='BASIC'):
+    ''' Send a command
+    '''
+    self.send(command=command, responseTimeout=responseTimeout, verbose=verbose)
+    self.waitForMachineIdle(verbose=verbose)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def send(self, command, responseTimeout=None, verbose='BASIC'):
     ''' Send a command
     '''
     command = command.rstrip().rstrip('\n').rstrip('\r')
@@ -709,7 +717,7 @@ class Grbl:
     '''
     ui.logTitle('Requesting build info')
     ui.log('Sending command [$I]...', v='DETAIL')
-    self.sendCommand('$I')
+    self.send('$I')
     ui.log()
 
 
@@ -728,7 +736,7 @@ class Grbl:
     '''
     ui.logTitle('Requesting GCode parser state')
     ui.log('Sending command [$G]...', v='DETAIL')
-    self.sendCommand('$G')
+    self.send('$G')
     self.lastParserStateQuery = time.time()
     ui.log()
 
@@ -739,7 +747,7 @@ class Grbl:
     '''
     ui.logTitle('Requesting GCode parameters')
     ui.log('Sending command [$#]...', v='DETAIL')
-    self.sendCommand('$#')
+    self.send('$#')
     ui.log()
 
 
@@ -749,7 +757,7 @@ class Grbl:
     '''
     ui.logTitle('Requesting grbl config')
     ui.log('Sending command [$$]...', v='DETAIL')
-    self.sendCommand('$$')
+    self.send('$$')
     ui.log()
 
 
@@ -759,7 +767,7 @@ class Grbl:
     '''
     ui.logTitle('Requesting startup blocks')
     ui.log('Sending command [$N]...', v='DETAIL')
-    self.sendCommand('$N')
+    self.send('$N')
     ui.log()
 
 
@@ -769,7 +777,7 @@ class Grbl:
     '''
     ui.logTitle('Requesting sleep mode enable')
     ui.log('Sending command [$SLP]...', v='DETAIL')
-    self.sendCommand('$SLP')
+    self.send('$SLP')
     ui.log()
 
 
@@ -812,39 +820,17 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def rapidAbsolute(self,x=None, y=None, z=None, machineCoords=False, verbose='WARNING'):
-    ''' TODO: comment
-    '''
-    cmd = 'G0 '
-
-    if machineCoords:
-      x = self.translateToMachinePos('x', x)
-      y = self.translateToMachinePos('y', y)
-      z = self.translateToMachinePos('z', z)
-
-    if x != None:
-      cmd += 'X{:} '.format(ui.coordStr(x))
-
-    if y != None:
-      cmd += 'Y{:} '.format(ui.coordStr(y))
-
-    if z != None:
-      cmd += 'Z{:} '.format(ui.coordStr(z))
-
-    cmd = cmd.rstrip()
-
-    ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
-    self.sendCommand(cmd, verbose=verbose)
-    self.waitForMachineIdle(verbose=verbose)
-    return
-
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def rapidRelative(self,x=None, y=None, z=None, verbose='WARNING'):
     cmd = self.getRapidRelativeCmd(x,y,z,verbose)
     ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
-    self.sendCommand(cmd, verbose=verbose)
-    self.waitForMachineIdle(verbose=verbose)
+    self.sendWait(cmd, verbose=verbose)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def feedRelative(self,x=None, y=None, z=None, speed=None, verbose='WARNING'):
+    cmd = self.getFeedRelativeCmd(x,y,z,speedverbose)
+    ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
+    self.sendWait(cmd, verbose=verbose)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -854,8 +840,7 @@ class Grbl:
       return
 
     ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
-    self.sendCommand(cmd, verbose=verbose)
-    self.waitForMachineIdle(verbose=verbose)
+    self.sendWait(cmd, verbose=verbose)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -868,6 +853,25 @@ class Grbl:
       return ''
 
     cmd = 'G0 ' + moveCmd
+    cmd = cmd.rstrip()
+    return cmd
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getFeedRelativeCmd(self,x=None, y=None, z=None, speed=None, verbose='WARNING'):
+    ''' TODO: comment
+    '''
+    if speed is None:
+      speed = self.mchCfg['feedSpeed']
+
+    moveCmd = self.getMoveRelativeCmd(x,y,z,verbose)
+
+    if not moveCmd:
+      return ''
+
+    cmd = 'G1 ' + moveCmd
+    cmd += 'F{:} '.format(speed)
+    cmd = cmd.rstrip()
     return cmd
 
 
@@ -952,6 +956,33 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def rapidAbsolute(self,x=None, y=None, z=None, machineCoords=False, verbose='WARNING'):
+    ''' TODO: comment
+    '''
+    cmd = 'G0 '
+
+    if machineCoords:
+      x = self.translateToMachinePos('x', x)
+      y = self.translateToMachinePos('y', y)
+      z = self.translateToMachinePos('z', z)
+
+    if x != None:
+      cmd += 'X{:} '.format(ui.coordStr(x))
+
+    if y != None:
+      cmd += 'Y{:} '.format(ui.coordStr(y))
+
+    if z != None:
+      cmd += 'Z{:} '.format(ui.coordStr(z))
+
+    cmd = cmd.rstrip()
+
+    ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
+    self.sendWait(cmd, verbose=verbose)
+    return
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def feedAbsolute(self,x=None, y=None, z=None, speed=None, verbose='WARNING'):
     ''' TODO: comment
     '''
@@ -974,8 +1005,7 @@ class Grbl:
     cmd = cmd.rstrip()
 
     ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
-    self.sendCommand(cmd, verbose=verbose)
-    self.waitForMachineIdle(verbose=verbose)
+    self.sendWait(cmd, verbose=verbose)
     return
 
 

@@ -76,8 +76,7 @@ def sendCommand(command):
   if command.rstrip(' ').upper() == '$H':
     responseTimeout=float(mchCfg['homingTimeout'])
 
-  mch.sendCommand(command, responseTimeout=responseTimeout)
-  mch.waitForMachineIdle()
+  mch.sendWait(command, responseTimeout=responseTimeout)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showHelp():
@@ -405,8 +404,6 @@ def processUserInput():
       """
       Available commands:
 
-      pP  - Point probe
-      tT  - Table probing scan
       sS  - Table position scan
       lL  - Base levelling holes
       zZ  - Zig-zag pattern
@@ -417,15 +414,7 @@ def processUserInput():
       key = kb.readKey()
       char=chr(key)
 
-      if char in 'pP':
-        ui.keyPressMessage('pP - Point probe', key, char)
-        tst.pointProbe()
-
-      elif char in 'tT':
-        ui.keyPressMessage('tT - Table probing scan', key, char)
-        tst.tableProbingScan()
-
-      elif char in 'sS':
+      if char in 'sS':
         ui.keyPressMessage('sS - Table position scan', key, char)
         tst.tablePositionScan()
 
