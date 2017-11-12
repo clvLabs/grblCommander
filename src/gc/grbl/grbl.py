@@ -805,6 +805,14 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def goToMachineHome(self):
+    ''' TODO: comment
+    '''
+    self.goToMachineHome_Z()
+    self.goToMachineHome_XY()
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def goToMachineHome_Z(self):
     ''' TODO: comment
     '''

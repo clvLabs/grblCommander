@@ -438,8 +438,7 @@ def processUserInput():
 
     elif char == '0':
       ui.keyPressMessage('0 - Safe go to machine home', key, char)
-      mch.goToMachineHome_Z()
-      mch.goToMachineHome_XY()
+      mch.goToMachineHome()
 
     elif char == '1':
       ui.keyPressMessage('1 - Jog - [DL]', key, char)
