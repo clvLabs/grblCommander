@@ -34,17 +34,18 @@ tst = test.Test(mch)
 
 # Table limits
 gMIN_X = 0.0
-gMAX_X = mchCfg['max']['X']
-
 gMIN_Y = 0.0
-gMAX_Y = mchCfg['max']['Y']
-
 gMIN_Z = 0.0
+gMAX_X = mchCfg['max']['X']
+gMAX_Y = mchCfg['max']['Y']
 gMAX_Z = mchCfg['max']['Z']
 
 # Jog distance
 gXYJog = mchCfg['xyJogMm']
 gZJog = mchCfg['zJogMm']
+
+# Last GCode command
+gLastGCodeCommand = ''
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def readyMsg(extraInfo=None):
@@ -63,6 +64,22 @@ def onParserStateChanged():
 mch.onParserStateChanged.append(onParserStateChanged)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def sendCommand(command):
+  if not command:
+    return
+
+  global gLastGCodeCommand
+  gLastGCodeCommand = command
+
+  # Special case for homing ($H)
+  responseTimeout=None
+  if command.rstrip(' ').upper() == '$H':
+    responseTimeout=float(mchCfg['homingTimeout'])
+
+  mch.sendCommand(command, responseTimeout=responseTimeout)
+  mch.waitForMachineIdle()
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showHelp():
   ui.logBlock(
   """
@@ -78,6 +95,7 @@ def showHelp():
   s/S        - Show current status (short/LONG)
   @          - Show current status (FULL)
   gG$[space] - Send raw GCode command
+  º          - Repeat last GCode command
   mM         - Macro (submenu)
   tT         - Tests (submenu)
 
@@ -349,14 +367,11 @@ def processUserInput():
       if char == ' ':
         char = ''
       userCommand = char + input(char)
+      sendCommand(userCommand)
 
-      # Special case for homing ($H)
-      responseTimeout=None
-      if userCommand.rstrip(' ').upper() == '$H':
-        responseTimeout=float(mchCfg['homingTimeout'])
-
-      mch.sendCommand(userCommand, responseTimeout=responseTimeout)
-      mch.waitForMachineIdle()
+    elif key == 167:   # º
+      ui.keyPressMessage('F12 - Repeat last GCode command', key, char)
+      sendCommand(gLastGCodeCommand)
 
     elif char == 's':
       ui.keyPressMessage('s - Show current status (short)', key, char)
