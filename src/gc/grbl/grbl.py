@@ -777,34 +777,6 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def feedAbsolute(self,x=None, y=None, z=None, speed=None, verbose='WARNING'):
-    ''' TODO: comment
-    '''
-    if speed is None:
-      speed = self.mchCfg['feedSpeed']
-
-    cmd = 'G1 '
-
-    if x != None:
-      cmd += 'X{:} '.format(ui.coordStr(x))
-
-    if y != None:
-      cmd += 'Y{:} '.format(ui.coordStr(y))
-
-    if z != None:
-      cmd += 'Z{:} '.format(ui.coordStr(z))
-
-    cmd += 'F{:} '.format(speed)
-
-    cmd = cmd.rstrip()
-
-    ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
-    self.sendCommand(cmd, verbose=verbose)
-    self.waitForMachineIdle(verbose=verbose)
-    return
-
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def goToMachineHome(self):
     ''' TODO: comment
     '''
@@ -872,15 +844,38 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def rapidRelative(self,x=None, y=None, z=None, verbose='WARNING'):
+    cmd = self.getRapidRelativeCmd(x,y,z,verbose)
+    ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
+    self.sendCommand(cmd, verbose=verbose)
+    self.waitForMachineIdle(verbose=verbose)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def moveRelative(self,x=None, y=None, z=None, verbose='WARNING'):
+    cmd = self.getMoveRelativeCmd(x,y,z,verbose)
+    ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
+    self.sendCommand(cmd, verbose=verbose)
+    self.waitForMachineIdle(verbose=verbose)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getRapidRelativeCmd(self,x=None, y=None, z=None, verbose='WARNING'):
+    ''' TODO: comment
+    '''
+    cmd = 'G0 ' + self.getMoveRelativeCmd(x,y,z,verbose)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getMoveRelativeCmd(self,x=None, y=None, z=None, verbose='WARNING'):
     ''' TODO: comment
     '''
     if x is None and y is None and z is None:
       ui.log('No parameters provided, doing nothing', v=verbose)
-      return
+      return ''
+
+    cmd = ''
 
     wpos = self.getWorkPos()
-
-    cmd = 'G0 '
 
     minX = 0.0
     minY = 0.0
@@ -933,6 +928,30 @@ class Grbl:
         ui.log('Z value unchanged, skipping', v='DETAIL')
       else:
         cmd += 'Z{:} '.format(ui.coordStr(newZ))
+
+    cmd = cmd.rstrip()
+    return cmd
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def feedAbsolute(self,x=None, y=None, z=None, speed=None, verbose='WARNING'):
+    ''' TODO: comment
+    '''
+    if speed is None:
+      speed = self.mchCfg['feedSpeed']
+
+    cmd = 'G1 '
+
+    if x != None:
+      cmd += 'X{:} '.format(ui.coordStr(x))
+
+    if y != None:
+      cmd += 'Y{:} '.format(ui.coordStr(y))
+
+    if z != None:
+      cmd += 'Z{:} '.format(ui.coordStr(z))
+
+    cmd += 'F{:} '.format(speed)
 
     cmd = cmd.rstrip()
 
