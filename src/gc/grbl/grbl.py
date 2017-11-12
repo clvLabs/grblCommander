@@ -282,9 +282,6 @@ class Grbl:
           for event in self.onParserStateChanged:
             event()
         self.lastParserStateStr=self.getSimpleSettingsStr()
-        # 'trick' to avoid showing the 'ok' for periodic calls
-        if self.waitingResponse:
-          self.waitingResponse = False
 
       # User-defined startup line
       elif line[:2] == "$N":
