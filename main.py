@@ -55,6 +55,8 @@ def readyMsg(extraInfo=None):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def onParserStateChanged():
+  if mch.status['machineState'] == 'Run':
+    ui.log()
   ui.log(mch.getSimpleMachineStatusStr())
 
 # Register

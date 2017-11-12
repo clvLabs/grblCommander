@@ -585,7 +585,7 @@ class Grbl:
   def getSimpleMachineStatusStr(self):
     ''' TODO: comment
     '''
-    return '[{:}] - WPos[{:}] [{:}]'.format(
+    return '[{:}] WPos[{:}] [{:}]'.format(
       self.getColoredMachineStateStr(),
       self.getWorkPosStr(),
       self.getSimpleSettingsStr()
