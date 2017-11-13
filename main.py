@@ -93,7 +93,8 @@ def showHelp():
   hH         - Show this help text
   s/S        - Show current status (short/LONG)
   @          - Show current status (FULL)
-  gG$[space] - Send raw GCode command
+  gfxyz$     - Send raw GCode command
+  [space]    - Send raw GCode command (start empty)
   º          - Repeat last GCode command
   mM         - Macro (submenu)
   tT         - Tests (submenu)
@@ -110,8 +111,8 @@ def showHelp():
 
   Settings
   ---------------------------------------------------------------------
-  xX         - Set jog distance (XY)
-  zZ         - Set jog distance (Z)
+  /          - Set jog distance (XY)
+  *          - Set jog distance (Z)
   v/V        - Set verbose level (-/+) (loop)
   """)
 
@@ -360,8 +361,8 @@ def processUserInput():
       else:
         ui.keyPressMessage('Unknown command', key, char)
 
-    elif char in 'gG$ ':
-      ui.keyPressMessage('gG$[space] - Send raw GCode command', key, char)
+    elif char in 'gfxyzGFXYZ$ ':
+      ui.keyPressMessage(' - Send raw GCode command', key, char)
       ui.inputMsg('Enter GCode command...')
       if char == ' ':
         char = ''
@@ -552,8 +553,8 @@ def processUserInput():
       else:
         ui.keyPressMessage('Unknown command', key, char)
 
-    elif char in 'xX':
-      ui.keyPressMessage('xX - Set jog distance (XY)', key, char)
+    elif char == '/':
+      ui.keyPressMessage('/ - Set jog distance (XY)', key, char)
       global gXYJog
       gXYJog = ui.getUserInput(
         'Distance ({:})'.format(gXYJog),
@@ -561,8 +562,8 @@ def processUserInput():
         gXYJog)
       showMachineStatus()
 
-    elif char in 'zZ':
-      ui.keyPressMessage('<CTRL>z - Set jog distance (Z)', key, char)
+    elif char == '*':
+      ui.keyPressMessage('* - Set jog distance (Z)', key, char)
       global gZJog
       gZJog = ui.getUserInput(
         'Distance ({:})'.format(gZJog),
