@@ -160,7 +160,7 @@ class Grbl:
       line = self.sp.readline()
 
     # Manage alarm state
-    if self.alarm:
+    if self.alarm and (self.waitingResponse or self.waitingMachineStatus):
       ui.log('Alarm detected, resetting wait flags', c='ui.msg', v='DETAIL')
       self.waitingResponse = False
       self.waitingMachineStatus = False
