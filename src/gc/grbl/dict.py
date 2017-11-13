@@ -124,10 +124,18 @@ options = {
 
 # See: https://www.shapeoko.com/wiki/index.php/G-Code
 # [GC:G1 G54 G17 G21 G90 G94 M5 M9 T0 F400 S0]
+
 modalGroups = {
   'motion': {
-    'G0': 'rapid',
-    'G1': 'linear',
+    'G0':    'rapid',
+    'G1':    'linear',
+    'G2':    'arcCW',
+    'G3':    'arcCCW',
+    'G38.2': 'straightProbeSC',
+    'G38.3': 'probeTowardSC',
+    'G38.4': 'probeAwaySLCerr',
+    'G38.5': 'probeAwaySLC',
+    'G80':   'motionCancel',
   },
   'wcs': {
     'G54': 'WCS1',
@@ -154,14 +162,24 @@ modalGroups = {
     'G93': 'inverseTime',
     'G94': 'unitsPerMinute',
   },
+  'program': {
+    'M0': 'pauseAndEnd',
+    'M1': 'sleep',
+    'M2': 'pauseAndEnd_old',
+    'M30': 'pauseAndEnd',
+  },
   'spindle': {
     'M3': 'spindleCW',
     'M4': 'spindleCCW',
     'M5': 'spindleOFF',
   },
   'coolant': {
+    'M7': 'mist',
     'M8': 'coolantON',
     'M9': 'coolantOFF',
+  },
+  'tool': {
+    'T': 'tool',
   },
   'feed': {
     'F': 'feedRate',
@@ -170,6 +188,7 @@ modalGroups = {
     'S': 'RPM',
   },
 }
+
 
 # ------------------------------------------------------------------
 # Dict class
