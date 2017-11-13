@@ -638,7 +638,7 @@ class Grbl:
     ''' TODO: comment
     '''
     wpos = self.status['WPos'] if 'WPos' in self.status else None
-    if not mPos:
+    if not wpos:
       return '<NONE>'
     return ui.xyzStr(wpos['x'], wpos['y'], wpos['z'])
 
