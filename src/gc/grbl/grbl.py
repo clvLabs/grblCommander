@@ -42,13 +42,6 @@ class Grbl:
     self.mcrCfg = cfg['macro']
     self.uiCfg = cfg['ui']
 
-    self.minX = 0.0
-    self.minY = 0.0
-    self.minZ = 0.0
-    self.maxX = self.mchCfg['max']['X']
-    self.maxY = self.mchCfg['max']['Y']
-    self.maxZ = self.mchCfg['max']['Z']
-
     self.dct = dict.Dict()
 
     self.waitingStartup = True
@@ -144,7 +137,6 @@ class Grbl:
       self.process()
 
       # Give some time for the processor to do other stuff
-      ui.log('SLEEP[1] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<',v='SUPER')
       time.sleep(PROCESS_SLEEP)
 
 
@@ -771,6 +763,47 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def mpos2wpos(self,coordName,val):
+    ''' Translate a MPos coordinate into WPos
+    '''
+    if val is None:
+      return None
+
+    return val - ( float(self.status['WCO'][coordName]) )
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def wpos2mpos(self,coordName,val):
+    ''' Translate a WPos coordinate into MPos
+    '''
+    if val is None:
+      return None
+
+    return val + ( float(self.status['WCO'][coordName]) )
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getMin(self, axis):
+    ''' calculate min axis(xyz) coord given current WCO
+    '''
+    min = self.mchCfg['maxTravel'][axis] - self.mchCfg['softLimitsMargin']
+    return self.mpos2wpos(axis, min * -1)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getMax(self, axis):
+    ''' calculate max axis(xyz) coord given current WCO
+    '''
+    # '27': "Homing switch pull-off distance, millimeters"
+    pullOff = float(self.status['settings']['27']['val'])
+
+    if pullOff < self.mchCfg['softLimitsMargin']:
+      pullOff = self.mchCfg['softLimitsMargin']
+
+    return self.mpos2wpos(axis, pullOff * -1)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def goToMachineHome(self):
     ''' TODO: comment
     '''
@@ -796,16 +829,6 @@ class Grbl:
     pullOff = float(self.status['settings']['27']['val'])
 
     self.rapidAbsolute(x=pullOff*-1, y=pullOff*-1, machineCoords=True)
-
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def translateToMachinePos(self,coordName,val):
-    ''' Translate a WCO coordinate into MPos
-    '''
-    if val is None:
-      return None
-
-    return val - ( float(self.status['WCO'][coordName]) )
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -842,104 +865,19 @@ class Grbl:
       ui.log('No parameters provided, doing nothing', v=verbose)
       return ''
 
-    cmd = ''
-
-    absolute = self.status['parserState']['distanceMode']['val'] == 'G90'
+    axes = ['x','y','z']
     wpos = self.status['WPos']
-    curX = wpos['x']
-    curY = wpos['y']
-    curZ = wpos['z']
+    target = {
+      'x': x,
+      'y': y,
+      'z': z
+    }
 
-    # ---[ ABSOLUTE MODE ]-----------------------------------------
-    if absolute:
-      if x:
-        newX = curX + x
-        if newX<self.minX:
-          ui.log('Adjusting X to MinX ({:})'.format(self.minX), v='DETAIL')
-          newX=self.minX
-        elif newX>self.maxX:
-          ui.log('Adjusting X to MaxX ({:})'.format(self.maxX), v='DETAIL')
-          newX=self.maxX
+    for axis in axes:
+      if target[axis] != None:
+        target[axis] += wpos[axis]
 
-        if newX == curX:
-          ui.log('X value unchanged, skipping', v='DETAIL')
-        else:
-          cmd += 'X{:} '.format(ui.coordStr(newX))
-
-      if y:
-        newY = curY + y
-        if newY<self.minY:
-          ui.log('Adjusting Y to MinY ({:})'.format(self.minY), v='DETAIL')
-          newY=self.minY
-        elif newY>self.maxY:
-          ui.log('Adjusting Y to MaxY ({:})'.format(self.maxY), v='DETAIL')
-          newY=self.maxY
-
-        if newY == curY:
-          ui.log('Y value unchanged, skipping', v='DETAIL')
-        else:
-          cmd += 'Y{:} '.format(ui.coordStr(newY))
-
-      if z:
-        newZ = curZ + z
-        if newZ<self.minZ:
-          ui.log('Adjusting Z to MinZ ({:})'.format(self.minZ), v='DETAIL')
-          newZ=self.minZ
-        elif newZ>self.maxZ:
-          ui.log('Adjusting Z to MaxZ ({:})'.format(self.maxZ), v='DETAIL')
-          newZ=self.maxZ
-
-        if newZ == curZ:
-          ui.log('Z value unchanged, skipping', v='DETAIL')
-        else:
-          cmd += 'Z{:} '.format(ui.coordStr(newZ))
-
-    # ---[ RELATIVE MODE ]-----------------------------------------
-    else:
-      if x:
-        newX = x
-        if curX+newX<self.minX:
-          ui.log('Adjusting X to MinX ({:})'.format(self.minX), v='DETAIL')
-          newX=self.minX-curX
-        elif curX+newX>self.maxX:
-          ui.log('Adjusting X to MaxX ({:})'.format(self.maxX), v='DETAIL')
-          newX=self.maxX-curX
-
-        if newX == 0:
-          ui.log('X value unchanged, skipping', v='DETAIL')
-        else:
-          cmd += 'X{:} '.format(ui.coordStr(newX))
-
-      if y:
-        newY = y
-        if curY+newY<self.minY:
-          ui.log('Adjusting Y to MinY ({:})'.format(self.minY), v='DETAIL')
-          newY=self.minY-curY
-        elif curY+newY>self.maxY:
-          ui.log('Adjusting Y to MaxY ({:})'.format(self.maxY), v='DETAIL')
-          newY=self.maxY-curY
-
-        if newY == 0:
-          ui.log('Y value unchanged, skipping', v='DETAIL')
-        else:
-          cmd += 'Y{:} '.format(ui.coordStr(newY))
-
-      if z:
-        newZ = z
-        if curZ+newZ<self.minZ:
-          ui.log('Adjusting Z to MinZ ({:})'.format(self.minZ), v='DETAIL')
-          newZ=self.minZ-curZ
-        elif curZ+newZ>self.maxZ:
-          ui.log('Adjusting Z to MaxZ ({:})'.format(self.maxZ), v='DETAIL')
-          newZ=self.maxZ-curZ
-
-        if newZ == 0:
-          ui.log('Z value unchanged, skipping', v='DETAIL')
-        else:
-          cmd += 'Z{:} '.format(ui.coordStr(newZ))
-
-    cmd = cmd.rstrip()
-    return cmd
+    return self.getMoveAbsoluteStr(target['x'], target['y'], target['z'], verbose=verbose)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -977,42 +915,60 @@ class Grbl:
       return ''
 
     cmd = ''
-
     absolute = self.status['parserState']['distanceMode']['val'] == 'G90'
+    axes = ['x','y','z']
+    target = {'x':x, 'y':y, 'z':z}
     wpos = self.status['WPos']
-    curX = wpos['x']
-    curY = wpos['y']
-    curZ = wpos['z']
+    min = {
+      'x': self.getMin('x'),
+      'y': self.getMin('y'),
+      'z': self.getMin('z')
+    }
+    max = {
+      'x': self.getMax('x'),
+      'y': self.getMax('y'),
+      'z': self.getMax('z')
+    }
 
+    # ---[ Translate machine coords ]-----------------------------------------
     if machineCoords:
-      x = self.translateToMachinePos('x', x)
-      y = self.translateToMachinePos('y', y)
-      z = self.translateToMachinePos('z', z)
+      for axis in axes:
+        target[axis] = self.mpos2wpos(axis, target[axis])
 
-    # ---[ ABSOLUTE MODE ]-----------------------------------------
     if absolute:
-      if x != None:
-        cmd += 'X{:} '.format(ui.coordStr(x))
+      # ---[ Absolute mode ]-----------------------------------------
+      for axis in axes:
+        if target[axis] != None:
+          if target[axis] < min[axis]:
+            ui.log('Adjusting target {:}({:}) to min({:})'.format(axis.upper(), target[axis], min[axis]), v='DETAIL')
+            target[axis] = min[axis]
+          elif target[axis] > max[axis]:
+            ui.log('Adjusting target {:}({:}) to max({:})'.format(axis.upper(), target[axis], max[axis]), v='DETAIL')
+            target[axis] = max[axis]
 
-      if y != None:
-        cmd += 'Y{:} '.format(ui.coordStr(y))
+          if target[axis] == wpos[axis]:
+            target[axis] = None
 
-      if z != None:
-        cmd += 'Z{:} '.format(ui.coordStr(z))
-
-    # ---[ RELATIVE MODE ]-----------------------------------------
     else:
-      if x != None:
-        x = x - curX
-        cmd += 'X{:} '.format(ui.coordStr(x))
+      # ---[ Relative mode ]-----------------------------------------
+      for axis in axes:
+        if target[axis] != None:
+          if target[axis] < min[axis]:
+            ui.log('Adjusting target {:}({:}) to min({:})'.format(axis.upper(), target[axis] - wpos[axis], min[axis] - wpos[axis]), v='DETAIL')
+            target[axis] = min[axis] - wpos[axis]
+          elif target[axis] > max[axis]:
+            ui.log('Adjusting target {:}({:}) to max({:})'.format(axis.upper(), target[axis] - wpos[axis], max[axis] - wpos[axis]), v='DETAIL')
+            target[axis] = max[axis] - wpos[axis]
+          else:
+            target[axis] -= wpos[axis]
 
-      if y != None:
-        y = y - curY
-        cmd += 'Y{:} '.format(ui.coordStr(y))
+          if target[axis] == 0:
+            target[axis] = None
 
-      if z != None:
-        z = z - curZ
-        cmd += 'Z{:} '.format(ui.coordStr(z))
+    # ---[ Generate gcode ]-----------------------------------------
+    for axis in axes:
+      if target[axis] != None and target[axis] != wpos[axis]:
+        cmd += '{:}{:} '.format(axis.upper(), ui.coordStr(target[axis]))
 
     cmd = cmd.rstrip()
 

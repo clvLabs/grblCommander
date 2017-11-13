@@ -25,11 +25,17 @@ cfg = {
 
   # ---[Machine configuration]--------------------------------------
   'machine': {
-    'max': {
-      'X': 280.0,            # Change to fit your machine
-      'Y': 280.0,            # Change to fit your machine
-      'Z': 80.0,             # Change to fit your machine
+    'maxTravel': {
+      'x': 280.0,            # Change to fit your machine
+      'y': 280.0,            # Change to fit your machine
+      'z': 80.0,             # Change to fit your machine
     },
+    'softLimitsMargin': 1.0,
+    'xyJogMm': 10.0,
+    'zJogMm': 3.0,
+    'seekSpeed': 2000,
+    'feedSpeed': 400,
+    'homingTimeout': 20,
     'preferredParserState': {
       'coolant': 'M9',          # Change to fit your preferences
       'distanceMode': 'G90',    # Change to fit your preferences
@@ -40,11 +46,6 @@ cfg = {
       'units': 'G21',           # Change to fit your preferences
       'wcs': 'G54',             # Change to fit your preferences
     },
-    'xyJogMm': 10.0,
-    'zJogMm': 3.0,
-    'seekSpeed': 2000,
-    'feedSpeed': 400,
-    'homingTimeout': 20,
   },
 
   # ---[Macro configuration]--------------------------------------

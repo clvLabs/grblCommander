@@ -33,11 +33,6 @@ class Test:
 
     self.testCancelled = False
 
-    # Table limits
-    self.maxX = self.mchCfg['max']['X']
-    self.maxY = self.mchCfg['max']['Y']
-    self.maxZ = self.mchCfg['max']['Z']
-
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getConfig(self):
@@ -161,18 +156,20 @@ class Test:
       ui.logTitle('Going to [{:}]'.format(stepName))
       self.mchRapid(x=x,y=y)
 
+    maxX = self.grbl.getMax('x')
+    maxY = self.grbl.getMax('y')
     savedX = self.wpos['x']
     savedY = self.wpos['y']
 
     tpsSingleStep('BL', x=0,y=0)
-    tpsSingleStep('BC', x=self.maxX/2,y=0)
-    tpsSingleStep('BR', x=self.maxX,y=0)
-    tpsSingleStep('CR', x=self.maxX,y=self.maxY/2)
-    tpsSingleStep('CC', x=self.maxX/2,y=self.maxY/2)
-    tpsSingleStep('CL', x=0,y=self.maxY/2)
-    tpsSingleStep('UL', x=0,y=self.maxY)
-    tpsSingleStep('UC', x=self.maxX/2,y=self.maxY)
-    tpsSingleStep('UR', x=self.maxX,y=self.maxY)
+    tpsSingleStep('BC', x=maxX/2,y=0)
+    tpsSingleStep('BR', x=maxX,y=0)
+    tpsSingleStep('CR', x=maxX,y=maxY/2)
+    tpsSingleStep('CC', x=maxX/2,y=maxY/2)
+    tpsSingleStep('CL', x=0,y=maxY/2)
+    tpsSingleStep('UL', x=0,y=maxY)
+    tpsSingleStep('UC', x=maxX/2,y=maxY)
+    tpsSingleStep('UR', x=maxX,y=maxY)
 
     if self.testCancelled:
       self.testCancelled = False   # Make sure we always get back home
