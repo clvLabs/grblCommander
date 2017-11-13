@@ -119,8 +119,8 @@ def showMachineStatus():
   Alarm   [{:s}]
   Msg     [{:s}]
 
-  WCO     [{:s}]
   MPos    [{:s}]
+  WCO     [{:s}]
   WPos    [{:s}]
 
   Software config:
@@ -131,8 +131,8 @@ def showMachineStatus():
       mch.getColoredMachineStateStr(),
       ui.setStrColor(mch.getAlarmStr(), 'ui.errorMsg'),
       ui.setStrColor(mch.getLastMessage(), 'ui.msg'),
-      mch.getWorkCoordinatesStr(),
       mch.getMachinePosStr(),
+      mch.getWorkCoordinatesStr(),
       mch.getWorkPosStr(),
       ui.coordStr(gXYJog),
       ui.coordStr(gZJog),
