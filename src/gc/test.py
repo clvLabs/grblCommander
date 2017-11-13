@@ -103,7 +103,7 @@ class Test:
     ''' TODO: comment
     '''
     if kb.keyPressed():
-      if kb.readKey() == 27:  # <ESC>
+      if kb.readKey() == kb.ESC:
         self.testCancelled = True
         self.logTestCancelled()
     return self.testCancelled

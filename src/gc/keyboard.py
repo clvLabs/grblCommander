@@ -35,9 +35,12 @@ def readKey():
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Key value constants
 
+LF=10
+CR=13
 CTRL_X = 24
 CTRL_Y = 25
 CTRL_Z = 26
+ESC = 27
 
 COMBO_0X = 0
 

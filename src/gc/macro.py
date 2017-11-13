@@ -230,13 +230,13 @@ class Macro:
           if cmdName.lower() == 'pause':
             ui.inputMsg('Paused, press <ENTER> to continue / <ESC> to exit ...')
             key=0
-            while key != 13 and key != 10 and key != 27:
+            while key != kb.CR and key != kb.LF and key != kb.ESC:
               key=kb.readKey()
 
-            if key == 27:  # <ESC>
+            if key == kb.ESC:
               ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
               return False
-            elif key == 13 or key == 10:  # <ENTER>
+            elif key == kb.CR or key == kb.LF:
               continue
 
           elif cmdName.lower() == 'startup':
@@ -257,7 +257,7 @@ class Macro:
             self.grbl.waitForMachineIdle()
 
       if kb.keyPressed():
-        if kb.readKey() == 27:  # <ESC>
+        if kb.readKey() == kb.ESC:
           ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
           return False
 
