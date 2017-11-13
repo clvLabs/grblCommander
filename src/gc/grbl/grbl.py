@@ -342,15 +342,9 @@ class Grbl:
 
       # Settings
       elif line[:1] == "$":
-        components = line[1:].split('=')
-        setting = components[0]
-        value = components[1]
-        self.status['settings'][setting] = {
-          'desc': self.dct.settings[setting],
-          'val': value,
-        }
+        settingStr = line[1:]
+        self.parseSetting(settingStr)
         showLine = False
-        ui.log('<<<<< {:} ({:})'.format(line, self.dct.settings[setting]), color='comms.recv')
 
       # Display
       if isResponse:
@@ -503,6 +497,32 @@ class Grbl:
           'desc': 'UNKNOWN',
           'val': paramValue
         }
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def parseSetting(self, settingStr):
+    ''' TODO: Comment
+    '''
+    components = settingStr.split('=')
+    setting = components[0]
+    value = components[1]
+    self.status['settings'][setting] = {
+      'desc': self.dct.settings[setting],
+      'val': value,
+    }
+
+    ui.log('<<<<< {:} ({:})'.format(settingStr, self.dct.settings[setting]), color='comms.recv')
+
+    # $2 - Step port invert, mask
+    # $3 -  Direction port invert, mask
+    # $23 - Homing direction invert, mask
+    if setting in ['2', '3', '23']:
+      mask = int(value)
+      self.status['settings'][setting]['parsed'] = {
+        'x': (mask & 0x1 == 1),
+        'y': (mask & 0x2 == 1),
+        'z': (mask & 0x4 == 1),
+      }
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
