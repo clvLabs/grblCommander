@@ -67,7 +67,7 @@ class SerialPort:
 
     try:
       self.serial.open()
-    except e:
+    except:
       pass
 
 
