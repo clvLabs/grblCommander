@@ -216,7 +216,7 @@ class Macro:
     for command in commands:
       cmdName = command[0] if len(command) > 0 else ''
       cmdComment = command[1] if len(command) > 1 else ''
-      isReservedName = cmdName.lower() in self.mcrCfg['reservedNames']
+      isReservedName = cmdName.lower().split(' ')[0] in self.mcrCfg['reservedNames']
       isMacroCall = self.isMacro(cmdName)
 
       if cmdComment:
