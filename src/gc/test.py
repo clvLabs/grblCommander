@@ -42,7 +42,7 @@ class Test:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def sendCommand(cmd):
+  def sendCommand(self,cmd):
     ''' Send a move command to the grblShield (wait for machine idle)
     '''
     self.grbl.sendWait(cmd)
