@@ -473,6 +473,15 @@ def processUserInput():
     elif char == '.':
       ui.keyPressMessage('. - Absolute rapid to table position', key, char)
 
+      minX = mch.getMin('x')
+      minY = mch.getMin('y')
+      maxX = mch.getMax('x')
+      maxY = mch.getMax('y')
+      wX = maxX-minX if minX<0 else minX-maxX
+      wY = maxY-minY if minY<0 else minY-maxY
+      cX = minX-(wX/2) if minX>0 else minX+(wX/2)
+      cY = minY-(wY/2) if minX>0 else minY+(wY/2)
+
       ui.logBlock(
       """
       Available commands:
@@ -502,46 +511,46 @@ def processUserInput():
 
         if char == '2':
           ui.keyPressMessage('2 - ONE AXIS ONLY - Absolute rapid to axis limits - [B]', key, char)
-          mch.rapidAbsolute(y=mch.getMin('y'))
+          mch.rapidAbsolute(y=minY)
         elif char == '4':
           ui.keyPressMessage('4 - ONE AXIS ONLY - Absolute rapid to axis limits - [L]', key, char)
-          mch.rapidAbsolute(x=mch.getMin('x'))
+          mch.rapidAbsolute(x=minX)
         elif char == '6':
           ui.keyPressMessage('6 - ONE AXIS ONLY - Absolute rapid to axis limits - [R]', key, char)
-          mch.rapidAbsolute(x=mch.getMax('x'))
+          mch.rapidAbsolute(x=maxX)
         elif char == '8':
           ui.keyPressMessage('8 - ONE AXIS ONLY - Absolute rapid to axis limits - [U]', key, char)
-          mch.rapidAbsolute(y=mch.getMax('y'))
+          mch.rapidAbsolute(y=maxY)
         else:
           ui.keyPressMessage('Unknown command', key, char)
 
       elif char == '1':
         ui.keyPressMessage('1 - Absolute rapid to table position - [BL]', key, char)
-        mch.rapidAbsolute(x=mch.getMin('x'),y=mch.getMin('y'))
+        mch.rapidAbsolute(x=minX,y=minY)
       elif char == '2':
         ui.keyPressMessage('2 - Absolute rapid to table position - [BC]', key, char)
-        mch.rapidAbsolute(x=mch.getMax('x')/2,y=mch.getMin('y'))
+        mch.rapidAbsolute(x=cX,y=minY)
       elif char == '3':
         ui.keyPressMessage('3 - Absolute rapid to table position - [BR]', key, char)
-        mch.rapidAbsolute(x=mch.getMax('x'),y=mch.getMin('y'))
+        mch.rapidAbsolute(x=maxX,y=minY)
       elif char == '4':
         ui.keyPressMessage('4 - Absolute rapid to table position - [CL]', key, char)
-        mch.rapidAbsolute(x=mch.getMin('x'),y=mch.getMax('y')/2)
+        mch.rapidAbsolute(x=minX,y=cY)
       elif char == '5':
         ui.keyPressMessage('5 - Absolute rapid to table position - [CC]', key, char)
-        mch.rapidAbsolute(x=mch.getMax('x')/2,y=mch.getMax('y')/2)
+        mch.rapidAbsolute(x=cX,y=cY)
       elif char == '6':
         ui.keyPressMessage('6 - Absolute rapid to table position - [CR]', key, char)
-        mch.rapidAbsolute(x=mch.getMax('x'),y=mch.getMax('y')/2)
+        mch.rapidAbsolute(x=maxX,y=cY)
       elif char == '7':
         ui.keyPressMessage('7 - Absolute rapid to table position - [UL]', key, char)
-        mch.rapidAbsolute(x=mch.getMin('x'),y=mch.getMax('y'))
+        mch.rapidAbsolute(x=minX,y=maxY)
       elif char == '8':
         ui.keyPressMessage('8 - Absolute rapid to table position - [UC]', key, char)
-        mch.rapidAbsolute(x=mch.getMax('x')/2,y=mch.getMax('y'))
+        mch.rapidAbsolute(x=cX,y=maxY)
       elif char == '9':
         ui.keyPressMessage('9 - Absolute rapid to table position - [UR]', key, char)
-        mch.rapidAbsolute(x=mch.getMax('x'),y=mch.getMax('y'))
+        mch.rapidAbsolute(x=maxX,y=maxY)
       else:
         ui.keyPressMessage('Unknown command', key, char)
 
