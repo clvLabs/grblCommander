@@ -12,10 +12,8 @@ import pprint
 import src.gc.utils as ut
 import src.gc.ui as ui
 import src.gc.keyboard as kb
-import src.gc.serialport as sp
-import src.gc.machine as mch
-import src.gc.table as tbl
-import src.gc.macro as mcr
+import src.gc.grbl.grbl as grbl
+import src.gc.macro as macro
 import src.gc.test as test
 from src.gc.config import cfg, loadedCfg
 
@@ -26,7 +24,20 @@ mchCfg = cfg['machine']
 mcrCfg = cfg['macro']
 
 # Current version
-gVERSION = '0.4.2'
+gVERSION = '0.5.0'
+
+# grbl machine manager
+mch = grbl.Grbl(cfg)
+
+mcr = macro.Macro(mch)
+tst = test.Test(mch)
+
+# Jog distance
+gXYJog = mchCfg['xyJogMm']
+gZJog = mchCfg['zJogMm']
+
+# Last GCode command
+gLastGCodeCommand = ''
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def readyMsg(extraInfo=None):
@@ -36,46 +47,65 @@ def readyMsg(extraInfo=None):
   ui.readyMsg(extraInfo)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def onParserStateChanged():
+  if mch.status['machineState'] == 'Run':
+    ui.log()
+  ui.log(mch.getSimpleMachineStatusStr())
+
+# Register
+mch.onParserStateChanged.append(onParserStateChanged)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def sendCommand(command):
+  if not command:
+    return
+
+  global gLastGCodeCommand
+  gLastGCodeCommand = command
+
+  # Special case for homing ($H)
+  responseTimeout=None
+  if command.rstrip(' ').upper() == '$H':
+    responseTimeout=float(mchCfg['homingTimeout'])
+
+  mch.sendWait(command, responseTimeout=responseTimeout)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showHelp():
   ui.logBlock(
   """
   Available commands
   ---------------------------------------------------------------------
-  hH?        - Show this help text
-  qQ         - Exit
+  qQ         - Quit
   rR         - Reset serial connection
-  cC         - Clear screen
+  <CTRL>x    - grbl soft reset
+  ?          - Force status re-query
 
-  sS         - Show current status (short/LONG)
-  gG         - Send raw GCode command
+  cC         - Clear screen
+  hH         - Show this help text
+  s/S        - Show current status (short/LONG)
+  @          - Show current status (FULL)
+  gfxyz$     - Send raw GCode command
+  [space]    - Send raw GCode command (start empty)
+  º          - Repeat last GCode command
   mM         - Macro (submenu)
   tT         - Tests (submenu)
 
-  <F12>      - Copy MPos to SPos
-
-  Rapids
+  Jog
   ---------------------------------------------------------------------
-  <numpad>   - Safe relative rapid (XY) (including diagonals)
-  */         - Relative rapid (Z) (-/+)
+  <numpad>        - XY jog (including diagonals)
+  SHIFT+<numpad>  - XY jog (double distance)
+  CTRL+<numpad>   - XY jog (half distance)
+  <numpad>-/+     - Z jog (up/down)
 
-  0          - Safe go to X0Y0Z0
-  .          - Safe absolute rapid (XY) to table position (submenu)
+  <numpad>0       - Safe go to machine home
+  <numpad>.       - Absolute rapid (XY) to table position (submenu)
 
   Settings
   ---------------------------------------------------------------------
-  -+         - Set rapid increment (XY) (-/+)
-  <CTRL>x/y  - Set rapid increment (XY)
-
-  zZ         - Set rapid increment (Z) (-/+)
-  <CTRL>z    - Set rapid increment (Z)
-
-  aA         - Set safe height (Z) (-/+)
-  <CTRL>a    - Set safe height (Z)
-
-  %          - Set table size percent (loop)
-  <ALT>5     - Set table size percent
-
-  vV         - Set verbose level (-/+) (loop)
+  /          - Set jog distance (XY)
+  *          - Set jog distance (Z)
+  v/V        - Set verbose level (-/+) (loop)
   """)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -84,68 +114,49 @@ def showMachineStatus():
 
   ui.logBlock(
   """
-  Current status:
+  Current status: [{:}]
 
-  Machine {:}
-  MPos    {:s}
-  WPos    {:s}
-  SPos    {:s}
+  Alarm   [{:s}]
+  Msg     [{:s}]
+
+  MPos    [{:s}]
+  WCO     [{:s}]
+  WPos    [{:s}]
 
   Software config:
   RapidIncrement_XY = {:}
   RapidIncrement_Z  = {:}
-  SafeHeight        = {:}
-  TableSize%        = {:d}%
   VerboseLevel      = {:d}/{:d} ({:s})
   """.format(
       mch.getColoredMachineStateStr(),
+      ui.setStrColor(mch.getAlarmStr(), 'ui.errorMsg'),
+      ui.setStrColor(mch.getLastMessage(), 'ui.msg'),
       mch.getMachinePosStr(),
+      mch.getWorkCoordinatesStr(),
       mch.getWorkPosStr(),
-      mch.getSoftwarePosStr(),
-      ui.coordStr(tbl.getRI_XY()),
-      ui.coordStr(tbl.getRI_Z()),
-      ui.coordStr(tbl.getSafeHeight()),
-      tbl.getTableSizePercent(),
+      ui.coordStr(gXYJog),
+      ui.coordStr(gZJog),
       ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
     )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showMachineLongStatus():
-  machineStatus = mch.getMachineStatus()
+  showMachineStatus()
+  mcr.run(mcrCfg['machineLongStatus'], silent=True)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def showMachineFullStatus():
+  machineStatus=mch.getMachineStatus()
 
   ui.logBlock(
   """
-  Current status (LONG version):
+  Machine FULL status: [{:}]
 
-  Machine {:}
-  MPos    {:s}
-  WPos    {:s}
-  SPos    {:s}
-
-  Machine FULL status:
-  {:}
-
-  Software config:
-  RapidIncrement_XY = {:}
-  RapidIncrement_Z  = {:}
-  SafeHeight        = {:}
-  TableSize%        = {:d}%
-  VerboseLevel      = {:d}/{:d} ({:s})
-
+  {:s}
   """.format(
       mch.getColoredMachineStateStr(),
-      mch.getMachinePosStr(),
-      mch.getWorkPosStr(),
-      mch.getSoftwarePosStr(),
-      pprint.pformat(machineStatus, indent=4, width=uiCfg['maxLineLen']),
-      ui.coordStr(tbl.getRI_XY()),
-      ui.coordStr(tbl.getRI_Z()),
-      ui.coordStr(tbl.getSafeHeight()),
-      tbl.getTableSizePercent(),
-      ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
-    )
-
-  mcr.run(mcrCfg['machineLongStatus'], silent=True)
+      pprint.pformat(machineStatus, indent=2, width=uiCfg['maxLineLen'])
+    ))
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def processUserInput():
@@ -153,68 +164,135 @@ def processUserInput():
     return True
 
   processed = True
+  ps = mch.status['parserState']
 
   key = kb.readKey()
   char=chr(key)
 
-  if(key == 0):  # Combined code 0+x
+  if key == kb.COMBO_0X:  # Combined code 0+x
     key = kb.readKey()
     char=chr(key)
 
-    if(key == 999999):
+    if key == 999999:
       pass
-    elif(key == 59): # <F1>
+    elif key == kb.F1:
       if mcrCfg['hotKeys']['F1']:
         mcr.run(mcrCfg['hotKeys']['F1'], silent=True)
-    elif(key == 60): # <F2>
+    elif key == kb.F2:
       if mcrCfg['hotKeys']['F2']:
         mcr.run(mcrCfg['hotKeys']['F2'], silent=True)
-    elif(key == 61): # <F3>
+    elif key == kb.F3:
       if mcrCfg['hotKeys']['F3']:
         mcr.run(mcrCfg['hotKeys']['F3'], silent=True)
-    elif(key == 62): # <F4>
+    elif key == kb.F4:
       if mcrCfg['hotKeys']['F4']:
         mcr.run(mcrCfg['hotKeys']['F4'], silent=True)
-    elif(key == 63): # <F5>
+    elif key == kb.F5:
       if mcrCfg['hotKeys']['F5']:
         mcr.run(mcrCfg['hotKeys']['F5'], silent=True)
-    elif(key == 64): # <F6>
+    elif key == kb.F6:
       if mcrCfg['hotKeys']['F6']:
         mcr.run(mcrCfg['hotKeys']['F6'], silent=True)
-    elif(key == 65): # <F7>
+    elif key == kb.F7:
       if mcrCfg['hotKeys']['F7']:
         mcr.run(mcrCfg['hotKeys']['F7'], silent=True)
-    elif(key == 66): # <F8>
+    elif key == kb.F8:
       if mcrCfg['hotKeys']['F8']:
         mcr.run(mcrCfg['hotKeys']['F8'], silent=True)
-    elif(key == 67): # <F9>
+    elif key == kb.F9:
       if mcrCfg['hotKeys']['F9']:
         mcr.run(mcrCfg['hotKeys']['F9'], silent=True)
-    elif(key == 68): # <F10>
+    elif key == kb.F10:
       if mcrCfg['hotKeys']['F10']:
         mcr.run(mcrCfg['hotKeys']['F10'], silent=True)
 
+    elif key == kb.KP_END:
+      ui.keyPressMessage('End - Jog - [DL] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
+      mch.moveRelative(x=gXYJog*-2,y=gXYJog*-2)
+
+    elif key == kb.KP_DOWN:
+      ui.keyPressMessage('Down - Jog - [D] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
+      mch.moveRelative(y=gXYJog*-2)
+
+    elif key == kb.KP_PGDN:
+      ui.keyPressMessage('Pgdn - Jog - [DR] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
+      mch.moveRelative(x=gXYJog*2,y=gXYJog*-2)
+
+    elif key == kb.KP_LEFT:
+      ui.keyPressMessage('Left - Jog - [L] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
+      mch.moveRelative(x=gXYJog*-2)
+
+    elif key == kb.KP_RIGHT:
+      ui.keyPressMessage('Right - Jog - [R] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
+      mch.moveRelative(x=gXYJog*2)
+
+    elif key == kb.KP_HOME:
+      ui.keyPressMessage('Home - Jog - [UL] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
+      mch.moveRelative(x=gXYJog*-2,y=gXYJog*2)
+
+    elif key == kb.KP_UP:
+      ui.keyPressMessage('Up - Jog - [U] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
+      mch.moveRelative(y=gXYJog*2)
+
+    elif key == kb.KP_PGUP:
+      ui.keyPressMessage('Pgup - Jog - [UR] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
+      mch.moveRelative(x=gXYJog*2,y=gXYJog*2)
+
+
+    elif key == kb.CTRL_KP_END:
+      ui.keyPressMessage('End - Jog - [DL] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
+      mch.moveRelative(x=(gXYJog/2)*-1,y=(gXYJog/2)*-1)
+
+    elif key == kb.CTRL_KP_DOWN:
+      ui.keyPressMessage('Down - Jog - [D] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
+      mch.moveRelative(y=(gXYJog/2)*-1)
+
+    elif key == kb.CTRL_KP_PGDN:
+      ui.keyPressMessage('Pgdn - Jog - [DR] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
+      mch.moveRelative(x=gXYJog/2,y=(gXYJog/2)*-1)
+
+    elif key == kb.CTRL_KP_LEFT:
+      ui.keyPressMessage('Left - Jog - [L] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
+      mch.moveRelative(x=(gXYJog/2)*-1)
+
+    elif key == kb.CTRL_KP_RIGHT:
+      ui.keyPressMessage('Right - Jog - [R] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
+      mch.moveRelative(x=gXYJog/2)
+
+    elif key == kb.CTRL_KP_HOME:
+      ui.keyPressMessage('Home - Jog - [UL] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
+      mch.moveRelative(x=(gXYJog/2)*-1,y=gXYJog/2)
+
+    elif key == kb.CTRL_KP_UP:
+      ui.keyPressMessage('Up - Jog - [U] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
+      mch.moveRelative(y=gXYJog/2)
+
+    elif key == kb.CTRL_KP_PGUP:
+      ui.keyPressMessage('Pgup - Jog - [UR] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
+      mch.moveRelative(x=gXYJog/2,y=gXYJog/2)
+
     else:  # Rest of keys
       processed = False
-      if(ui.getVerboseLevelStr() == 'DEBUG'):
+      if ui.getVerboseLevelStr() == 'DEBUG':
         ui.keyPressMessage('Pressed unknown COMBINED key 0+{:d}'.format(key), key, char)
       else:
         pass
         #ui.keyPressMessage('Unknown command', key, char)
 
-  elif(key == 224):  # Combined code 224+x
+  elif key == kb.COMBO_224X:  # Combined code 224x
     key = kb.readKey()
     char=chr(key)
 
-    if(key == 999999):
+    if key == 999999:
       pass
-    elif(key == 134): # <F12>
-      ui.keyPressMessage('<F12> - Copy MPos to SPos', key, char)
-      mch.refreshSoftwarePos()
+    elif key == kb.F11:
+      pass
+    elif key == kb.F12:
+      pass
 
     else:  # Rest of keys
       processed = False
-      if(ui.getVerboseLevelStr() == 'DEBUG'):
+      if ui.getVerboseLevelStr() == 'DEBUG':
         ui.keyPressMessage('Pressed unknown COMBINED key 224+{:d}'.format(key), key, char)
       else:
         pass
@@ -222,15 +300,19 @@ def processUserInput():
 
   else:  # Standard keys
 
-    if(char in 'qQ'):
-      ui.keyPressMessage('qQ - Exit', key, char)
+    if char in 'qQ':
+      ui.keyPressMessage('qQ - Quit', key, char)
       return False
 
-    elif(char in 'hH?'):
-      ui.keyPressMessage('hH? - Show help text', key, char)
+    elif char in 'hH':
+      ui.keyPressMessage('hH - Show help text', key, char)
       showHelp()
 
-    elif(char in 'mM'):
+    elif char in '?':
+      ui.keyPressMessage('? - Force status re-query', key, char)
+      mch.viewMachineStatus()
+
+    elif char in 'mM':
       ui.keyPressMessage('mM - Macro', key, char)
 
       ui.logBlock(
@@ -247,23 +329,23 @@ def processUserInput():
       key = kb.readKey()
       char=chr(key)
 
-      if(char in 'lL'):
+      if char in 'lL':
         ui.keyPressMessage('lL - List macros', key, char)
         mcr.list()
 
-      elif(char in 'rR'):
+      elif char in 'rR':
         ui.keyPressMessage('rR - Run macro', key, char)
         ui.inputMsg('Enter macro name...')
         macroName=input()
         mcr.run(macroName)
 
-      elif(char in 'sS'):
+      elif char in 'sS':
         ui.keyPressMessage('sS - Show macro', key, char)
         ui.inputMsg('Enter macro name...')
         macroName=input()
         mcr.show(macroName)
 
-      elif(char in 'xX'):
+      elif char in 'xX':
         ui.keyPressMessage('xX - Reload macros', key, char)
         ui.logTitle('Reloading macros')
         mcr.load()
@@ -271,39 +353,50 @@ def processUserInput():
       else:
         ui.keyPressMessage('Unknown command', key, char)
 
-    elif(char in 'gG'):
-      ui.keyPressMessage('gG - Send raw GCode command', key, char)
+    elif char in 'gfxyzGFXYZ$ ':
+      ui.keyPressMessage(' - Send raw GCode command', key, char)
       ui.inputMsg('Enter GCode command...')
-      userCommand=input()
-      sp.sendCommand(userCommand)
-      mch.waitForMachineIdle()
+      if char == ' ':
+        char = ''
+      userCommand = char + input(char)
+      sendCommand(userCommand)
 
-    elif(char == 's'):
+    elif key == 167:   # º
+      ui.keyPressMessage('F12 - Repeat last GCode command', key, char)
+      sendCommand(gLastGCodeCommand)
+
+    elif char == 's':
       ui.keyPressMessage('s - Show current status (short)', key, char)
       showMachineStatus()
 
-    elif(char == 'S'):
+    elif char == 'S':
       ui.keyPressMessage('S - Show current status (LONG)', key, char)
       showMachineLongStatus()
 
-    elif(char in 'rR'):
-      ui.keyPressMessage('rR - Reset serial connection', key, char)
-      sp.connect()
-      mch.getMachineStatus()
+    elif char == '@':
+      ui.keyPressMessage('@ - Show current status (FULL)', key, char)
+      showMachineFullStatus()
 
-    elif(char in 'cC'):
+    elif char in 'rR':
+      ui.keyPressMessage('rR - Reset serial connection', key, char)
+      mch.resetConnection()
+      mch.queryMachineStatus()
+
+    elif key == kb.CTRL_X:
+      ui.keyPressMessage('<CTRL>x - grbl soft reset', key, char)
+      mch.softReset()
+
+    elif char in 'cC':
       ui.keyPressMessage('cC - Clear screen', key, char)
       ui.clearScreen()
 
-    elif(char in 'tT'):
+    elif char in 'tT':
       ui.keyPressMessage('tT - Tests', key, char)
 
       ui.logBlock(
       """
       Available commands:
 
-      pP  - Point probe
-      tT  - Table probing scan
       sS  - Table position scan
       lL  - Base levelling holes
       zZ  - Zig-zag pattern
@@ -314,79 +407,80 @@ def processUserInput():
       key = kb.readKey()
       char=chr(key)
 
-      if(char in 'pP'):
-        ui.keyPressMessage('pP - Point probe', key, char)
-        test.pointProbe()
-
-      elif(char in 'tT'):
-        ui.keyPressMessage('tT - Table probing scan', key, char)
-        test.tableProbingScan()
-
-      elif(char in 'sS'):
+      if char in 'sS':
         ui.keyPressMessage('sS - Table position scan', key, char)
-        test.tablePositionScan()
+        tst.tablePositionScan()
 
-      elif(char in 'lL'):
+      elif char in 'lL':
         ui.keyPressMessage('lL - Base levelling holes', key, char)
-        test.baseLevelingHoles()
+        tst.baseLevelingHoles()
 
-      elif(char in 'zZ'):
+      elif char in 'zZ':
         ui.keyPressMessage('zZ - Zig-zag pattern', key, char)
-        test.zigZagPattern()
+        tst.zigZagPattern()
 
-      elif(char == '*'):
+      elif char == '*':
         ui.keyPressMessage('* - DUMMY Test', key, char)
-        test.dummy()
+        tst.dummy()
 
       else:
         ui.keyPressMessage('Unknown command', key, char)
 
-    elif(char == '/'):
-      ui.keyPressMessage('/ - Relative rapid (Z)+', key, char)
-      mch.safeRapidRelative(x=0,y=0,z=tbl.getRI_Z())
+    elif char == '-':
+      ui.keyPressMessage('- - Jog (Z) up ({:} {:})'.format(gZJog, ps['units']['desc']), key, char)
+      mch.moveRelative(x=0,y=0,z=gZJog)
 
-    elif(char == '*'):
-      ui.keyPressMessage('* - Relative rapid (Z)-', key, char)
-      mch.safeRapidRelative(x=0,y=0,z=tbl.getRI_Z()*-1)
+    elif char == '+':
+      ui.keyPressMessage('+ - Jog (Z) down ({:} {:})'.format(gZJog, ps['units']['desc']), key, char)
+      mch.moveRelative(x=0,y=0,z=gZJog*-1)
 
-    elif(char == '0'):
-      ui.keyPressMessage('0 - Safe go to X0Y0Z0', key, char)
-      mch.safeRapidAbsolute(x=0,y=0,z=0)
+    elif char == '0':
+      ui.keyPressMessage('0 - Safe go to machine home', key, char)
+      mch.goToMachineHome()
 
-    elif(char == '1'):
-      ui.keyPressMessage('1 - Safe relative rapid - [DL]', key, char)
-      mch.safeRapidRelative(x=tbl.getRI_XY()*-1,y=tbl.getRI_XY()*-1)
+    elif char == '1':
+      ui.keyPressMessage('1 - Jog - [DL] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
+      mch.moveRelative(x=gXYJog*-1,y=gXYJog*-1)
 
-    elif(char == '2'):
-      ui.keyPressMessage('2 - Safe relative rapid - [D]', key, char)
-      mch.safeRapidRelative(y=tbl.getRI_XY()*-1)
+    elif char == '2':
+      ui.keyPressMessage('2 - Jog - [D] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
+      mch.moveRelative(y=gXYJog*-1)
 
-    elif(char == '3'):
-      ui.keyPressMessage('3 - Safe relative rapid - [DR]', key, char)
-      mch.safeRapidRelative(x=tbl.getRI_XY(),y=tbl.getRI_XY()*-1)
+    elif char == '3':
+      ui.keyPressMessage('3 - Jog - [DR] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
+      mch.moveRelative(x=gXYJog,y=gXYJog*-1)
 
-    elif(char == '4'):
-      ui.keyPressMessage('4 - Safe relative rapid - [L]', key, char)
-      mch.safeRapidRelative(x=tbl.getRI_XY()*-1)
+    elif char == '4':
+      ui.keyPressMessage('4 - Jog - [L] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
+      mch.moveRelative(x=gXYJog*-1)
 
-    elif(char == '6'):
-      ui.keyPressMessage('6 - Safe relative rapid - [R]', key, char)
-      mch.safeRapidRelative(x=tbl.getRI_XY())
+    elif char == '6':
+      ui.keyPressMessage('6 - Jog - [R] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
+      mch.moveRelative(x=gXYJog)
 
-    elif(char == '7'):
-      ui.keyPressMessage('7 - Safe relative rapid - [UL]', key, char)
-      mch.safeRapidRelative(x=tbl.getRI_XY()*-1,y=tbl.getRI_XY())
+    elif char == '7':
+      ui.keyPressMessage('7 - Jog - [UL] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
+      mch.moveRelative(x=gXYJog*-1,y=gXYJog)
 
-    elif(char == '8'):
-      ui.keyPressMessage('8 - Safe relative rapid - [U]', key, char)
-      mch.safeRapidRelative(y=tbl.getRI_XY())
+    elif char == '8':
+      ui.keyPressMessage('8 - Jog - [U] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
+      mch.moveRelative(y=gXYJog)
 
-    elif(char == '9'):
-      ui.keyPressMessage('9 - Safe relative rapid - [UR]', key, char)
-      mch.safeRapidRelative(x=tbl.getRI_XY(),y=tbl.getRI_XY())
+    elif char == '9':
+      ui.keyPressMessage('9 - Jog - [UR] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
+      mch.moveRelative(x=gXYJog,y=gXYJog)
 
-    elif(char == '.'):
-      ui.keyPressMessage('. - Safe absolute rapid to table position', key, char)
+    elif char == '.':
+      ui.keyPressMessage('. - Absolute rapid to table position', key, char)
+
+      minX = mch.getMin('x')
+      minY = mch.getMin('y')
+      maxX = mch.getMax('x')
+      maxY = mch.getMax('y')
+      wX = maxX-minX if minX<0 else minX-maxX
+      wY = maxY-minY if minY<0 else minY-maxY
+      cX = minX-(wX/2) if minX>0 else minX+(wX/2)
+      cY = minY-(wY/2) if minX>0 else minY+(wY/2)
 
       ui.logBlock(
       """
@@ -400,7 +494,7 @@ def processUserInput():
       key = kb.readKey()
       char=chr(key)
 
-      if(char == '.'):
+      if char == '.':
         ui.keyPressMessage('. - ONE AXIS ONLY', key, char)
 
         ui.logBlock(
@@ -415,145 +509,92 @@ def processUserInput():
         key = kb.readKey()
         char=chr(key)
 
-        if(char == '2'):
-          ui.keyPressMessage('2 - ONE AXIS ONLY - Safe absolute rapid to axis limits - [B]', key, char)
-          mch.safeRapidAbsolute(y=0)
-        elif(char == '4'):
-          ui.keyPressMessage('4 - ONE AXIS ONLY - Safe absolute rapid to axis limits - [L]', key, char)
-          mch.safeRapidAbsolute(x=0)
-        elif(char == '6'):
-          ui.keyPressMessage('6 - ONE AXIS ONLY - Safe absolute rapid to axis limits - [R]', key, char)
-          mch.safeRapidAbsolute(x=tbl.getMaxX())
-        elif(char == '8'):
-          ui.keyPressMessage('8 - ONE AXIS ONLY - Safe absolute rapid to axis limits - [U]', key, char)
-          mch.safeRapidAbsolute(y=tbl.getMaxY())
+        if char == '2':
+          ui.keyPressMessage('2 - ONE AXIS ONLY - Absolute rapid to axis limits - [B]', key, char)
+          mch.rapidAbsolute(y=minY)
+        elif char == '4':
+          ui.keyPressMessage('4 - ONE AXIS ONLY - Absolute rapid to axis limits - [L]', key, char)
+          mch.rapidAbsolute(x=minX)
+        elif char == '6':
+          ui.keyPressMessage('6 - ONE AXIS ONLY - Absolute rapid to axis limits - [R]', key, char)
+          mch.rapidAbsolute(x=maxX)
+        elif char == '8':
+          ui.keyPressMessage('8 - ONE AXIS ONLY - Absolute rapid to axis limits - [U]', key, char)
+          mch.rapidAbsolute(y=maxY)
         else:
           ui.keyPressMessage('Unknown command', key, char)
 
-      elif(char == '1'):
-        ui.keyPressMessage('1 - Safe absolute rapid to table position - [BL]', key, char)
-        mch.safeRapidAbsolute(x=0,y=0)
-      elif(char == '2'):
-        ui.keyPressMessage('2 - Safe absolute rapid to table position - [BC]', key, char)
-        mch.safeRapidAbsolute(x=tbl.getMaxX()/2,y=0)
-      elif(char == '3'):
-        ui.keyPressMessage('3 - Safe absolute rapid to table position - [BR]', key, char)
-        mch.safeRapidAbsolute(x=tbl.getMaxX(),y=0)
-      elif(char == '4'):
-        ui.keyPressMessage('4 - Safe absolute rapid to table position - [CL]', key, char)
-        mch.safeRapidAbsolute(x=0,y=tbl.getMaxY()/2)
-      elif(char == '5'):
-        ui.keyPressMessage('5 - Safe absolute rapid to table position - [CC]', key, char)
-        mch.safeRapidAbsolute(x=tbl.getMaxX()/2,y=tbl.getMaxY()/2)
-      elif(char == '6'):
-        ui.keyPressMessage('6 - Safe absolute rapid to table position - [CR]', key, char)
-        mch.safeRapidAbsolute(x=tbl.getMaxX(),y=tbl.getMaxY()/2)
-      elif(char == '7'):
-        ui.keyPressMessage('7 - Safe absolute rapid to table position - [UL]', key, char)
-        mch.safeRapidAbsolute(x=0,y=tbl.getMaxY())
-      elif(char == '8'):
-        ui.keyPressMessage('8 - Safe absolute rapid to table position - [UC]', key, char)
-        mch.safeRapidAbsolute(x=tbl.getMaxX()/2,y=tbl.getMaxY())
-      elif(char == '9'):
-        ui.keyPressMessage('9 - Safe absolute rapid to table position - [UR]', key, char)
-        mch.safeRapidAbsolute(x=tbl.getMaxX(),y=tbl.getMaxY())
+      elif char == '1':
+        ui.keyPressMessage('1 - Absolute rapid to table position - [BL]', key, char)
+        mch.rapidAbsolute(x=minX,y=minY)
+      elif char == '2':
+        ui.keyPressMessage('2 - Absolute rapid to table position - [BC]', key, char)
+        mch.rapidAbsolute(x=cX,y=minY)
+      elif char == '3':
+        ui.keyPressMessage('3 - Absolute rapid to table position - [BR]', key, char)
+        mch.rapidAbsolute(x=maxX,y=minY)
+      elif char == '4':
+        ui.keyPressMessage('4 - Absolute rapid to table position - [CL]', key, char)
+        mch.rapidAbsolute(x=minX,y=cY)
+      elif char == '5':
+        ui.keyPressMessage('5 - Absolute rapid to table position - [CC]', key, char)
+        mch.rapidAbsolute(x=cX,y=cY)
+      elif char == '6':
+        ui.keyPressMessage('6 - Absolute rapid to table position - [CR]', key, char)
+        mch.rapidAbsolute(x=maxX,y=cY)
+      elif char == '7':
+        ui.keyPressMessage('7 - Absolute rapid to table position - [UL]', key, char)
+        mch.rapidAbsolute(x=minX,y=maxY)
+      elif char == '8':
+        ui.keyPressMessage('8 - Absolute rapid to table position - [UC]', key, char)
+        mch.rapidAbsolute(x=cX,y=maxY)
+      elif char == '9':
+        ui.keyPressMessage('9 - Absolute rapid to table position - [UR]', key, char)
+        mch.rapidAbsolute(x=maxX,y=maxY)
       else:
         ui.keyPressMessage('Unknown command', key, char)
 
-    elif(char == '+'):
-      ui.keyPressMessage('+ - Set rapid increment (XY)+', key, char)
-      tbl.changeRI_XY(+1)
-
-    elif(char == '-'):
-      ui.keyPressMessage('- - Set rapid increment (XY)-', key, char)
-      tbl.changeRI_XY(-1)
-
-    elif(key in [24, 25]):  # <CTRL>x/y
-      ui.keyPressMessage('<CTRL>x/y - Set rapid increment (XY)', key, char)
-      tbl.setRI_XY(
-        ui.getUserInput(
-          'Increment ({:})'.format(tbl.getRI_XY()),
-          float,
-          tbl.getRI_XY()))
+    elif char == '/':
+      ui.keyPressMessage('/ - Set jog distance (XY)', key, char)
+      global gXYJog
+      gXYJog = ui.getUserInput(
+        'Distance ({:})'.format(gXYJog),
+        float,
+        gXYJog)
       showMachineStatus()
 
-    elif(char == 'Z'):
-      ui.keyPressMessage('Z - Set rapid increment (Z)+', key, char)
-      tbl.changeRI_Z(+1)
-
-    elif(char == 'z'):
-      ui.keyPressMessage('z - Set rapid increment (Z)-', key, char)
-      tbl.changeRI_Z(-1)
-
-    elif(key == 26):  # <CTRL>z
-      ui.keyPressMessage('<CTRL>z - Set rapid increment (Z)', key, char)
-      tbl.setRI_Z(
-        ui.getUserInput(
-          'Increment ({:})'.format(tbl.getRI_Z()),
-          float,
-          tbl.getRI_Z()))
+    elif char == '*':
+      ui.keyPressMessage('* - Set jog distance (Z)', key, char)
+      global gZJog
+      gZJog = ui.getUserInput(
+        'Distance ({:})'.format(gZJog),
+        float,
+        gZJog)
       showMachineStatus()
 
-    elif(char == '%'):
-      ui.keyPressMessage('% - Set table size percent (loop)', key, char)
-      tmpTableSizePercent = ut.genericValueChanger(  tbl.getTableSizePercent(), +10, tbl.gMIN_TABLE_SIZE_PERCENT, tbl.gMAX_TABLE_SIZE_PERCENT,
-                              loop=True, valueName='Table size percent')
-
-      tbl.setTableSizePercent(tmpTableSizePercent)
-
-    elif(key == 53):  # <ALT>5
-      ui.keyPressMessage('<ALT>5 - Set table size percent', key, char)
-      tbl.setTableSizePercent(
-        ui.getUserInput(
-          'Table size % ({:})'.format(tbl.getTableSizePercent()),
-          int,
-          tbl.getTableSizePercent()))
-      showMachineStatus()
-
-    elif(char == 'V'):
+    elif char == 'V':
       ui.keyPressMessage('V - Set verbose level+', key, char)
       tempVerboseLevel = ut.genericValueChanger(  ui.getVerboseLevel(), +1, ui.gMIN_VERBOSE_LEVEL, ui.gMAX_VERBOSE_LEVEL,
                             loop=True, valueName='Verbose level',
                             valueFormatter=lambda level : '{:d} {:s}'.format(level,ui.getVerboseLevelStr(level)) )
       ui.setVerboseLevel(tempVerboseLevel)
 
-    elif(char == 'v'):
+    elif char == 'v':
       ui.keyPressMessage('v - Set verbose level-', key, char)
       tempVerboseLevel = ut.genericValueChanger(  ui.getVerboseLevel(), -1, ui.gMIN_VERBOSE_LEVEL, ui.gMAX_VERBOSE_LEVEL,
                           loop=True, valueName='Verbose level',
                           valueFormatter=lambda level : '{:d} {:s}'.format(level,ui.getVerboseLevelStr(level)) )
       ui.setVerboseLevel(tempVerboseLevel)
 
-    elif(char == 'A'):
-      ui.keyPressMessage('A - Set safe height (Z)+', key, char)
-      tempSafeHeight = ut.genericValueChanger(  tbl.getSafeHeight(), +1, tbl.gMIN_SAFE_HEIGHT, tbl.gMAX_SAFE_HEIGHT,
-                            loop=False, valueName='Safe Height' )
-      tbl.setSafeHeight(tempSafeHeight)
-
-    elif(char == 'a'):
-      ui.keyPressMessage('a - Set safe height (Z)-', key, char)
-      tempSafeHeight = ut.genericValueChanger(  tbl.getSafeHeight(), -1, tbl.gMIN_SAFE_HEIGHT, tbl.gMAX_SAFE_HEIGHT,
-                            loop=False, valueName='Safe Height' )
-      tbl.setSafeHeight(tempSafeHeight)
-
-    elif(key == 1):  # <CTRL>a
-      ui.keyPressMessage('<CTRL>a - Set safe height (Z)', key, char)
-      tbl.setSafeHeight(
-        ui.getUserInput(
-          'Safe height ({:})'.format(tbl.getSafeHeight()),
-          int,
-          tbl.getSafeHeight()))
-      showMachineStatus()
-
     else:  # Rest of keys
       processed = False
-      if(ui.getVerboseLevelStr() == 'DEBUG'):
+      if ui.getVerboseLevelStr() == 'DEBUG':
         ui.keyPressMessage('Pressed unknown key {:d} {:s}'.format(key,char), key, char)
       else:
         pass
         #ui.keyPressMessage('Unknown command', key, char)
 
-  if(processed):
+  if processed:
     readyMsg()
 
   return True
@@ -562,7 +603,7 @@ def processUserInput():
 def main():
   ui.clearScreen()
 
-  ui.logBlock('    grblCommander v{0}'.format(gVERSION), color='ui.header')
+  ui.logBlock('    grblCommander v{:}'.format(gVERSION), color='ui.header')
 
   ui.logTitle('Loading configuration')
   ui.log('Using configuration file: {:}'.format(loadedCfg))
@@ -572,32 +613,31 @@ def main():
   mcr.load()
   ui.log()
 
-  ui.logTitle('Serial connection')
-  sp.connect()
-
-  mch.viewBuildInfo()
+  ui.logTitle('Grbl connection')
+  mch.start()
 
   ui.logTitle('Sending startup macro')
-  mcr.run(mcrCfg['startup'], silent=True)
+  if mch.status['machineState'] == 'Idle':
+    mcr.run(mcrCfg['startup'], silent=True)
+  else:
+    ui.log('WARNING: startup macro NOT executed (machine not ready)',c='ui.msg')
+    ui.log()
 
-  mch.viewGCodeParserState()
-  ui.log('System ready!', color='ui.msg')
+  ui.log('System ready!', color='ui.successMsg')
 
   showMachineStatus()
-  ui.log('Type [hH?] for help', color='ui.msg')
+  ui.log('Type [hH] for help', color='ui.msg')
 
   readyMsg()
 
-  while(True):
-    line = sp.readline()
-    if(line):
-      ui.log('<<<<< {:}'.format(line), color='comms.recv')
+  while True:
+    mch.process()
 
     if not processUserInput():
       break
 
-  ui.log('Closing serial port...')
-  sp.close()
+  ui.log('Closing grbl connection...')
+  mch.stop()
 
   ui.log('Closing program...')
 

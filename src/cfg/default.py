@@ -25,15 +25,27 @@ cfg = {
 
   # ---[Machine configuration]--------------------------------------
   'machine': {
-    'maxX': 280.0,            # Change to fit your machine
-    'maxY': 280.0,            # Change to fit your machine
-    'maxZ': 80.0,             # Change to fit your machine
-    'zSafeHeight': 5.0,
-    'rapidXY': 25.0,
-    'rapidZ': 10.0,
-    'tableSizePercent': 100,
+    'maxTravel': {
+      'x': 280.0,            # Change to fit your machine
+      'y': 280.0,            # Change to fit your machine
+      'z': 80.0,             # Change to fit your machine
+    },
+    'softLimitsMargin': 1.0,
+    'xyJogMm': 10.0,
+    'zJogMm': 3.0,
     'seekSpeed': 2000,
-    'feedSpeed': 50,
+    'feedSpeed': 400,
+    'homingTimeout': 20,
+    'preferredParserState': {
+      'coolant': 'M9',          # Change to fit your preferences
+      'distanceMode': 'G90',    # Change to fit your preferences
+      'feedRateMode': 'G94',    # Change to fit your preferences
+      'motion': 'G0',           # Change to fit your preferences
+      'plane': 'G17',           # Change to fit your preferences
+      'spindle': 'M5',          # Change to fit your preferences
+      'units': 'G21',           # Change to fit your preferences
+      'wcs': 'G54',             # Change to fit your preferences
+    },
   },
 
   # ---[Macro configuration]--------------------------------------
@@ -41,7 +53,7 @@ cfg = {
     'autoReload': True,
     'startup': 'def.start',
     'machineLongStatus': 'def.mls',
-    'reservedNames': [ 'PAUSE', 'STARTUP' ],
+    'reservedNames': [ 'pause', 'startup', 'sleep' ],
     'blackList': [ ],
     'hotKeys': {
       'F1': '',
@@ -71,34 +83,40 @@ cfg = {
   # ---[Interface configuration]--------------------------------------
   'ui': {
     'verboseLevel': 'WARNING',
-    'maxLineLen': 80,
+    'maxLineLen': 100,
     'clearScreenLines': 100,
     'inputTitleWidth': 45,
-    'readyMsg': '==================[ Ready ]==================',
-    'coordFormat': '{:.3f}',
-    'xyzFormat': '[{:}/{:}/{:}]',
+    'readyMsg': '==========================[ Ready ]==========================',
+    'simpleParserState': {
+      'distanceMode': 'G90',    # Change to fit your preferences
+      'motion': 'G0',           # Change to fit your preferences
+      'units': 'G21',           # Change to fit your preferences
+      'wcs': 'G54',             # Change to fit your preferences
+    },
+    'coordFormat': '{:8.3f}',
+    'xyzFormat': '{:}/{:}/{:}',
     'msgSeparatorChar': '-',
     'titleSeparatorChar': '-',
     'blockSeparatorChar': '*',
 
     'colors': {
       'ui': {
-        '':                     'white',    # Default
-        'title':                'white+',
-        'subtitle':             'white+',
-        'header':               'cyan+',
-        'onlineMachineStatus':  'yellow+',
-        'machinePosDiff':       'yellow+, red',
-        'info':                 'white',
-        'msg':                  'yellow+',
-        'keyPressMsg':          'cyan+',
-        'readyMsg':             'yellow+, magenta',
-        'inputMsg':             'yellow+, magenta',
-        'errorMsg':             'yellow+, red',
-        'cancelMsg':            'white+, red',
-        'confirmMsg':           'magenta+',
-        'finishedMsg':          'white+, green',
-        'waiting':              'cyan+',
+        '':                  'white',    # Default
+        'title':             'white+',
+        'subtitle':          'white+',
+        'header':            'cyan+',
+        'onlineMachinePos':  'yellow+',
+        'info':              'white',
+        'msg':               'yellow+',
+        'keyPressMsg':       'cyan+',
+        'readyMsg':          'yellow+, magenta',
+        'inputMsg':          'yellow+, magenta',
+        'successMsg':        'green+',
+        'errorMsg':          'yellow+, red',
+        'cancelMsg':         'white+, red',
+        'confirmMsg':        'magenta+',
+        'finishedMsg':       'white+, green',
+        'waiting':           'cyan+',
       },
 
       'macro': {
@@ -106,7 +124,7 @@ cfg = {
         'command':      'white+',
         'comment':      'green+',
         'macroCall':    'white+, blue',
-        'reservedName': 'yellow+, blue',
+        'reservedName': 'green+, blue',
         'subCallStart': 'white+, green',
         'subCallEnd':   'white+, red',
       },

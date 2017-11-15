@@ -8,8 +8,8 @@ User interface management
 if __name__ == '__main__':
   print('This file is a module, it should not be executed directly')
 
+from enum import Enum
 from src.gc.config import cfg
-
 # ------------------------------------------------------------------
 # Make it easier (shorter) to use cfg object
 uiCfg = cfg['ui']
@@ -82,11 +82,11 @@ def fillLogParams(kwargs):
   verboseStr = 'BASIC'
   color = None
 
-  while( 'verbose' in kwargs ):   verboseStr = kwargs.pop('verbose')
-  while( 'v' in kwargs ):         verboseStr = kwargs.pop('v')
+  while 'verbose' in kwargs:   verboseStr = kwargs.pop('verbose')
+  while 'v' in kwargs:         verboseStr = kwargs.pop('v')
 
-  while( 'color' in kwargs ):     color = kwargs.pop('color')
-  while( 'c' in kwargs ):         color = kwargs.pop('c')
+  while 'color' in kwargs:     color = kwargs.pop('color')
+  while 'c' in kwargs:         color = kwargs.pop('c')
 
   # Write values back
   kwargs['verbose'] = verboseStr
@@ -116,11 +116,11 @@ def log(message='', **kwargs):
 def logBlock(message, **kwargs):
   separator = gBLOCK_SEPARATOR
 
-  while( 'separator' in kwargs ):   separator = kwargs.pop('separator')
-  while( 's' in kwargs ):           separator = kwargs.pop('s')
+  while 'separator' in kwargs:   separator = kwargs.pop('separator')
+  while 's' in kwargs:           separator = kwargs.pop('s')
 
   message = message.rstrip(' ').strip('\r\n')
-  log('\n{0}\n{1}\n{2}'.format(separator, message, separator), **kwargs)
+  log('\n{:}\n{:}\n{:}'.format(separator, message, separator), **kwargs)
   log('', **kwargs)  # Additional separator line NOT colored!
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -139,10 +139,11 @@ def inputMsg(text, **kwargs):
   log('{:}'.format(text), **kwargs)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def readyMsg(extraInfo=''):
-  log('\n{:} {:}'.format(
-    setStrColor(uiCfg['readyMsg'], 'ui.readyMsg'),
-    extraInfo))
+def readyMsg(extraInfo=None):
+  log()
+  if extraInfo:
+    log('{:}'.format(extraInfo))
+  log('{:}'.format(setStrColor(uiCfg['readyMsg'], 'ui.readyMsg')))
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def keyPressMessage(message, key, char):
@@ -160,12 +161,12 @@ def charLine(char, widthMultiplier=1):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def clearLine():
-  log('\r{0}'.format(charLine(' ')), end='')
+  log('\r{:}'.format(charLine(' ')), end='')
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def getUserInput(description, dataType='str', default=None):
   titleWidth = uiCfg['inputTitleWidth']
-  inputMsg('Enter {0}:'.format(description)[:titleWidth].ljust(titleWidth), end='')
+  inputMsg('Enter {:}:'.format(description)[:titleWidth].ljust(titleWidth), end='')
   userInput=input()
   try:
     userInput=dataType(userInput)
@@ -179,7 +180,7 @@ def coordStr(c):
   return cFmt.format(c)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def xyzStr(x, y, z, xColor='', yColor='', zColor=''):
+def ColoredXyzStr(x, y, z, xColor='', yColor='', zColor=''):
   xyzFmt = uiCfg['xyzFormat']
   return xyzFmt.format(
     setStrColor(coordStr(x), xColor ),
@@ -188,8 +189,26 @@ def xyzStr(x, y, z, xColor='', yColor='', zColor=''):
     )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def xyzStr(x, y, z):
+  xyzFmt = uiCfg['xyzFormat']
+  return xyzFmt.format(
+    coordStr(x),
+    coordStr(y),
+    coordStr(z),
+    )
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # Verbose level
+class v(Enum):
+  NONE = 0
+  BASIC = 1
+  ERROR = 2
+  WARNING = 3
+  DETAIL = 4
+  SUPER = 5
+  DEBUG = 6
+
 gVerboseLevels = [ 'NONE', 'BASIC', 'ERROR', 'WARNING', 'DETAIL', 'SUPER', 'DEBUG' ]
 gMIN_VERBOSE_LEVEL = gVerboseLevels.index('BASIC')
 gMAX_VERBOSE_LEVEL = len(gVerboseLevels) - 1

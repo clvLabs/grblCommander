@@ -14,260 +14,306 @@ from pathlib import Path, PurePath
 
 from . import ui as ui
 from . import keyboard as kb
-from . import serialport as sp
-from . import machine as mch
-from src.gc.config import cfg
+
 
 # ------------------------------------------------------------------
-# Make it easier (shorter) to use cfg object
-mcrCfg = cfg['macro']
+# Macro class
 
-gMACROS = {}
-gSUPPORT_FILES = {}
+class Macro:
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def load(silent=False):
-  global gMACROS, gSUPPORT_FILES
-  gMACROS = {}
+  def __init__(self, grbl):
+    ''' Construct a Macro object.
+    '''
+    self.grbl = grbl
+    self.cfg = grbl.getConfig()
+    self.mcrCfg = self.cfg['macro']
 
-  # Reload support files before macros
-  for index in gSUPPORT_FILES:
-    try:
-      importlib.reload(gSUPPORT_FILES[index])
-    except:
-      pass
-  gSUPPORT_FILES = {}
+    self.macros = {}
+    self.supportFiles = {}
 
-  loadFolder('src/macros', silent=silent)
 
-  if not silent:
-    ui.log()
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getConfig(self):
+    ''' Get working configuration
+    '''
+    return self.cfg
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def loadFolder(folder='', silent=False):
-  global gMACROS
 
-  dotBasePath = 'src.macros.'
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def load(self, silent=False):
+    ''' TODO: comment
+    '''
+    self.macros = {}
 
-  if folder[-1] != '/':
-    folder += '/'
-
-  dotPath = folder.replace('/','.')
-
-  # Find macros and subfolders
-  for item in Path(folder).glob('*.py'):
-    if item.is_file():
-      fileName = item.name[:-3]
-
-      if fileName == '__init__':    # IGNORE __init__.py !!!
-        continue
-
-      macroName = dotPath + fileName
-      macroShortName = macroName.replace(dotBasePath,'')
-
-      blackListed = False
-      for item in mcrCfg['blackList']:
-        if macroShortName[:len(item)] == item:
-          blackListed = True
-          continue
-
-      if blackListed:
-        continue
-
+    # Reload support files before macros
+    for index in self.supportFiles:
       try:
-        tmpModule = __import__(macroName, fromlist=[''])
-        importlib.reload(tmpModule)
+        importlib.reload(self.supportFiles[index])
+      except:
+        pass
+    self.supportFiles = {}
 
-        try:
-          tmpMacro = tmpModule.macro
-        except AttributeError:
-          gSUPPORT_FILES[macroName] = tmpModule
+    self.loadFolder('src/macros', silent=silent)
+
+    if not silent:
+      ui.log()
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def loadFolder(self,folder='', silent=False):
+    ''' TODO: comment
+    '''
+    dotBasePath = 'src.macros.'
+
+    if folder[-1] != '/':
+      folder += '/'
+
+    dotPath = folder.replace('/','.')
+
+    # Find macros and subfolders
+    for item in Path(folder).glob('*.py'):
+      if item.is_file():
+        fileName = item.name[:-3]
+
+        if fileName == '__init__':    # IGNORE __init__.py !!!
           continue
 
-        if 'title' in tmpMacro and 'commands' in tmpMacro:
-          gMACROS[macroShortName] = tmpMacro
-          if not silent:
-            ui.log('[{:}]'.format(macroShortName), end=' ')
-        else:
-          if not silent:
-            ui.log('[{:}]'.format(macroShortName), color='ui.errorMsg', end=' ')
-      except ImportError:
-        if not silent:
-          ui.log('[{:}]'.format(macroShortName), color='ui.errorMsg', end=' ')
+        macroName = dotPath + fileName
+        macroShortName = macroName.replace(dotBasePath,'')
 
-  for item in Path(folder).glob('*'):
-    if item.is_dir():
-      folderName = PurePath(item).as_posix()
-      loadFolder(folderName, silent=silent)
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def list():
-  if mcrCfg['autoReload']:
-    load(silent=True)
-
-  maxNameLen = 0
-  for macroName in gMACROS:
-    if len(macroName) > maxNameLen:
-      maxNameLen = len(macroName)
-
-  block = ''
-  block += '  Available macros:\n\n'
-  block += '  {:}   {:} {:}\n\n'.format(
-    'Name'.ljust(maxNameLen),
-    'Lines'.ljust(5),
-    'title'
-    )
-
-  for macroName in sorted(gMACROS):
-    macro = gMACROS[macroName]
-    title = macro['title'] if 'title' in macro else ''
-    commands = macro['commands']
-
-    block += '  {:}   {:} {:}\n'.format(
-      macroName.ljust(maxNameLen),
-      str(len(commands)).ljust(5),
-      title
-      )
-
-  ui.logBlock(block)
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def run(name, silent=False, isSubCall=False):
-  success = _run(name, silent=silent)
-
-  if not success:
-    ui.logTitle('Restoring machine settings after macro cancel')
-    _run(mcrCfg['startup'], silent=True)
-
-  return success
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def _run(name, silent=False, isSubCall=False):
-  if mcrCfg['autoReload']:
-    load(silent=True)
-
-  if not name in gMACROS:
-    ui.log('ERROR: Macro [{:}] does not exist, please check config file.'.format(name),
-      color='ui.errorMsg')
-    return False
-
-  macro = gMACROS[name]
-  commands = macro['commands']
-
-  if not silent:
-    if isSubCall:
-      ui.logTitle('Macro [{:}] subcall START'.format(name), color='macro.subCallStart')
-    else:
-      show(name, avoidReload=True)
-
-      ui.inputMsg('Press y/Y to execute, any other key to cancel...')
-      key=kb.readKey()
-      char=chr(key)
-
-      if not char in 'yY':
-        ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
-        return False
-
-  for command in commands:
-    cmdName = command[0].upper() if len(command) > 0 else ''
-    cmdComment = command[1] if len(command) > 1 else ''
-    isReservedName = cmdName in mcrCfg['reservedNames']
-    isMacroCall = cmdName in gMACROS
-
-    if cmdComment:
-      # if not silent:
-      ui.logTitle(cmdComment, color='macro.macroCall' if isMacroCall else 'macro.comment')
-
-    if cmdName:
-      if cmdName[:5] == 'SLEEP':
-        isReservedName = True
-
-      if isReservedName:
-        ui.logTitle(cmdName, color='macro.reservedName')
-        if cmdName == 'PAUSE':
-          ui.inputMsg('Paused, press <ENTER> to continue / <ESC> to exit ...')
-          key=0
-          while( key != 13 and key != 10 and key != 27 ):
-            key=kb.readKey()
-
-          if key == 27:  # <ESC>
-            ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
-            return False
-          elif key == 13 or key == 10:  # <ENTER>
+        blackListed = False
+        for item in self.mcrCfg['blackList']:
+          if macroShortName[:len(item)] == item:
+            blackListed = True
             continue
 
-        elif cmdName == 'STARTUP':
-          cmdName = mcrCfg['startup']
-          isMacroCall = cmdName in gMACROS
-
-        elif cmdName[:5] == 'SLEEP':
-          time.sleep(float(cmdName[5:]))
+        if blackListed:
           continue
 
-      if isMacroCall:
-        if not _run(cmdName, silent=silent, isSubCall=True):
+        try:
+          tmpModule = __import__(macroName, fromlist=[''])
+          importlib.reload(tmpModule)
+
+          try:
+            tmpMacro = tmpModule.macro
+          except AttributeError:
+            self.supportFiles[macroName] = tmpModule
+            continue
+
+          if 'title' in tmpMacro and 'commands' in tmpMacro:
+            self.macros[macroShortName] = tmpMacro
+            if not silent:
+              ui.log('[{:}]'.format(macroShortName), end=' ')
+          else:
+            if not silent:
+              ui.log('[{:}]'.format(macroShortName), color='ui.errorMsg', end=' ')
+        except ImportError:
+          if not silent:
+            ui.log('[{:}]'.format(macroShortName), color='ui.errorMsg', end=' ')
+
+    for item in Path(folder).glob('*'):
+      if item.is_dir():
+        folderName = PurePath(item).as_posix()
+        self.loadFolder(folderName, silent=silent)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def list(self):
+    ''' TODO: comment
+    '''
+    if self.mcrCfg['autoReload']:
+      self.load(silent=True)
+
+    maxNameLen = 0
+    for macroName in self.macros:
+      if len(macroName) > maxNameLen:
+        maxNameLen = len(macroName)
+
+    block = ''
+    block += '  Available macros:\n\n'
+    block += '  {:}   {:} {:}\n\n'.format(
+      'Name'.ljust(maxNameLen),
+      'Lines'.ljust(5),
+      'title'
+      )
+
+    for macroName in sorted(self.macros):
+      macro = self.macros[macroName]
+      title = macro['title'] if 'title' in macro else ''
+      commands = macro['commands']
+
+      block += '  {:}   {:} {:}\n'.format(
+        macroName.ljust(maxNameLen),
+        str(len(commands)).ljust(5),
+        title
+        )
+
+    ui.logBlock(block)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def run(self,name, silent=False, isSubCall=False):
+    ''' TODO: comment
+    '''
+    success = self._run(name, silent=silent)
+
+    if not success:
+      ui.logTitle('Restoring machine settings after macro cancel')
+      self._run(self.mcrCfg['startup'], silent=True)
+
+    return success
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def isMacro(self,name):
+    ''' TODO: comment
+    '''
+    for macroName in self.macros:
+      if macroName.lower() == name.lower():
+        return True
+    return False
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getMacro(self,name):
+    ''' TODO: comment
+    '''
+    for macroName in self.macros:
+      if macroName.lower() == name.lower():
+        return self.macros[macroName]
+    return None
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def _run(self,name, silent=False, isSubCall=False):
+    ''' TODO: comment
+    '''
+    if self.mcrCfg['autoReload']:
+      self.load(silent=True)
+
+    macro = self.getMacro(name)
+    if not macro:
+      ui.log('ERROR: Macro [{:}] does not exist, please check config file.'.format(name),
+        color='ui.errorMsg')
+      return False
+
+    commands = macro['commands']
+
+    if not silent:
+      if isSubCall:
+        ui.logTitle('Macro [{:}] subcall START'.format(name), color='macro.subCallStart')
+      else:
+        self.show(name, avoidReload=True)
+
+        ui.inputMsg('Press y/Y to execute, any other key to cancel...')
+        key=kb.readKey()
+        char=chr(key)
+
+        if not char in 'yY':
           ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
           return False
+
+    for command in commands:
+      cmdName = command[0] if len(command) > 0 else ''
+      cmdComment = command[1] if len(command) > 1 else ''
+      isReservedName = cmdName.lower().split(' ')[0] in self.mcrCfg['reservedNames']
+      isMacroCall = self.isMacro(cmdName)
+
+      if cmdComment:
+        # if not silent:
+        ui.logTitle(cmdComment, color='macro.macroCall' if isMacroCall else 'macro.comment')
+
+      if cmdName:
+        if isReservedName:
+          ui.logTitle(cmdName, color='macro.reservedName')
+
+          if cmdName.lower() == 'pause':
+            ui.inputMsg('Paused, press <ENTER> to continue / <ESC> to exit ...')
+            key=0
+            while key != kb.CR and key != kb.LF and key != kb.ESC:
+              key=kb.readKey()
+
+            if key == kb.ESC:
+              ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
+              return False
+            elif key == kb.CR or key == kb.LF:
+              continue
+
+          elif cmdName.lower() == 'startup':
+            cmdName = self.mcrCfg['startup']
+            isMacroCall = self.isMacro(cmdName)
+
+          elif cmdName[:5].lower() == 'sleep':
+            time.sleep(float(cmdName[5:]))
+            continue
+
+        if isMacroCall:
+          if not self._run(cmdName, silent=silent, isSubCall=True):
+            ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
+            return False
+        else:
+          self.grbl.send(cmdName)
+          if not silent:
+            self.grbl.waitForMachineIdle()
+
+      if kb.keyPressed():
+        if kb.readKey() == kb.ESC:
+          ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
+          return False
+
+    if not silent:
+      if isSubCall:
+        ui.logTitle('Macro [{:}] subCall END'.format(name), color='macro.subCallEnd')
       else:
-        sp.sendCommand(cmdName)
-        if not silent:
-          mch.waitForMachineIdle()
+        ui.logBlock('MACRO [{:}] FINISHED'.format(name), color='ui.finishedMsg')
 
-    if kb.keyPressed():
-      if kb.readKey() == 27:  # <ESC>
-        ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
-        return False
+    if not isSubCall:
+      ui.log()
 
-  if not silent:
-    if isSubCall:
-      ui.logTitle('Macro [{:}] subCall END'.format(name), color='macro.subCallEnd')
-    else:
-      ui.logBlock('MACRO [{:}] FINISHED'.format(name), color='ui.finishedMsg')
+    return True
 
-  if not isSubCall:
-    ui.log()
 
-  return True
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def show(self,name, avoidReload=False):
+    ''' TODO: comment
+    '''
+    if self.mcrCfg['autoReload'] and not avoidReload:
+      self.load(silent=True)
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def show(name, avoidReload=False):
-  if mcrCfg['autoReload'] and not avoidReload:
-    load(silent=True)
+    macro = self.getMacro(name)
+    if not macro:
+      ui.log('ERROR: Macro [{:}] does not exist, check config file.'.format(name),
+        color='ui.errorMsg')
+      return
 
-  if not name in gMACROS:
-    ui.log('ERROR: Macro [{:}] does not exist, check config file.'.format(name),
-      color='ui.errorMsg')
-    return
+    title = macro['title'] if 'title' in macro else ''
 
-  macro = gMACROS[name]
-  title = macro['title'] if 'title' in macro else ''
+    commands = macro['commands']
 
-  commands = macro['commands']
+    block = ui.setStrColor('Macro [{:}] - {:} ({:} lines)\n\n'.format(
+      name, title, len(commands)), 'ui.title')
 
-  block = ui.setStrColor('Macro [{:}] - {:} ({:} lines)\n\n'.format(
-    name, title, len(commands)), 'ui.title')
+    if 'description' in macro:
+      description = macro['description'].rstrip(' ').strip('\r\n')
+      block += ui.setStrColor(description, 'ui.msg') + '\n\n'
 
-  if 'description' in macro:
-    description = macro['description'].rstrip(' ').strip('\r\n')
-    block += ui.setStrColor(description, 'ui.msg') + '\n\n'
+    maxCommandLen = 0
+    for command in commands:
+      cmdName = command[0] if len(command) > 0 else ''
+      cmdComment = command[1] if len(command) > 1 else ''
 
-  maxCommandLen = 0
-  for command in commands:
-    cmdName = command[0] if len(command) > 0 else ''
-    cmdComment = command[1] if len(command) > 1 else ''
+      if len(cmdName) > maxCommandLen:
+        maxCommandLen = len(cmdName)
 
-    if len(cmdName) > maxCommandLen:
-      maxCommandLen = len(cmdName)
+    for command in commands:
+      cmdName = command[0] if len(command) > 0 else ''
+      cmdComment = command[1] if len(command) > 1 else ''
+      isMacroCall = self.isMacro(cmdName)
+      isReservedName = cmdName.lower() in self.mcrCfg['reservedNames']
+      cmdColor = 'macro.macroCall' if isMacroCall else 'macro.reservedName' if isReservedName else 'macro.command'
 
-  for command in commands:
-    cmdName = command[0] if len(command) > 0 else ''
-    cmdComment = command[1] if len(command) > 1 else ''
-    isMacroCall = cmdName in gMACROS
-    isReservedName = cmdName in mcrCfg['reservedNames']
-    cmdColor = 'macro.macroCall' if isMacroCall else 'macro.reservedName' if isReservedName else 'macro.command'
+      block += '{:}   {:}\n'.format(
+        ui.setStrColor(cmdName.ljust(maxCommandLen), cmdColor),
+        ui.setStrColor(cmdComment, 'macro.comment') )
 
-    block += '{:}   {:}\n'.format(
-      ui.setStrColor(cmdName.ljust(maxCommandLen), cmdColor),
-      ui.setStrColor(cmdComment, 'macro.comment') )
-
-  ui.logBlock(block)
+    ui.logBlock(block)
