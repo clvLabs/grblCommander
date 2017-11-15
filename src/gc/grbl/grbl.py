@@ -803,24 +803,50 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getHomingCorner(self, axis):
+    ''' TODO: comment
+    '''
+    # '27': "Homing switch pull-off distance, millimeters"
+    pos = float(self.status['settings']['27']['val'])
+
+    if pos < self.mchCfg['softLimitsMargin']:
+      pos = self.mchCfg['softLimitsMargin']
+
+    return pos
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getAwayCorner(self, axis):
+    ''' TODO: comment
+    '''
+    pos = self.mchCfg['maxTravel'][axis] - self.mchCfg['softLimitsMargin']
+    return pos
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getMin(self, axis):
     ''' calculate min axis(xyz) coord given current WCO
     '''
-    min = self.mchCfg['maxTravel'][axis] - self.mchCfg['softLimitsMargin']
-    return self.mpos2wpos(axis, min * -1)
+    # '23': "Homing direction invert, mask"
+    if self.status['settings']['23']['parsed'][axis]:
+      min = self.getHomingCorner(axis)
+    else:
+      min = self.getAwayCorner(axis) * -1
+
+    return self.mpos2wpos(axis, min)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getMax(self, axis):
     ''' calculate max axis(xyz) coord given current WCO
     '''
-    # '27': "Homing switch pull-off distance, millimeters"
-    pullOff = float(self.status['settings']['27']['val'])
+    # '23': "Homing direction invert, mask"
+    if self.status['settings']['23']['parsed'][axis]:
+      max = self.getAwayCorner(axis)
+    else:
+      max = self.getHomingCorner(axis) * -1
 
-    if pullOff < self.mchCfg['softLimitsMargin']:
-      pullOff = self.mchCfg['softLimitsMargin']
-
-    return self.mpos2wpos(axis, pullOff * -1)
+    return self.mpos2wpos(axis, max)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -838,7 +864,11 @@ class Grbl:
     # '27': "Homing switch pull-off distance, millimeters"
     pullOff = float(self.status['settings']['27']['val'])
 
-    self.rapidAbsolute(z=pullOff*-1, machineCoords=True)
+    # '23': "Homing direction invert, mask"
+    if not self.status['settings']['23']['parsed']['z']:
+      pullOff *= -1
+
+    self.rapidAbsolute(z=pullOff, machineCoords=True)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -846,9 +876,17 @@ class Grbl:
     ''' TODO: comment
     '''
     # '27': "Homing switch pull-off distance, millimeters"
-    pullOff = float(self.status['settings']['27']['val'])
+    xPullOff = float(self.status['settings']['27']['val'])
+    yPullOff = xPullOff
 
-    self.rapidAbsolute(x=pullOff*-1, y=pullOff*-1, machineCoords=True)
+    # '23': "Homing direction invert, mask"
+    if not self.status['settings']['23']['parsed']['x']:
+      xPullOff *= -1
+
+    if not self.status['settings']['23']['parsed']['y']:
+      yPullOff *= -1
+
+    self.rapidAbsolute(x=xPullOff, y=yPullOff, machineCoords=True)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
