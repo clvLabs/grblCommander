@@ -616,8 +616,12 @@ def main():
   ui.logTitle('Grbl connection')
   mch.start()
 
-  # ui.logTitle('Sending startup macro')
-  # mcr.run(mcrCfg['startup'], silent=True)
+  ui.logTitle('Sending startup macro')
+  if mch.status['machineState'] == 'Idle':
+    mcr.run(mcrCfg['startup'], silent=True)
+  else:
+    ui.log('WARNING: startup macro NOT executed (machine not ready)',c='ui.msg')
+    ui.log()
 
   ui.log('System ready!', color='ui.successMsg')
 
