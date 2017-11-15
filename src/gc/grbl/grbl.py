@@ -891,7 +891,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def rapidRelative(self,x=None, y=None, z=None, verbose='WARNING'):
-    cmd = self.getMoveRelativeStr(x,y,z,verbose)
+    cmd = self.getMoveRelativeStr(x=x,y=y,z=z,verbose=verbose)
     if cmd:
       cmd = 'G0 {:}'.format(cmd)
       ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
@@ -900,23 +900,23 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def feedRelative(self,x=None, y=None, z=None, speed=None, verbose='WARNING'):
-    cmd = self.getMoveRelativeStr(x,y,z,speed,verbose)
+    cmd = self.getMoveRelativeStr(x=x,y=y,z=z,speed=speed,verbose=verbose)
     if cmd:
-      cmd = 'G1 {:} {:}'.format(cmd, 'F'+speed if speed else '')
+      cmd = 'G1 {:}'.format(cmd)
       ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
       self.sendWait(cmd, verbose=verbose)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def moveRelative(self,x=None, y=None, z=None, verbose='WARNING'):
-    cmd = self.getMoveRelativeStr(x,y,z,verbose)
+  def moveRelative(self,x=None, y=None, z=None, speed=None, verbose='WARNING'):
+    cmd = self.getMoveRelativeStr(x=x,y=y,z=z,speed=speed,verbose=verbose)
     if cmd:
       ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
       self.sendWait(cmd, verbose=verbose)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def getMoveRelativeStr(self,x=None, y=None, z=None, verbose='WARNING'):
+  def getMoveRelativeStr(self,x=None, y=None, z=None, speed=None, verbose='WARNING'):
     ''' TODO: comment
     '''
     if x is None and y is None and z is None:
@@ -935,12 +935,12 @@ class Grbl:
       if target[axis] != None:
         target[axis] += wpos[axis]
 
-    return self.getMoveAbsoluteStr(target['x'], target['y'], target['z'], verbose=verbose)
+    return self.getMoveAbsoluteStr(target['x'], target['y'], target['z'], speed=speed, verbose=verbose)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def rapidAbsolute(self,x=None, y=None, z=None, machineCoords=False, verbose='WARNING'):
-    cmd = self.getMoveAbsoluteStr(x,y,z,machineCoords,verbose)
+    cmd = self.getMoveAbsoluteStr(x=x,y=y,z=z,machineCoords=machineCoords,verbose=verbose)
     if cmd:
       cmd = 'G0 {:}'.format(cmd)
       ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
@@ -949,23 +949,23 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def feedAbsolute(self,x=None, y=None, z=None, machineCoords=False, speed=None, verbose='WARNING'):
-    cmd = self.getMoveAbsoluteStr(x,y,z,machineCoords,speed,verbose)
+    cmd = self.getMoveAbsoluteStr(x=x,y=y,z=z,machineCoords=machineCoords,speed=speed,verbose=verbose)
     if cmd:
-      cmd = 'G1 {:} {:}'.format(cmd, 'F'+speed if speed else '')
+      cmd = 'G1 {:}'.format(cmd)
       ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
       self.sendWait(cmd, verbose=verbose)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def moveAbsolute(self,x=None, y=None, z=None, machineCoords=False, verbose='WARNING'):
-    cmd = self.getMoveAbsoluteStr(x,y,z,machineCoords,verbose)
+  def moveAbsolute(self,x=None, y=None, z=None, machineCoords=False, speed=None, verbose='WARNING'):
+    cmd = self.getMoveAbsoluteStr(x=x,y=y,z=z,machineCoords=machineCoords,speed=speed,verbose=verbose)
     if cmd:
       ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
       self.sendWait(cmd, verbose=verbose)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def getMoveAbsoluteStr(self,x=None, y=None, z=None, machineCoords=False, verbose='WARNING'):
+  def getMoveAbsoluteStr(self,x=None, y=None, z=None, machineCoords=False, speed=None, verbose='WARNING'):
     ''' TODO: comment
     '''
     if x is None and y is None and z is None:
@@ -1026,8 +1026,11 @@ class Grbl:
     # ---[ Generate gcode ]-----------------------------------------
     for axis in axes:
       if target[axis] != None and target[axis] != wpos[axis]:
-        cmd += '{:}{:} '.format(axis.upper(), ui.coordStr(target[axis]))
+        cmd += '{:}{:} '.format(axis.upper(), ui.coordStr(target[axis]).strip())
 
     cmd = cmd.rstrip()
+
+    if cmd and speed:
+      cmd += ' F{:}'.format(speed)
 
     return cmd
