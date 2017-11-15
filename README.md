@@ -16,10 +16,6 @@ Allows:
 
 Custom tests are currently stored on `src/test.py`:
 
-* Point probe
-    * Finds current Z height at current X/Y using a custom probe (to be used with a Raspberry Pi or similar)
-* Table probing scan
-    * Performs a grid check of the whole table using `Point probe`
 * Table position scan
     * Moves the spindle around a 3x3 grid representing the coordinates:
         * [UL] [UC] [UR]

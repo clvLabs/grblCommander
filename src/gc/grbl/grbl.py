@@ -97,9 +97,6 @@ class Grbl:
       self.viewGCodeParserState()
       self.viewGCodeParameters()
 
-      # else:
-      #   ui.log('ERROR: startup message error, exiting program', color='ui.errorMsg', v='ERROR')
-      #   quit()
     else:
       ui.log('ERROR opening serial port, exiting program', color='ui.errorMsg', v='ERROR')
       quit()
