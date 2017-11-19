@@ -125,8 +125,8 @@ def showMachineStatus():
   WPos    [{:s}]
 
   Software config:
-  RapidIncrement_XY = {:}
-  RapidIncrement_Z  = {:}
+  Jog distance (XY) = {:}
+  Jog distance (Z)  = {:}
   VerboseLevel      = {:d}/{:d} ({:s})
   """.format(
       mch.getColoredMachineStateStr(),
