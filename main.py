@@ -437,6 +437,7 @@ def processUserInput():
       xX  - Reset X to current position
       yY  - Reset Y to current position
       zZ  - Reset Z to current position
+      *   - Reset ALL to current position
       """)
 
       ui.inputMsg('Select command...')
@@ -454,6 +455,12 @@ def processUserInput():
       if char in 'zZ':
         ui.keyPressMessage('zZ  - Reset Z to current position', key, char)
         mch.resetWCoord(char.lower())
+
+      if char == '*':
+        ui.keyPressMessage('*   - Reset ALL to current position', key, char)
+        mch.resetWCoord('x')
+        mch.resetWCoord('y')
+        mch.resetWCoord('z')
 
       else:
         ui.keyPressMessage('Unknown command', key, char)
