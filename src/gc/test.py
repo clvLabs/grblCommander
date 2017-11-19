@@ -105,6 +105,23 @@ class Test:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def waitForEnter(self, message):
+    ''' TODO: comment
+    '''
+    ui.log()
+    ui.inputMsg(message)
+    while True:
+      while not kb.keyPressed():
+        key = kb.readKey()
+        if key == kb.ENTER:
+          return True
+        elif key == kb.ESC:
+          self.testCancelled = True
+          self.logTestCancelled()
+          return False
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def userConfirm(self,password=None):
     ''' TODO: comment
     '''
@@ -125,6 +142,7 @@ class Test:
       elif typedPassword == password:
         return True
       else:
+        self.testCancelled = True
         self.logTestCancelled()
         return False
 
@@ -224,9 +242,8 @@ class Test:
     ui.log()
 
     ui.logTitle('Spindle start')
-    ui.log()
-    ui.inputMsg('Please start spindle and press <ENTER>...')
-    input()
+    if not self.waitForEnter('Please start spindle and press <ENTER> (<ESC> to cancel)...'):
+      return
 
     ui.logTitle('Starting drill pattern')
     totalDrills = len(YSteps) * len(XSteps)
@@ -416,9 +433,8 @@ class Test:
     ui.log()
 
     ui.logTitle('Spindle start')
-    ui.log()
-    ui.inputMsg('Please start spindle and press <ENTER>...')
-    input()
+    if not self.waitForEnter('Please start spindle and press <ENTER> (<ESC> to cancel)...'):
+      return
 
     ui.logTitle('Rapid to initial position')
     self.mchRapid(x=startX, y=startY)
@@ -598,9 +614,8 @@ class Test:
     ui.log()
 
     ui.logTitle('Spindle start')
-    ui.log()
-    ui.inputMsg('Please start spindle and press <ENTER>...')
-    input()
+    if not self.waitForEnter('Please start spindle and press <ENTER> (<ESC> to cancel)...'):
+      return
 
     ui.logTitle('Rapid to initial position')
     self.mchRapid(x=startX, y=startY)
