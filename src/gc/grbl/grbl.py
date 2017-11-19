@@ -780,6 +780,16 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def resetWCoord(self,coordName,val=None):
+    ''' Reset a work coordinate's 0
+    '''
+    if val is None:
+      val = self.status['MPos'][coordName]
+
+    self.send('G10L2P0{:}{:}'.format(coordName,val))
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def mpos2wpos(self,coordName,val):
     ''' Translate a MPos coordinate into WPos
     '''

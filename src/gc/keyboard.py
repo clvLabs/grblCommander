@@ -37,6 +37,7 @@ def readKey():
 
 LF=10
 CR=13
+CTRL_R = 18
 CTRL_X = 24
 CTRL_Y = 25
 CTRL_Z = 26

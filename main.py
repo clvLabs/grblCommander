@@ -77,7 +77,7 @@ def showHelp():
   Available commands
   ---------------------------------------------------------------------
   qQ         - Quit
-  rR         - Reset serial connection
+  <CTRL>r    - Reset serial connection
   <CTRL>x    - grbl soft reset
   ?          - Force status re-query
 
@@ -90,12 +90,13 @@ def showHelp():
   º          - Repeat last GCode command
   mM         - Macro (submenu)
   tT         - Tests (submenu)
+  rR         - Reset work coordinate (submenu)
 
   Jog
   ---------------------------------------------------------------------
   <numpad>        - XY jog (including diagonals)
   SHIFT+<numpad>  - XY jog (double distance)
-  CTRL+<numpad>   - XY jog (half distance)
+  <CTRL><numpad>   - XY jog (half distance)
   <numpad>-/+     - Z jog (up/down)
 
   <numpad>0       - Safe go to machine home
@@ -377,8 +378,8 @@ def processUserInput():
       ui.keyPressMessage('@ - Show current status (FULL)', key, char)
       showMachineFullStatus()
 
-    elif char in 'rR':
-      ui.keyPressMessage('rR - Reset serial connection', key, char)
+    elif key == kb.CTRL_R:
+      ui.keyPressMessage('<CTRL>r - Reset serial connection', key, char)
       mch.resetConnection()
       mch.queryMachineStatus()
 
@@ -422,6 +423,37 @@ def processUserInput():
       elif char == '*':
         ui.keyPressMessage('* - DUMMY Test', key, char)
         tst.dummy()
+
+      else:
+        ui.keyPressMessage('Unknown command', key, char)
+
+    elif char in 'rR':
+      ui.keyPressMessage('rR - Reset work coordinate', key, char)
+
+      ui.logBlock(
+      """
+      Available commands:
+
+      xX  - Reset X to current position
+      yY  - Reset Y to current position
+      zZ  - Reset Z to current position
+      """)
+
+      ui.inputMsg('Select command...')
+      key = kb.readKey()
+      char=chr(key)
+
+      if char in 'xX':
+        ui.keyPressMessage('xX  - Reset X to current position', key, char)
+        mch.resetWCoord(char.lower())
+
+      if char in 'yY':
+        ui.keyPressMessage('yY  - Reset Y to current position', key, char)
+        mch.resetWCoord(char.lower())
+
+      if char in 'zZ':
+        ui.keyPressMessage('zZ  - Reset Z to current position', key, char)
+        mch.resetWCoord(char.lower())
 
       else:
         ui.keyPressMessage('Unknown command', key, char)
