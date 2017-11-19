@@ -436,8 +436,11 @@ def processUserInput():
 
       xX  - Reset X to current position
       yY  - Reset Y to current position
+      wW  - Reset XY to current position
       zZ  - Reset Z to current position
-      *   - Reset ALL to current position
+      aA  - Reset XYZ to current position
+      -   - Reset XY to max machine travel
+      *   - Reset XYZ to max machine travel
       """)
 
       ui.inputMsg('Select command...')
@@ -445,22 +448,38 @@ def processUserInput():
       char=chr(key)
 
       if char in 'xX':
-        ui.keyPressMessage('xX  - Reset X to current position', key, char)
+        ui.keyPressMessage('xX - Reset X to current position', key, char)
         mch.resetWCoord(char.lower())
 
-      if char in 'yY':
-        ui.keyPressMessage('yY  - Reset Y to current position', key, char)
+      elif char in 'yY':
+        ui.keyPressMessage('yY - Reset Y to current position', key, char)
         mch.resetWCoord(char.lower())
 
-      if char in 'zZ':
-        ui.keyPressMessage('zZ  - Reset Z to current position', key, char)
+      elif char in 'wW':
+        ui.keyPressMessage('wW - Reset XY to current position', key, char)
+        mch.resetWCoord('x')
+        mch.resetWCoord('y')
+
+      elif char in 'zZ':
+        ui.keyPressMessage('zZ - Reset Z to current position', key, char)
         mch.resetWCoord(char.lower())
 
-      if char == '*':
-        ui.keyPressMessage('*   - Reset ALL to current position', key, char)
+      elif char in 'aA':
+        ui.keyPressMessage('aA - Reset XYZ to current position', key, char)
         mch.resetWCoord('x')
         mch.resetWCoord('y')
         mch.resetWCoord('z')
+
+      elif char == '-':
+        ui.keyPressMessage('- - Reset XY to max machine travel', key, char)
+        mch.resetWCoord('x','away')
+        mch.resetWCoord('y','away')
+
+      elif char == '*':
+        ui.keyPressMessage('* - Reset XYZ to max machine travel', key, char)
+        mch.resetWCoord('x','away')
+        mch.resetWCoord('y','away')
+        mch.resetWCoord('z','home')
 
       else:
         ui.keyPressMessage('Unknown command', key, char)

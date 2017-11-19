@@ -780,33 +780,37 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def resetWCoord(self,coordName,val=None):
+  def resetWCoord(self,axis,val=None):
     ''' Reset a work coordinate's 0
     '''
     if val is None:
-      val = self.status['MPos'][coordName]
+      val = self.status['MPos'][axis]
+    elif val == 'away':
+      val = self.getAwayCorner(axis)
+    elif val == 'home':
+      val = self.getHomingCorner(axis)
 
-    self.send('G10L2P0{:}{:}'.format(coordName,val))
+    self.send('G10L2P0{:}{:}'.format(axis,val))
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def mpos2wpos(self,coordName,val):
+  def mpos2wpos(self,axis,val):
     ''' Translate a MPos coordinate into WPos
     '''
     if val is None:
       return None
 
-    return val - ( float(self.status['WCO'][coordName]) )
+    return val - ( float(self.status['WCO'][axis]) )
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def wpos2mpos(self,coordName,val):
+  def wpos2mpos(self,axis,val):
     ''' Translate a WPos coordinate into MPos
     '''
     if val is None:
       return None
 
-    return val + ( float(self.status['WCO'][coordName]) )
+    return val + ( float(self.status['WCO'][axis]) )
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -819,7 +823,10 @@ class Grbl:
     if pos < self.mchCfg['softLimitsMargin']:
       pos = self.mchCfg['softLimitsMargin']
 
-    return pos
+    if self.status['settings']['23']['parsed'][axis]:
+      return pos
+    else:
+      return pos * -1
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -827,7 +834,11 @@ class Grbl:
     ''' TODO: comment
     '''
     pos = self.mchCfg['maxTravel'][axis] - self.mchCfg['softLimitsMargin']
-    return pos
+
+    if self.status['settings']['23']['parsed'][axis]:
+      return pos
+    else:
+      return pos * -1
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -838,7 +849,7 @@ class Grbl:
     if self.status['settings']['23']['parsed'][axis]:
       min = self.getHomingCorner(axis)
     else:
-      min = self.getAwayCorner(axis) * -1
+      min = self.getAwayCorner(axis)
 
     return self.mpos2wpos(axis, min)
 
@@ -851,7 +862,7 @@ class Grbl:
     if self.status['settings']['23']['parsed'][axis]:
       max = self.getAwayCorner(axis)
     else:
-      max = self.getHomingCorner(axis) * -1
+      max = self.getHomingCorner(axis)
 
     return self.mpos2wpos(axis, max)
 
