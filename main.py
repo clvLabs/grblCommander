@@ -79,7 +79,7 @@ def showHelp():
   qQ         - Quit
   <CTRL>r    - Reset serial connection
   <CTRL>x    - grbl soft reset
-  ?          - Force status re-query
+  <ENTER>/?  - Force status re-query
 
   cC         - Clear screen
   hH         - Show this help text
@@ -94,13 +94,13 @@ def showHelp():
 
   Jog
   ---------------------------------------------------------------------
-  <numpad>        - XY jog (including diagonals)
-  SHIFT+<numpad>  - XY jog (double distance)
+  <numpad>         - XY jog (including diagonals)
+  <SHIFT>+<numpad> - XY jog (double distance)
   <CTRL><numpad>   - XY jog (half distance)
-  <numpad>-/+     - Z jog (up/down)
+  <numpad>-/+      - Z jog (up/down)
 
-  <numpad>0       - Safe go to machine home
-  <numpad>.       - Absolute rapid (XY) to table position (submenu)
+  <numpad>0        - Safe go to machine home
+  <numpad>.        - Absolute rapid (XY) to table position (submenu)
 
   Settings
   ---------------------------------------------------------------------
@@ -309,8 +309,8 @@ def processUserInput():
       ui.keyPressMessage('hH - Show help text', key, char)
       showHelp()
 
-    elif char in '?':
-      ui.keyPressMessage('? - Force status re-query', key, char)
+    elif char == '?' or key == kb.ENTER:
+      ui.keyPressMessage('<ENTER>/? - Force status re-query', key, char)
       mch.viewMachineStatus()
 
     elif char in 'mM':
