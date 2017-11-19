@@ -493,7 +493,7 @@ class Test:
 
           if not self.testCancelled:
             if currIteration < (zzIterations-1):
-              currX = currIterX + zzRun + zzSpacing
+              # currX = currIterX + zzRun + zzSpacing
               currX = currIterX + SAMPLE_ITEM_WIDTH
               currY = currIterY
               self.mchRapid(x=currX, y=currY)
