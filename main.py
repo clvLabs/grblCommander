@@ -80,6 +80,7 @@ def showHelp():
   <CTRL>r    - Reset serial connection
   <CTRL>x    - grbl soft reset
   <ENTER>/?  - Force status re-query
+  =          - Lock grblCommander
 
   cC         - Clear screen
   hH         - Show this help text
@@ -312,6 +313,13 @@ def processUserInput():
     elif char == '?' or key == kb.ENTER:
       ui.keyPressMessage('<ENTER>/? - Force status re-query', key, char)
       mch.viewMachineStatus()
+
+    elif char == '=':
+      ui.keyPressMessage('= - Lock grblCommander', key, char)
+      while not ui.userConfirm(
+        '================= grblCommander is LOCKED =================',
+        'unlock'):
+        pass
 
     elif char in 'mM':
       ui.keyPressMessage('mM - Macro', key, char)
