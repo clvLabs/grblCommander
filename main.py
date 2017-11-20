@@ -162,6 +162,9 @@ def showMachineFullStatus():
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def processUserInput():
+  global gXYJog
+  global gZJog
+
   if not kb.keyPressed():
     return True
 
@@ -622,7 +625,6 @@ def processUserInput():
 
     elif char == '/':
       ui.keyPressMessage('/ - Set jog distance (XY)', key, char)
-      global gXYJog
       gXYJog = ui.getUserInput(
         'Distance ({:})'.format(gXYJog),
         float,
@@ -631,7 +633,6 @@ def processUserInput():
 
     elif char == '*':
       ui.keyPressMessage('* - Set jog distance (Z)', key, char)
-      global gZJog
       gZJog = ui.getUserInput(
         'Distance ({:})'.format(gZJog),
         float,
