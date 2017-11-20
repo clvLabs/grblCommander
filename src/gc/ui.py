@@ -52,7 +52,7 @@ def colorStr(string, foreColor, backColor=None):
   elif backColor == 'cyan':      attr.append('46')
   elif backColor == 'white':     attr.append('47')
 
-  return '\x1b[{:s}m{:s}\x1b[0m'.format(';'.join(attr), string)
+  return '\x1b[{:s}m{:s}\x1b[0;0m'.format(';'.join(attr), string)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Give a string some ANSI color formatting - allows to use config colors
