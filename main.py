@@ -713,10 +713,7 @@ def main():
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def execTestCode():
 
-  print(ui.charLine('*'))
-  print('  TEST ACTIVE - TEST ACTIVE - TEST ACTIVE - TEST ACTIVE - TEST ACTIVE')
-  print(ui.charLine('*'))
-  print('\n\n')
+  ui.logBlock('  TEST ACTIVE - TEST ACTIVE - TEST ACTIVE - TEST ACTIVE - TEST ACTIVE', color='ui.cancelMsg')
 
   # <TEST CODE>
   pass
