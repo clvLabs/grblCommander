@@ -105,46 +105,31 @@ class Test:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def waitForEnter(self, message):
+  def waitForSpindleStart(self):
     ''' TODO: comment
     '''
-    ui.log()
-    ui.inputMsg(message)
-    while True:
-      while not kb.keyPressed():
-        key = kb.readKey()
-        if key == kb.ENTER:
-          return True
-        elif key == kb.ESC:
-          self.testCancelled = True
-          self.logTestCancelled()
-          return False
+    ui.logTitle('Spindle start')
+    if ui.waitForEnterOrEscape('Please start spindle...'):
+      return True
+    else:
+      self.testCancelled = True
+      self.logTestCancelled()
+      return False
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def userConfirm(self,password=None):
+  def confirmStart(self,password=None):
     ''' TODO: comment
     '''
     if password is None:
       password = self.tstCfg['password']
 
-    while True:
-      ui.log("""
-      Are you sure you want to continue?
-      (please enter '{:}' to confirm)
-      """.format(password), color='ui.confirmMsg')
-
-      ui.inputMsg('Enter confirmation text')
-      typedPassword=input()
-
-      if typedPassword == '':
-        continue
-      elif typedPassword == password:
-        return True
-      else:
-        self.testCancelled = True
-        self.logTestCancelled()
-        return False
+    if ui.userConfirm('Are you sure you want to start?', password):
+      return True
+    else:
+      self.testCancelled = True
+      self.logTestCancelled()
+      return False
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -164,7 +149,7 @@ class Test:
     [DL] [DC] [DR]
     """)
 
-    if not self.userConfirm():
+    if not self.confirmStart():
       return
 
     def tpsSingleStep(stepName, x, y):
@@ -210,7 +195,7 @@ class Test:
     of your machine, so it will send NEGATIVE COORDINATES.
     """)
 
-    if not self.userConfirm():
+    if not self.confirmStart():
       return
 
     # - [X/Y steps]- - - - - - - - - - - - - - - - - -
@@ -241,8 +226,7 @@ class Test:
     goToSafeZ()
     ui.log()
 
-    ui.logTitle('Spindle start')
-    if not self.waitForEnter('Please start spindle and press <ENTER> (<ESC> to cancel)...'):
+    if not self.waitForSpindleStart():
       return
 
     ui.logTitle('Starting drill pattern')
@@ -424,7 +408,7 @@ class Test:
 
     showZZParameters('FINAL parameters')
 
-    if not self.userConfirm():
+    if not self.confirmStart():
       return
 
     ui.logTitle('Safe initial position')
@@ -432,8 +416,7 @@ class Test:
     self.mchRapid(x=0, y=0)
     ui.log()
 
-    ui.logTitle('Spindle start')
-    if not self.waitForEnter('Please start spindle and press <ENTER> (<ESC> to cancel)...'):
+    if not self.waitForSpindleStart():
       return
 
     ui.logTitle('Rapid to initial position')
@@ -605,7 +588,7 @@ class Test:
 
     showParams('FINAL parameters')
 
-    if not self.userConfirm():
+    if not self.confirmStart():
       return
 
     ui.logTitle('Safe initial position')
@@ -613,8 +596,7 @@ class Test:
     self.mchRapid(x=0, y=0)
     ui.log()
 
-    ui.logTitle('Spindle start')
-    if not self.waitForEnter('Please start spindle and press <ENTER> (<ESC> to cancel)...'):
+    if not self.waitForSpindleStart():
       return
 
     ui.logTitle('Rapid to initial position')

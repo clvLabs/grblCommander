@@ -9,6 +9,7 @@ if __name__ == '__main__':
   print('This file is a module, it should not be executed directly')
 
 from enum import Enum
+from . import keyboard as kb
 from src.gc.config import cfg
 # ------------------------------------------------------------------
 # Make it easier (shorter) to use cfg object
@@ -173,6 +174,45 @@ def getUserInput(description, dataType='str', default=None):
     return userInput
   except:
     return default
+
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def waitForEnterOrEscape(message):
+  ''' TODO: comment
+  '''
+  msg = """{:}
+  (press <ENTER> or <ESC>)""".format(message)
+
+  log()
+  inputMsg(msg)
+  while True:
+    while not kb.keyPressed():
+      key = kb.readKey()
+      if key == kb.ENTER:
+        return True
+      elif key == kb.ESC:
+        return False
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def userConfirm(message, password):
+  ''' TODO: comment
+  '''
+  while True:
+    log("""
+    {:}
+    (please enter '{:}' to continue)
+    """.format(message, password), color='ui.confirmMsg')
+
+    inputMsg('Enter confirmation text')
+    typedPassword=input()
+
+    if typedPassword == '':
+      continue
+    elif typedPassword == password:
+      return True
+    else:
+      return False
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def coordStr(c):
