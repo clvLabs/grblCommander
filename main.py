@@ -101,7 +101,7 @@ def showHelp():
   <numpad>-/+      - Z jog (up/down)
 
   <numpad>0        - Safe go to machine home
-  <numpad>.        - Absolute rapid (XY) to table position (submenu)
+  <numpad>.        - Absolute move (XY) to table position (submenu)
 
   Settings
   ---------------------------------------------------------------------
@@ -540,7 +540,7 @@ def processUserInput():
       mch.moveRelative(x=gXYJog,y=gXYJog)
 
     elif char == '.':
-      ui.keyPressMessage('. - Absolute rapid to table position', key, char)
+      ui.keyPressMessage('. - Absolute move to table position', key, char)
 
       minX = mch.getMin('x')
       minY = mch.getMin('y')
@@ -579,47 +579,47 @@ def processUserInput():
         char=chr(key)
 
         if char == '2':
-          ui.keyPressMessage('2 - ONE AXIS ONLY - Absolute rapid to axis limits - [B]', key, char)
-          mch.rapidAbsolute(y=minY)
+          ui.keyPressMessage('2 - ONE AXIS ONLY - Absolute move to axis limits - [B]', key, char)
+          mch.moveAbsolute(y=minY)
         elif char == '4':
-          ui.keyPressMessage('4 - ONE AXIS ONLY - Absolute rapid to axis limits - [L]', key, char)
-          mch.rapidAbsolute(x=minX)
+          ui.keyPressMessage('4 - ONE AXIS ONLY - Absolute move to axis limits - [L]', key, char)
+          mch.moveAbsolute(x=minX)
         elif char == '6':
-          ui.keyPressMessage('6 - ONE AXIS ONLY - Absolute rapid to axis limits - [R]', key, char)
-          mch.rapidAbsolute(x=maxX)
+          ui.keyPressMessage('6 - ONE AXIS ONLY - Absolute move to axis limits - [R]', key, char)
+          mch.moveAbsolute(x=maxX)
         elif char == '8':
-          ui.keyPressMessage('8 - ONE AXIS ONLY - Absolute rapid to axis limits - [U]', key, char)
-          mch.rapidAbsolute(y=maxY)
+          ui.keyPressMessage('8 - ONE AXIS ONLY - Absolute move to axis limits - [U]', key, char)
+          mch.moveAbsolute(y=maxY)
         else:
           ui.keyPressMessage('Unknown command', key, char)
 
       elif char == '1':
-        ui.keyPressMessage('1 - Absolute rapid to table position - [BL]', key, char)
-        mch.rapidAbsolute(x=minX,y=minY)
+        ui.keyPressMessage('1 - Absolute move to table position - [BL]', key, char)
+        mch.moveAbsolute(x=minX,y=minY)
       elif char == '2':
-        ui.keyPressMessage('2 - Absolute rapid to table position - [BC]', key, char)
-        mch.rapidAbsolute(x=cX,y=minY)
+        ui.keyPressMessage('2 - Absolute move to table position - [BC]', key, char)
+        mch.moveAbsolute(x=cX,y=minY)
       elif char == '3':
-        ui.keyPressMessage('3 - Absolute rapid to table position - [BR]', key, char)
-        mch.rapidAbsolute(x=maxX,y=minY)
+        ui.keyPressMessage('3 - Absolute move to table position - [BR]', key, char)
+        mch.moveAbsolute(x=maxX,y=minY)
       elif char == '4':
-        ui.keyPressMessage('4 - Absolute rapid to table position - [CL]', key, char)
-        mch.rapidAbsolute(x=minX,y=cY)
+        ui.keyPressMessage('4 - Absolute move to table position - [CL]', key, char)
+        mch.moveAbsolute(x=minX,y=cY)
       elif char == '5':
-        ui.keyPressMessage('5 - Absolute rapid to table position - [CC]', key, char)
-        mch.rapidAbsolute(x=cX,y=cY)
+        ui.keyPressMessage('5 - Absolute move to table position - [CC]', key, char)
+        mch.moveAbsolute(x=cX,y=cY)
       elif char == '6':
-        ui.keyPressMessage('6 - Absolute rapid to table position - [CR]', key, char)
-        mch.rapidAbsolute(x=maxX,y=cY)
+        ui.keyPressMessage('6 - Absolute move to table position - [CR]', key, char)
+        mch.moveAbsolute(x=maxX,y=cY)
       elif char == '7':
-        ui.keyPressMessage('7 - Absolute rapid to table position - [UL]', key, char)
-        mch.rapidAbsolute(x=minX,y=maxY)
+        ui.keyPressMessage('7 - Absolute move to table position - [UL]', key, char)
+        mch.moveAbsolute(x=minX,y=maxY)
       elif char == '8':
-        ui.keyPressMessage('8 - Absolute rapid to table position - [UC]', key, char)
-        mch.rapidAbsolute(x=cX,y=maxY)
+        ui.keyPressMessage('8 - Absolute move to table position - [UC]', key, char)
+        mch.moveAbsolute(x=cX,y=maxY)
       elif char == '9':
-        ui.keyPressMessage('9 - Absolute rapid to table position - [UR]', key, char)
-        mch.rapidAbsolute(x=maxX,y=maxY)
+        ui.keyPressMessage('9 - Absolute move to table position - [UR]', key, char)
+        mch.moveAbsolute(x=maxX,y=maxY)
       else:
         ui.keyPressMessage('Unknown command', key, char)
 
