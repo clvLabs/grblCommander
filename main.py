@@ -758,6 +758,7 @@ def main():
 
   ui.logTitle('Joystick connection')
   joy.start()
+  ui.log()
 
   ui.logTitle('Sending startup macro')
   if mch.status['machineState'] == 'Idle':
