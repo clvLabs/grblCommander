@@ -9,6 +9,7 @@ Currently compatible with [grbl](https://github.com/gnea/grbl) v1.1
 Allows:
 
 * Manually moving X/Y/Z axis at configurable steps
+    * Now also using a joystick!
 * Directly going to table corners / individual axis limits
 * Sending raw g-code commands
 * Running custom macros, stored in separate files in a folder tree
@@ -41,7 +42,7 @@ Custom tests are currently stored on `src/test.py`:
 ### Settings
 grblcommander comes with some default settings that might not suit your needs.
 
-* Serial port configuration, machine configuration and some other general settings are stored in a configuration file.
+* Serial port/machine/joystick configuration and some other general settings are stored in a configuration file.
 * Some configurable features are stored as macros:
     * **Startup sequence** : GCode commands to execute at grblCommander startup
         * If you work in inches or in relative mode, make sure you check this out!
@@ -53,6 +54,7 @@ To change the configuration file:
 * Check the following sections in the new file for settings that might need to be changed:
     * `[Serial configuration]`
     * `[Machine configuration]`
+    * `[Joystick configuration]`
 * Feel free to experiment with the rest of settings!
 
 To change the macros used in grblCommander:
