@@ -48,6 +48,27 @@ cfg = {
     },
   },
 
+  # ---[Joystick configuration]--------------------------------------
+  'joystick': {                 # Change to fit your joystick
+    'name': 'joystickName',
+    'axes': {
+      0: {
+        'axis': 'y',
+        'invert': True,
+      },
+      1: {
+        'axis': 'x',
+        'invert': True,
+      },
+    },
+    'buttons': {
+      0: 'z-',
+      1: 'extra-',
+      3: 'extra+',
+      4: 'z+',
+    },
+  },
+
   # ---[Macro configuration]--------------------------------------
   'macro': {
     'autoReload': True,
