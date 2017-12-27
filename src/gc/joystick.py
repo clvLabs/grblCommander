@@ -105,6 +105,7 @@ class Joystick:
     ''' Call this method frequently to give Joystick some processing time
     '''
     if not self._joystick:
+      self.flushQueue()
       return
 
     for event in pygame.event.get():
