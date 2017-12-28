@@ -27,10 +27,22 @@ def keyPressed():
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def readKey():
-  if 'win' in sys.platform:
-    return ord(msvcrt.getch())
-  else:
-    return ord(getch.getch())
+  try:
+    if 'win' in sys.platform:
+      char = msvcrt.getch()
+    else:
+      char = getch.getch()
+  except Exception as e:
+    print('keyboard.py: EXCEPTION reading keyboard: {:}'.format(str(e)))
+    return 0
+
+  try:
+    retVal = ord(char)
+  except Exception as e:
+    print('keyboard.py: EXCEPTION trying to evaluate ord({:}): {:}'.format(char, str(e)))
+    retVal = 0
+
+  return retVal
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Key value constants
