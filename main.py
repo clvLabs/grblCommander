@@ -12,6 +12,7 @@ import pprint
 import src.gc.utils as ut
 import src.gc.ui as ui
 import src.gc.keyboard as kb
+import src.gc.joystick as joystick
 import src.gc.grbl.grbl as grbl
 import src.gc.macro as macro
 import src.gc.test as test
@@ -28,6 +29,9 @@ gVERSION = '0.5.0'
 
 # grbl machine manager
 mch = grbl.Grbl(cfg)
+
+# joystick manager
+joy = joystick.Joystick(cfg)
 
 mcr = macro.Macro(mch)
 tst = test.Test(mch)
@@ -95,6 +99,7 @@ def showHelp():
 
   Jog
   ---------------------------------------------------------------------
+  jJ               - Restart joystick connection
   <numpad>         - XY jog (including diagonals)
   <SHIFT>+<numpad> - XY jog (double distance)
   <CTRL><numpad>   - XY jog (half distance)
@@ -495,6 +500,10 @@ def processUserInput():
       else:
         ui.keyPressMessage('Unknown command', key, char)
 
+    elif char in 'jJ':
+      ui.keyPressMessage('jJ - Restart joystick connection', key, char)
+      joy.restart()
+
     elif char == '-':
       ui.keyPressMessage('- - Jog (Z) up ({:} {:})'.format(gZJog, ps['units']['desc']), key, char)
       mch.moveRelative(x=0,y=0,z=gZJog)
@@ -666,6 +675,70 @@ def processUserInput():
 
   return True
 
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def processJoystickInput():
+  global gXYJog
+  global gZJog
+
+  joy.process()
+
+  processed = True
+
+  # see: https://github.com/gnea/grbl/wiki/Grbl-v1.1-Jogging#joystick-implementation
+  # for key in joy.status:
+  #   status = joy.status[key]
+  #   if status:
+  #     print('jog: {:s}'.format(key))
+  ps = mch.status['parserState']
+  unitsDesc = ps['units']['desc']
+
+  if joy.status['y-'] and joy.status['x-']:
+    ui.keyPressMessage('JoyJog - [DL] ({:} {:})'.format(gXYJog, unitsDesc), 0, '')
+    mch.moveRelative(x=gXYJog*-1,y=gXYJog*-1)
+
+  elif joy.status['y-'] and joy.status['x+']:
+    ui.keyPressMessage('JoyJog - [DR] ({:} {:})'.format(gXYJog, unitsDesc), 0, '')
+    mch.moveRelative(x=gXYJog,y=gXYJog*-1)
+
+  elif joy.status['y+'] and joy.status['x-']:
+    ui.keyPressMessage('JoyJog - [UL] ({:} {:})'.format(gXYJog, unitsDesc), 0, '')
+    mch.moveRelative(x=gXYJog*-1,y=gXYJog)
+
+  elif joy.status['y+'] and joy.status['x+']:
+    ui.keyPressMessage('JoyJog - [UR] ({:} {:})'.format(gXYJog, unitsDesc), 0, '')
+    mch.moveRelative(x=gXYJog,y=gXYJog)
+
+  elif joy.status['y-']:
+    ui.keyPressMessage('JoyJog - [D] ({:} {:})'.format(gXYJog, unitsDesc), 0, '')
+    mch.moveRelative(y=gXYJog*-1)
+
+  elif joy.status['y+']:
+    ui.keyPressMessage('JoyJog - [U] ({:} {:})'.format(gXYJog, unitsDesc), 0, '')
+    mch.moveRelative(y=gXYJog)
+
+  elif joy.status['x-']:
+    ui.keyPressMessage('JoyJog - [L] ({:} {:})'.format(gXYJog, unitsDesc), 0, '')
+    mch.moveRelative(x=gXYJog*-1)
+
+  elif joy.status['x+']:
+    ui.keyPressMessage('JoyJog - [R] ({:} {:})'.format(gXYJog, unitsDesc), 0, '')
+    mch.moveRelative(x=gXYJog)
+
+  elif joy.status['z+']:
+    ui.keyPressMessage('JoyJog (Z) up ({:} {:})'.format(gZJog, unitsDesc), 0, '')
+    mch.moveRelative(x=0,y=0,z=gZJog)
+
+  elif joy.status['z-']:
+    ui.keyPressMessage('JoyJog (Z) down ({:} {:})'.format(gZJog, unitsDesc), 0, '')
+    mch.moveRelative(x=0,y=0,z=gZJog*-1)
+
+  else:
+    processed = False
+
+  if processed:
+    readyMsg()
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def main():
   ui.clearScreen()
@@ -683,6 +756,10 @@ def main():
   ui.logTitle('Grbl connection')
   mch.start()
 
+  ui.logTitle('Joystick connection')
+  joy.start()
+  ui.log()
+
   ui.logTitle('Sending startup macro')
   if mch.status['machineState'] == 'Idle':
     mcr.run(mcrCfg['startup'], silent=True)
@@ -699,6 +776,8 @@ def main():
 
   while True:
     mch.process()
+
+    processJoystickInput()
 
     if not processUserInput():
       break
