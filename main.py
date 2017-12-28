@@ -92,7 +92,7 @@ def showHelp():
   @          - Show current status (FULL)
   gfxyz$     - Send raw GCode command
   [space]    - Send raw GCode command (start empty)
-  º          - Repeat last GCode command
+  !          - Repeat last GCode command
   mM         - Macro (submenu)
   tT         - Tests (submenu)
   rR         - Reset work coordinate (submenu)
@@ -378,8 +378,8 @@ def processUserInput():
       userCommand = char + input(char)
       sendCommand(userCommand)
 
-    elif key == 167:   # º
-      ui.keyPressMessage('F12 - Repeat last GCode command', key, char)
+    elif char == '!':
+      ui.keyPressMessage('! - Repeat last GCode command', key, char)
       sendCommand(gLastGCodeCommand)
 
     elif char == 's':
