@@ -12,11 +12,6 @@ import time
 import sys
 from . import kbhit
 
-if 'win' in sys.platform:
-  import msvcrt
-else:
-  import getch
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Keyboard manager
 gKey = kbhit.KBHit()
@@ -26,23 +21,14 @@ def keyPressed():
   return gKey.kbhit()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def readKey():
+def getch():
   try:
-    if 'win' in sys.platform:
-      char = msvcrt.getch()
-    else:
-      char = getch.getch()
+    char = gKey.getch()
   except Exception as e:
     print('keyboard.py: EXCEPTION reading keyboard: {:}'.format(str(e)))
     return 0
 
-  try:
-    retVal = ord(char)
-  except Exception as e:
-    print('keyboard.py: EXCEPTION trying to evaluate ord({:}): {:}'.format(char, str(e)))
-    retVal = 0
-
-  return retVal
+  return char
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Key value constants

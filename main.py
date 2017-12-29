@@ -92,7 +92,7 @@ def showHelp():
   @          - Show current status (FULL)
   gfxyz$     - Send raw GCode command
   [space]    - Send raw GCode command (start empty)
-  !          - Repeat last GCode command
+  º          - Repeat last GCode command
   mM         - Macro (submenu)
   tT         - Tests (submenu)
   rR         - Reset work coordinate (submenu)
@@ -176,12 +176,12 @@ def processUserInput():
   processed = True
   ps = mch.status['parserState']
 
-  key = kb.readKey()
-  char=chr(key)
+  char = kb.getch()
+  key=ord(char)
 
   if key == kb.COMBO_0X:  # Combined code 0+x
-    key = kb.readKey()
-    char=chr(key)
+    char = kb.getch()
+    key=ord(char)
 
     if key == 999999:
       pass
@@ -290,8 +290,8 @@ def processUserInput():
         #ui.keyPressMessage('Unknown command', key, char)
 
   elif key == kb.COMBO_224X:  # Combined code 224x
-    key = kb.readKey()
-    char=chr(key)
+    char = kb.getch()
+    key=ord(char)
 
     if key == 999999:
       pass
@@ -343,8 +343,8 @@ def processUserInput():
       """)
 
       ui.inputMsg('Select command...')
-      key = kb.readKey()
-      char=chr(key)
+      char = kb.getch()
+      key=ord(char)
 
       if char in 'lL':
         ui.keyPressMessage('lL - List macros', key, char)
@@ -378,8 +378,8 @@ def processUserInput():
       userCommand = char + input(char)
       sendCommand(userCommand)
 
-    elif char == '!':
-      ui.keyPressMessage('! - Repeat last GCode command', key, char)
+    elif char == 'º':
+      ui.keyPressMessage('º - Repeat last GCode command', key, char)
       sendCommand(gLastGCodeCommand)
 
     elif char == 's':
@@ -421,8 +421,8 @@ def processUserInput():
       """)
 
       ui.inputMsg('Select command...')
-      key = kb.readKey()
-      char=chr(key)
+      char = kb.getch()
+      key=ord(char)
 
       if char in 'sS':
         ui.keyPressMessage('sS - Table position scan', key, char)
@@ -460,8 +460,8 @@ def processUserInput():
       """)
 
       ui.inputMsg('Select command...')
-      key = kb.readKey()
-      char=chr(key)
+      char = kb.getch()
+      key=ord(char)
 
       if char in 'xX':
         ui.keyPressMessage('xX - Reset X to current position', key, char)
@@ -569,8 +569,8 @@ def processUserInput():
       """)
 
       ui.inputMsg('Select command...')
-      key = kb.readKey()
-      char=chr(key)
+      char = kb.getch()
+      key=ord(char)
 
       if char == '.':
         ui.keyPressMessage('. - ONE AXIS ONLY', key, char)
@@ -584,8 +584,8 @@ def processUserInput():
         """)
 
         ui.inputMsg('Select command...')
-        key = kb.readKey()
-        char=chr(key)
+        char = kb.getch()
+        key=ord(char)
 
         if char == '2':
           ui.keyPressMessage('2 - ONE AXIS ONLY - Absolute move to axis limits - [B]', key, char)
@@ -664,11 +664,7 @@ def processUserInput():
 
     else:  # Rest of keys
       processed = False
-      if ui.getVerboseLevelStr() == 'DEBUG':
-        ui.keyPressMessage('Pressed unknown key {:d} {:s}'.format(key,char), key, char)
-      else:
-        pass
-        #ui.keyPressMessage('Unknown command', key, char)
+      ui.keyPressMessage('Unknown command {:s} ({:d})'.format(char, key), key, char)
 
   if processed:
     readyMsg()
@@ -811,4 +807,4 @@ if __name__ == '__main__':
   finally:
     pass
 #    ui.log('Press any key to exit...')
-#    readKey()
+#    kb.readKey()
