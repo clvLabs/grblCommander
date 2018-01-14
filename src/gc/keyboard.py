@@ -35,7 +35,7 @@ def getch():
 
 LF=10
 CR=13
-ENTER=13
+ENTER=LF
 CTRL_R = 18
 CTRL_X = 24
 CTRL_Y = 25
