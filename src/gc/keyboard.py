@@ -21,6 +21,10 @@ def keyPressed():
   return gKey.kbhit()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def ch2key(ch):
+  return ord(ch)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def getch():
   try:
     char = gKey.getch()
@@ -29,6 +33,10 @@ def getch():
     return 0
 
   return char
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def getKey():
+  return ch2key(getch())
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Key value constants

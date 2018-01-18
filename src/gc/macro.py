@@ -206,8 +206,7 @@ class Macro:
         self.show(name, avoidReload=True)
 
         ui.inputMsg('Press y/Y to execute, any other key to cancel...')
-        key=kb.readKey()
-        char=chr(key)
+        char=kb.getch()
 
         if not char in 'yY':
           ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
@@ -231,7 +230,7 @@ class Macro:
             ui.inputMsg('Paused, press <ENTER> to continue / <ESC> to exit ...')
             key=0
             while key != kb.CR and key != kb.LF and key != kb.ESC:
-              key=kb.readKey()
+              key=kb.getKey()
 
             if key == kb.ESC:
               ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
@@ -257,7 +256,7 @@ class Macro:
             self.grbl.waitForMachineIdle()
 
       if kb.keyPressed():
-        if kb.readKey() == kb.ESC:
+        if kb.getKey() == kb.ESC:
           ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
           return False
 

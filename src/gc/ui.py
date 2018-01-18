@@ -188,7 +188,7 @@ def waitForEnterOrEscape(message):
   inputMsg(msg)
   while True:
     while not kb.keyPressed():
-      key = kb.readKey()
+      key=kb.getKey()
       if key == kb.ENTER:
         return True
       elif key == kb.ESC:

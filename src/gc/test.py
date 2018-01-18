@@ -98,7 +98,7 @@ class Test:
     ''' TODO: comment
     '''
     if kb.keyPressed():
-      if kb.readKey() == kb.ESC:
+      if kb.getKey() == kb.ESC:
         self.testCancelled = True
         self.logTestCancelled()
     return self.testCancelled

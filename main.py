@@ -807,4 +807,4 @@ if __name__ == '__main__':
   finally:
     pass
 #    ui.log('Press any key to exit...')
-#    kb.readKey()
+#    kb.getch()
