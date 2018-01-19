@@ -631,12 +631,40 @@ class Grbl:
   def getSimpleMachineStatusStr(self):
     ''' TODO: comment
     '''
-    return '[{:}] WPos[{:}] [{:}] [{:}]'.format(
-      self.getColoredMachineStateStr(),
-      self.getWorkPosStr(),
-      self.getSimpleSettingsStr(),
-      ui.setStrColor(self.getInputPinStateStr(), 'machineState.Alarm')
-    )
+    machineState = self.status['machineState']
+    stateStr = self.getColoredMachineStateStr()
+
+    prefix = '[{:}]'.format(stateStr)
+    content = ''
+    suffix = ''
+
+    # Content
+    if  machineState in ['Idle', 'Alarm', 'Check', 'Sleep', 'Door']:
+      content = 'W[{:}] M[{:}] [{:}]'.format(
+        self.getWorkPosStr().replace(' ',''),
+        self.getMachinePosStr().replace(' ',''),
+        self.getSimpleSettingsStr()
+        )
+    elif  machineState in ['Run', 'Home', 'Hold', 'Jog']:
+      content = 'W[{:}] M[{:}] F[{:}]'.format(
+        self.getWorkPosStr(),
+        self.getMachinePosStr(),
+        self.status['F']['val']
+        )
+      content = ui.setStrColor(content, 'ui.onlineMachinePos')
+
+    # Suffix
+    if self.getInputPinStateStr():
+      suffix = '[{:}]'.format(ui.setStrColor(self.getInputPinStateStr(), 'machineState.Alarm'))
+
+    # Build string
+    string = prefix
+    if content:
+      string += ' ' + content
+    if suffix:
+      string += ' ' + suffix
+
+    return string
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -775,29 +803,21 @@ class Grbl:
 
     def showCurrentPosition():
       ui.clearLine()
-      stateStr = self.getColoredMachineStateStr()
-      posStr = 'W[{:}] M[{:}] F[{:}]'.format(
-        self.getWorkPosStr(),
-        self.getMachinePosStr(),
-        self.status['F']['val']
-        )
-      posStr = ui.setStrColor(posStr, 'ui.onlineMachinePos')
-      displayStr = '[{:}] {:}'.format(
-        stateStr,
-        posStr
-        )
-      ui.log('\r{:}'.format(displayStr), end='')
+      ui.log('\r{:}'.format(self.getSimpleMachineStatusStr()), end='')
 
     # Valid states types: Idle, Run, Hold, Jog, Alarm, Door, Check, Home, Sleep
-    while self.status['machineState'] == 'Run':
+    machineState = self.status['machineState']
+
+    while machineState == 'Run' or machineState == 'Home':
       self.queryMachineStatus()
       if showStatus:
         showCurrentPosition()
         currPosShown = True
       self.sleep(WAITIDLE_SLEEP)
+      machineState = self.status['machineState']
 
     if currPosShown:
-      showCurrentPosition()
+      ui.clearLine()
 
     ui.log('Machine operation finished', v='SUPER')
     ui.log()
