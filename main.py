@@ -353,13 +353,13 @@ def processUserInput():
       elif char in 'rR':
         ui.keyPressMessage('rR - Run macro', key, char)
         ui.inputMsg('Enter macro name...')
-        macroName=input()
+        macroName=kb.input()
         mcr.run(macroName)
 
       elif char in 'sS':
         ui.keyPressMessage('sS - Show macro', key, char)
         ui.inputMsg('Enter macro name...')
-        macroName=input()
+        macroName=kb.input()
         mcr.show(macroName)
 
       elif char in 'xX':
@@ -375,7 +375,7 @@ def processUserInput():
       ui.inputMsg('Enter GCode command...')
       if char == ' ':
         char = ''
-      userCommand = char + input(char)
+      userCommand = char + kb.input(char)
       sendCommand(userCommand)
 
     elif char == 'º':

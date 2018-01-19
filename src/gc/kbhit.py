@@ -57,10 +57,21 @@ class KBHit:
       # New terminal setting unbuffered
       #self.new_term[3] = (self.new_term[3] & ~termios.ICANON & ~termios.ECHO)
       self.new_term[3] = (self.new_term[3] & ~termios.ICANON)
-      termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.new_term)
+      self.set_own_term()
 
       # Support normal-terminal reset at exit
       atexit.register(self.set_normal_term)
+
+
+  def set_own_term(self):
+    ''' Activate own terminal.  On Windows this is a no-op.
+    '''
+
+    if os.name == 'nt':
+      pass
+
+    else:
+      termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.new_term)
 
 
   def set_normal_term(self):
@@ -88,6 +99,17 @@ class KBHit:
       char = sys.stdin.read(1)
       sys.stdout.write('\b')
       return char
+
+
+  def input(self, prompt=''):
+    ''' Substitution for python's input(), switching terminals
+    '''
+
+    self.set_normal_term()
+    retVal = input(prompt)
+    self.set_own_term()
+
+    return retVal
 
 
 #  def getarrow(self):

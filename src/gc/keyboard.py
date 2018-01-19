@@ -38,6 +38,11 @@ def getch():
 def getKey():
   return ch2key(getch())
 
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def input(prompt=''):
+  return gKey.input(prompt)
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Key value constants
 

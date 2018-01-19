@@ -168,7 +168,7 @@ def clearLine():
 def getUserInput(description, dataType='str', default=None):
   titleWidth = uiCfg['inputTitleWidth']
   inputMsg('Enter {:}:'.format(description)[:titleWidth].ljust(titleWidth), end='')
-  userInput=input()
+  userInput=kb.input()
   try:
     userInput=dataType(userInput)
     return userInput
@@ -205,7 +205,7 @@ def userConfirm(message, password):
     """.format(message, password), color='ui.confirmMsg')
 
     inputMsg('Enter confirmation text')
-    typedPassword=input()
+    typedPassword=kb.input()
 
     if typedPassword == '':
       continue
