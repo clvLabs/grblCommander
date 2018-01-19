@@ -155,7 +155,7 @@ class Grbl:
       self.waitingResponse = False
       self.waitingMachineStatus = False
 
-    # Automatic periodic status queries
+    # Automatic periodic machine status queries
     sendStatusQuery = False
 
     if self.waitingMachineStatus and not self.statusQuerySent:
@@ -168,6 +168,7 @@ class Grbl:
       self.queryMachineStatus()
       self.showNextMachineStatus = False
 
+    # Automatic periodic parser status queries
     sendParserStateQuery = False
 
     if (time.time() - self.lastParserStateQuery) > PERIODIC_QUERY_INTERVAL:
@@ -176,6 +177,11 @@ class Grbl:
     if sendParserStateQuery:
       self.queryGCodeParserState()
       self.showNextParserState = False
+
+    # Show "live" machine status if running
+    if self.isRunning():
+      ui.clearLine()
+      ui.log('\r{:}'.format(self.getSimpleMachineStatusStr()), end='')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -202,6 +208,15 @@ class Grbl:
     self.sp.write(command+'\n')
 
     return self.readResponse(responseTimeout=responseTimeout,verbose=verbose)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def isRunning(self):
+    if 'machineState' not in self.status:
+      return False
+
+    machineState = self.status['machineState']
+    return machineState == 'Run' or machineState == 'Home' or machineState == 'Jog'
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -798,26 +813,9 @@ class Grbl:
     ui.log('Waiting for machine operation to finish...', v='SUPER')
     self.getMachineStatus()
 
-    showStatus = ((verbose != 'NONE') and (ui.getVerboseLevel() >= ui.getVerboseLevelIndex(verbose)))
-    currPosShown = False
-
-    def showCurrentPosition():
-      ui.clearLine()
-      ui.log('\r{:}'.format(self.getSimpleMachineStatusStr()), end='')
-
-    # Valid states types: Idle, Run, Hold, Jog, Alarm, Door, Check, Home, Sleep
-    machineState = self.status['machineState']
-
-    while machineState == 'Run' or machineState == 'Home':
-      self.queryMachineStatus()
-      if showStatus:
-        showCurrentPosition()
-        currPosShown = True
-      self.sleep(WAITIDLE_SLEEP)
-      machineState = self.status['machineState']
-
-    if currPosShown:
-      ui.clearLine()
+    while self.isRunning():
+      self.process()
+      self.getMachineStatus()
 
     ui.log('Machine operation finished', v='SUPER')
     ui.log()
