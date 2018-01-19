@@ -189,6 +189,20 @@ modalGroups = {
   },
 }
 
+# See: https://github.com/gnea/grbl/wiki/Grbl-v1.1-Interface
+# <...|Pn:XYZPDHRS|...>
+
+inputPinStates = {
+  'X': 'X limit',
+  'Y': 'Y limit',
+  'Z': 'Z limit',
+  'P': 'Probe',
+  'D': 'Door',
+  'H': 'Hold',
+  'R': 'Soft reset',
+  'S': 'Cycle Start',
+}
+
 
 # ------------------------------------------------------------------
 # Dict class

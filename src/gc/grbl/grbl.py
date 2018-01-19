@@ -67,6 +67,7 @@ class Grbl:
       'parserState': {
         'str': '',
       },
+      'inputPinState': self.parseInputPinState('')
     }
 
     self.sp = serialport.SerialPort(cfg)
@@ -388,6 +389,21 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def parseInputPinState(self,pinState):
+    ''' Parses a pin state string and returns an object
+    '''
+    state = {}
+
+    for item in dict.inputPinStates:
+      state[item] = {
+        'desc': dict.inputPinStates[item],
+        'val': item in pinState
+      }
+
+    return state
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def parseMachineStatus(self,status):
     ''' TODO: Comment
     '''
@@ -396,6 +412,9 @@ class Grbl:
 
     # Split parameter groups
     params = status.split('|')
+
+    # Initialize input pin state variable
+    inputPinState = ''
 
     # Status is always the first field
     self.status['machineState'] = params.pop(0)
@@ -466,10 +485,7 @@ class Grbl:
         }
 
       elif paramName == 'Pn':
-        self.status[paramName] = {
-          'desc': 'inputPinState',
-          'val': paramValue
-        }
+        inputPinState = paramValue
 
       elif paramName == 'Ov':
         values = paramValue.split(',')
@@ -494,6 +510,14 @@ class Grbl:
           'desc': 'UNKNOWN',
           'val': paramValue
         }
+
+    # ALWAYS save&parse input pin state (if none comes, it's empty!)
+    self.status['Pn'] = {
+      'desc': 'inputPinState',
+      'val': inputPinState
+    }
+
+    self.status['inputPinState'] = self.parseInputPinState(inputPinState)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -607,10 +631,11 @@ class Grbl:
   def getSimpleMachineStatusStr(self):
     ''' TODO: comment
     '''
-    return '[{:}] WPos[{:}] [{:}]'.format(
+    return '[{:}] WPos[{:}] [{:}] [{:}]'.format(
       self.getColoredMachineStateStr(),
       self.getWorkPosStr(),
-      self.getSimpleSettingsStr()
+      self.getSimpleSettingsStr(),
+      ui.setStrColor(self.getInputPinStateStr(), 'machineState.Alarm')
     )
 
 
@@ -667,6 +692,75 @@ class Grbl:
       return self.dct.alarms[self.alarm]
     else:
       return ''
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getInputPinState(self):
+    ''' Helpers to get pin states
+    '''
+    return self.status['inputPinState']
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getInputPinStateStr(self):
+    ''' Helpers to get pin states
+    '''
+    return self.status['Pn']['val']
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getInputPinStateLongStr(self):
+    ''' Helpers to get pin states
+    '''
+    stateStr = ''
+
+    pins = self.status['inputPinState']
+    for pin in pins:
+      if pins[pin]['val']:
+        stateStr += '{:}({:}) '.format(pin,pins[pin]['desc'])
+
+    return stateStr.rstrip()
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getLimitSwitchState(self,axis):
+    ''' Helpers to get pin states
+    '''
+    return self.status['inputPinState'][axis]
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getProbeState(self):
+    ''' Helpers to get pin states
+    '''
+    return self.status['inputPinState']['P']
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getDoorState(self):
+    ''' Helpers to get pin states
+    '''
+    return self.status['inputPinState']['D']
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getHoldState(self):
+    ''' Helpers to get pin states
+    '''
+    return self.status['inputPinState']['H']
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getSoftResetState(self):
+    ''' Helpers to get pin states
+    '''
+    return self.status['inputPinState']['R']
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getCycleStartState(self):
+    ''' Helpers to get pin states
+    '''
+    return self.status['inputPinState']['S']
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
