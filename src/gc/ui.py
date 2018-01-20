@@ -54,6 +54,7 @@ def colorStr(string, foreColor, backColor=None):
 
   return '\x1b[{:s}m{:s}\x1b[0;0m'.format(';'.join(attr), string)
 
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Give a string some ANSI color formatting - allows to use config colors
 # Color format examples:
@@ -78,6 +79,7 @@ def setStrColor(str, colorName):
 
   return colorStr(str, color)
 
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def fillLogParams(kwargs):
   verboseStr = 'BASIC'
@@ -94,6 +96,7 @@ def fillLogParams(kwargs):
   kwargs['color'] = color
 
   return kwargs
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def log(message='', **kwargs):
@@ -113,6 +116,7 @@ def log(message='', **kwargs):
 
     print(message, **kwargs)
 
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def logBlock(message, **kwargs):
   separator = gBLOCK_SEPARATOR
@@ -124,20 +128,24 @@ def logBlock(message, **kwargs):
   log('\n{:}\n{:}\n{:}'.format(separator, message, separator), **kwargs)
   log('', **kwargs)  # Additional separator line NOT colored!
 
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def logTitle(text, **kwargs):
   if not 'color' in kwargs:    kwargs['color'] = 'ui.title'
   log('{:s}[{:s}]'.format(gTITLE_SEPARATOR, text), **kwargs)
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def logSubtitle(text, **kwargs):
   if not 'color' in kwargs:    kwargs['color'] = 'ui.subtitle'
   log('{:s}[{:s}]'.format(gSUBTITLE_SEPARATOR, text), **kwargs)
 
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def inputMsg(text, **kwargs):
   if not 'color' in kwargs:    kwargs['color'] = 'ui.inputMsg'
   log('{:}'.format(text), **kwargs)
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def readyMsg(extraInfo=None):
@@ -146,23 +154,28 @@ def readyMsg(extraInfo=None):
     log('{:}'.format(extraInfo))
   log('{:}'.format(setStrColor(uiCfg['readyMsg'], 'ui.readyMsg')))
 
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def keyPressMessage(message, key, char):
   # log('\n{:}\n{:}\n'.format(gMSG_SEPARATOR, message)
   log('{:}\n{:}\n'.format(gMSG_SEPARATOR, message)
     , color='ui.keyPressMsg', v='WARNING')
 
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def clearScreen():
   log('\n' * uiCfg['clearScreenLines'])
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def charLine(char, widthMultiplier=1):
   return char * int(uiCfg['maxLineLen'] * widthMultiplier)
 
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def clearLine():
   log('\r{:}'.format(charLine(' ')), end='')
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def getUserInput(description, dataType='str', default=None):
@@ -174,7 +187,6 @@ def getUserInput(description, dataType='str', default=None):
     return userInput
   except:
     return default
-
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -193,6 +205,7 @@ def waitForEnterOrEscape(message):
         return True
       elif key == kb.ESC:
         return False
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def userConfirm(message, password):
@@ -214,10 +227,12 @@ def userConfirm(message, password):
     else:
       return False
 
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def coordStr(c):
   cFmt = uiCfg['coordFormat']
   return cFmt.format(c)
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def ColoredXyzStr(x, y, z, xColor='', yColor='', zColor=''):
@@ -228,6 +243,7 @@ def ColoredXyzStr(x, y, z, xColor='', yColor='', zColor=''):
     setStrColor(coordStr(z), zColor ),
     )
 
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def xyzStr(x, y, z):
   xyzFmt = uiCfg['xyzFormat']
@@ -236,6 +252,7 @@ def xyzStr(x, y, z):
     coordStr(y),
     coordStr(z),
     )
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -254,7 +271,9 @@ gMIN_VERBOSE_LEVEL = gVerboseLevels.index('BASIC')
 gMAX_VERBOSE_LEVEL = len(gVerboseLevels) - 1
 gVerboseLevel = gVerboseLevels.index(uiCfg['verboseLevel'])
 
+
 def getVerboseLevel():    return(gVerboseLevel)
+
 
 def getVerboseLevelStr(level=None):
   if(level is None):
@@ -262,12 +281,15 @@ def getVerboseLevelStr(level=None):
   else:
     return(gVerboseLevels[level])
 
+
 def getVerboseLevelIndex(str):
   return gVerboseLevels.index(str)
+
 
 def setVerboseLevel(level):
   global gVerboseLevel
   gVerboseLevel = level
+
 
 # Standard separator
 gMSG_SEPARATOR = charLine(uiCfg['msgSeparatorChar'])

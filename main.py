@@ -50,6 +50,7 @@ def readyMsg(extraInfo=None):
 
   ui.readyMsg(extraInfo)
 
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def onParserStateChanged():
   # While running, machine is already displaying status
@@ -58,6 +59,7 @@ def onParserStateChanged():
 
 # Register
 mch.onParserStateChanged.append(onParserStateChanged)
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def sendCommand(command):
@@ -73,6 +75,7 @@ def sendCommand(command):
     responseTimeout=float(mchCfg['homingTimeout'])
 
   mch.sendWait(command, responseTimeout=responseTimeout)
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showHelp():
@@ -115,6 +118,7 @@ def showHelp():
   v/V        - Set verbose level (-/+) (loop)
   """)
 
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showMachineStatus():
   mch.getMachineStatus()
@@ -141,10 +145,12 @@ def showMachineStatus():
 
   ui.logBlock(statusStr)
 
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showMachineLongStatus():
   showMachineStatus()
   mcr.run(mcrCfg['machineLongStatus'], silent=True)
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showMachineFullStatus():
@@ -159,6 +165,7 @@ def showMachineFullStatus():
       mch.getColoredMachineStateStr(),
       pprint.pformat(machineStatus, indent=2, width=uiCfg['maxLineLen'])
     ))
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def processUserInput():
@@ -751,6 +758,7 @@ def processJoystickInput():
   if processed:
     readyMsg()
 
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def main():
   ui.clearScreen()
@@ -798,7 +806,6 @@ def main():
   mch.stop()
 
   ui.log('Closing program...')
-
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

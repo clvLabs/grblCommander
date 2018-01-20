@@ -764,6 +764,7 @@ class Grbl:
 
     return stateStr.rstrip()
 
+
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getLimitSwitchState(self,axis):
     ''' Helpers to get pin states

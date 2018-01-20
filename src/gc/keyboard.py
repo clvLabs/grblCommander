@@ -16,13 +16,16 @@ from . import kbhit
 # Keyboard manager
 gKey = kbhit.KBHit()
 
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def keyPressed():
   return gKey.kbhit()
 
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def ch2key(ch):
   return ord(ch)
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def getch():
@@ -34,6 +37,7 @@ def getch():
 
   return char
 
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def getKey():
   return ch2key(getch())
@@ -42,6 +46,7 @@ def getKey():
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def input(prompt=''):
   return gKey.input(prompt)
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Key value constants

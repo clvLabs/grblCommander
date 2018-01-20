@@ -47,6 +47,7 @@ errors = {
   '37': "The G43.1 dynamic tool length offset command cannot apply an offset to an axis other than its configured axis. The Grbl default axis is the Z-axis.",
 }
 
+
 # See: https://github.com/gnea/grbl/blob/master/doc/csv/alarm_codes_en_US.csv
 alarms = {
   '1': "Hard limit triggered. Machine position is likely lost due to sudden and immediate halt. Re-homing is highly recommended.",
@@ -59,6 +60,7 @@ alarms = {
   '8': "Homing fail. Cycle failed to clear limit switch when pulling off. Try increasing pull-off setting or check wiring.",
   '9': "Homing fail. Could not find limit switch within search distance. Defined as 1.5 * max_travel on search and 5 * pulloff on locate phases.  ",
 }
+
 
 # See: https://github.com/gnea/grbl/blob/master/doc/csv/setting_codes_en_US.csv
 settings = {
@@ -98,6 +100,7 @@ settings = {
   '132': "Z-axis maximum travel, millimeters",
 }
 
+
 # See: https://github.com/gnea/grbl/blob/master/doc/csv/build_option_codes_en_US.csv
 options = {
   'V': "Variable spindle ",
@@ -122,9 +125,9 @@ options = {
   'L': "Homing initialization auto-lock",
 }
 
+
 # See: https://www.shapeoko.com/wiki/index.php/G-Code
 # [GC:G1 G54 G17 G21 G90 G94 M5 M9 T0 F400 S0]
-
 modalGroups = {
   'motion': {
     'G0':    'rapid',
@@ -189,9 +192,9 @@ modalGroups = {
   },
 }
 
+
 # See: https://github.com/gnea/grbl/wiki/Grbl-v1.1-Interface
 # <...|Pn:XYZPDHRS|...>
-
 inputPinStates = {
   'X': 'X limit',
   'Y': 'Y limit',
