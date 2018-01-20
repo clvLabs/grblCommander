@@ -102,7 +102,8 @@ def showHelp():
 
   Jog
   ---------------------------------------------------------------------
-  jJ               - Restart joystick connection
+  j                - Enable/disable joystick
+  J                - Restart joystick connection
   <numpad>         - XY jog (including diagonals)
   <SHIFT>+<numpad> - XY jog (double distance)
   <CTRL><numpad>   - XY jog (half distance)
@@ -127,15 +128,21 @@ def showMachineStatus():
 
   statusStr += 'Current status: [{:}]\n'.format(mch.getColoredMachineStateStr())
   statusStr += '\n'
-  statusStr += 'Alarm   [{:s}]\n'.format(ui.setStrColor(mch.getAlarmStr(), 'ui.errorMsg'))
-  statusStr += 'Msg     [{:s}]\n'.format(ui.setStrColor(mch.getLastMessage(), 'ui.msg'))
+  statusStr += 'Alarm    [{:s}]\n'.format(ui.setStrColor(mch.getAlarmStr(), 'ui.errorMsg'))
+  statusStr += 'Msg      [{:s}]\n'.format(ui.setStrColor(mch.getLastMessage(), 'ui.msg'))
   statusStr += '\n'
-  statusStr += 'MPos    [{:s}]\n'.format(mch.getMachinePosStr())
-  statusStr += 'WCO     [{:s}]\n'.format(mch.getWorkCoordinatesStr())
-  statusStr += 'WPos    [{:s}]\n'.format(mch.getWorkPosStr())
+  statusStr += 'MPos     [{:s}]\n'.format(mch.getMachinePosStr())
+  statusStr += 'WCO      [{:s}]\n'.format(mch.getWorkCoordinatesStr())
+  statusStr += 'WPos     [{:s}]\n'.format(mch.getWorkPosStr())
   statusStr += '\n'
-  statusStr += 'INPins  [{:s}]\n'.format(ui.setStrColor(mch.getInputPinStateStr(), 'machineState.Alarm'))
-  statusStr += 'Parser  [{:s}]\n'.format(mch.getSimpleSettingsStr())
+  statusStr += 'INPins   [{:s}]\n'.format(ui.setStrColor(mch.getInputPinStateStr(), 'machineState.Alarm'))
+  statusStr += 'Parser   [{:s}]\n'.format(mch.getSimpleSettingsStr())
+
+  statusStr += 'Joystick [{:s}] [{:s}]\n'.format(
+    ui.setStrColor('CONNECTED', 'ui.successMsg') if joy.connected else ui.setStrColor('DISCONNECTED', 'ui.errorMsg'),
+    ui.setStrColor('ENABLED', 'ui.successMsg') if joy.enabled else ui.setStrColor('DISABLED', 'ui.errorMsg')
+  )
+
   statusStr += '\n'
   statusStr += 'Software config:\n'
   statusStr += 'Jog distance (XY) = {:}\n'.format(ui.coordStr(gXYJog))
@@ -523,9 +530,24 @@ def processUserInput():
       else:
         ui.keyPressMessage('Unknown command', key, char)
 
-    elif char in 'jJ':
-      ui.keyPressMessage('jJ - Restart joystick connection', key, char)
+    elif char == 'j':
+      ui.keyPressMessage('j - Enable/disable joystick', key, char)
+      joy.enabled = not joy.enabled
+
+      ui.log('Joystick [{:s}] [{:s}]\n'.format(
+        ui.setStrColor('CONNECTED', 'ui.successMsg') if joy.connected else ui.setStrColor('DISCONNECTED', 'ui.errorMsg'),
+        ui.setStrColor('ENABLED', 'ui.successMsg') if joy.enabled else ui.setStrColor('DISABLED', 'ui.errorMsg')
+      ))
+
+    elif char == 'J':
+      ui.keyPressMessage('J - Restart joystick connection', key, char)
       joy.restart()
+
+      ui.log()
+      ui.log('Joystick [{:s}] [{:s}]\n'.format(
+        ui.setStrColor('CONNECTED', 'ui.successMsg') if joy.connected else ui.setStrColor('DISCONNECTED', 'ui.errorMsg'),
+        ui.setStrColor('ENABLED', 'ui.successMsg') if joy.enabled else ui.setStrColor('DISABLED', 'ui.errorMsg')
+      ))
 
     elif char == '-':
       ui.keyPressMessage('- - Jog (Z) up ({:} {:})'.format(gZJog, ps['units']['desc']), key, char)

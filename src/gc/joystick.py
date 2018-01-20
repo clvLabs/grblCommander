@@ -26,6 +26,8 @@ class Joystick:
     self.cfg = cfg
     self.joyCfg = cfg['joystick']
     self._joystick = None
+    self.connected = False
+    self.enabled = False
     self.status = {}
     self.resetStatus()
 
@@ -96,8 +98,10 @@ class Joystick:
 
     # Ignore initialization messages
     if self._joystick:
+      self.connected = True
       self.flushQueue()
     else:
+      self.connected = False
       ui.log('Joystick not found', color='ui.errorMsg', v='ERROR')
 
 
@@ -110,7 +114,8 @@ class Joystick:
       return
 
     for event in pygame.event.get():
-        self.joystickEventListener(event)
+        if self.enabled:
+          self.joystickEventListener(event)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
