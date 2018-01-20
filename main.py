@@ -772,19 +772,19 @@ def processJoystickInput():
   if joy.status['extraU']:
     if joy.status['x+']:
       gXYJog = ut.genericValueChanger(gXYJog, +1, 1, 100, loop=True, valueName='xyJog')
-      ui.keyPressMessage('JoyJog [XY+] ({:})'.format(gXYJog), 0, '')
+      ui.keyPressMessage('Change jog distance (XY) (+1) ({:})'.format(gXYJog), 0, '')
 
     elif joy.status['x-']:
       gXYJog = ut.genericValueChanger(gXYJog, -1, 1, 100, loop=True, valueName='xyJog')
-      ui.keyPressMessage('JoyJog [XY-] ({:})'.format(gXYJog), 0, '')
+      ui.keyPressMessage('Change jog distance (XY) (-1) ({:})'.format(gXYJog), 0, '')
 
     elif joy.status['y+']:
       gXYJog = ut.genericValueChanger(gXYJog, +10, 1, 100, loop=True, valueName='xyJog')
-      ui.keyPressMessage('JoyJog [XY++] ({:})'.format(gXYJog), 0, '')
+      ui.keyPressMessage('Change jog distance (XY) (+10) ({:})'.format(gXYJog), 0, '')
 
     elif joy.status['y-']:
       gXYJog = ut.genericValueChanger(gXYJog, -10, 1, 100, loop=True, valueName='xyJog')
-      ui.keyPressMessage('JoyJog [XY--] ({:})'.format(gXYJog), 0, '')
+      ui.keyPressMessage('Change jog distance (XY) (-10) ({:})'.format(gXYJog), 0, '')
 
     else:
       processed = False
@@ -793,19 +793,19 @@ def processJoystickInput():
   elif joy.status['extraD']:
     if joy.status['x+']:
       gZJog = ut.genericValueChanger(gZJog, +1, 1, 20, loop=True, valueName='zJog')
-      ui.keyPressMessage('JoyJog [Z+] ({:})'.format(gZJog), 0, '')
+      ui.keyPressMessage('Change jog distance (Z) (+1) ({:})'.format(gZJog), 0, '')
 
     elif joy.status['x-']:
       gZJog = ut.genericValueChanger(gZJog, -1, 1, 20, loop=True, valueName='zJog')
-      ui.keyPressMessage('JoyJog [Z-] ({:})'.format(gZJog), 0, '')
+      ui.keyPressMessage('Change jog distance (Z) (-1) ({:})'.format(gZJog), 0, '')
 
     elif joy.status['y+']:
       gZJog = ut.genericValueChanger(gZJog, +10, 1, 20, loop=True, valueName='zJog')
-      ui.keyPressMessage('JoyJog [Z++] ({:})'.format(gZJog), 0, '')
+      ui.keyPressMessage('Change jog distance (Z) (+10)] ({:})'.format(gZJog), 0, '')
 
     elif joy.status['y-']:
       gZJog = ut.genericValueChanger(gZJog, -10, 1, 20, loop=True, valueName='zJog')
-      ui.keyPressMessage('JoyJog [Z--] ({:})'.format(gZJog), 0, '')
+      ui.keyPressMessage('Change jog distance (Z) (-10)] ({:})'.format(gZJog), 0, '')
 
     else:
       processed = False
