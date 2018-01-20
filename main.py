@@ -457,7 +457,9 @@ def processUserInput():
       aA  - Reset XYZ to current position
       mM  - Manual [XYZ] reset
       -   - Reset XY to max machine travel
-      *   - Reset XYZ to max machine travel
+      +   - Reset XY to max machine travel, Z to home
+      /   - Reset XY to machine home
+      *   - Reset XYZ to machine home
       """)
 
       ui.inputMsg('Select command...')
@@ -499,10 +501,21 @@ def processUserInput():
         mch.resetWCoord('x','away')
         mch.resetWCoord('y','away')
 
-      elif char == '*':
-        ui.keyPressMessage('* - Reset XYZ to max machine travel', key, char)
+      elif char == '+':
+        ui.keyPressMessage('+ - Reset XY to max machine travel, Z to home', key, char)
         mch.resetWCoord('x','away')
         mch.resetWCoord('y','away')
+        mch.resetWCoord('z','home')
+
+      elif char == '/':
+        ui.keyPressMessage('/ - Reset XY to machine home', key, char)
+        mch.resetWCoord('x','home')
+        mch.resetWCoord('y','home')
+
+      elif char == '*':
+        ui.keyPressMessage('* - Reset XYZ to machine home', key, char)
+        mch.resetWCoord('x','home')
+        mch.resetWCoord('y','home')
         mch.resetWCoord('z','home')
 
       else:
