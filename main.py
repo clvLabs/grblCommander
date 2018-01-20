@@ -455,6 +455,7 @@ def processUserInput():
       wW  - Reset XY to current position
       zZ  - Reset Z to current position
       aA  - Reset XYZ to current position
+      mM  - Manual [XYZ] reset
       -   - Reset XY to max machine travel
       *   - Reset XYZ to max machine travel
       """)
@@ -485,6 +486,13 @@ def processUserInput():
         mch.resetWCoord('x')
         mch.resetWCoord('y')
         mch.resetWCoord('z')
+
+      elif char in 'mM':
+        ui.keyPressMessage('mM - Manual [XYZ] reset', key, char)
+        ui.inputMsg('Enter GCode command...')
+        prefix = 'G10L2P0'
+        userCommand = prefix + kb.input(prefix)
+        sendCommand(userCommand)
 
       elif char == '-':
         ui.keyPressMessage('- - Reset XY to max machine travel', key, char)
