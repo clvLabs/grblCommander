@@ -81,20 +81,26 @@ def sendCommand(command):
 def showHelp():
   ui.logBlock(
   """
-  Available commands
+  General commands
   ---------------------------------------------------------------------
   qQ         - Quit
   <CTRL>r    - Reset serial connection
   <CTRL>x    - grbl soft reset
-  <ENTER>/?  - Force status re-query
   =          - Lock grblCommander
-
   cC         - Clear screen
+  v/V        - Set verbose level (-/+) (loop)
+
+  Info
+  ---------------------------------------------------------------------
   hH         - Show this help text
   s/S        - Show current status (short/LONG)
   @          - Show current status (FULL)
+
+  Machine control
+  ---------------------------------------------------------------------
   gfxyz$     - Send raw GCode command
   [space]    - Send raw GCode command (start empty)
+  <ENTER>/?  - Force status re-query
   º          - Repeat last GCode command
   mM         - Macro (submenu)
   tT         - Tests (submenu)
@@ -102,21 +108,25 @@ def showHelp():
 
   Jog
   ---------------------------------------------------------------------
-  j                - Enable/disable joystick
-  J                - Restart joystick connection
   <numpad>         - XY jog (including diagonals)
   <SHIFT>+<numpad> - XY jog (double distance)
   <CTRL><numpad>   - XY jog (half distance)
   <numpad>-/+      - Z jog (up/down)
-
+  /                - Set jog distance (XY)
+  *                - Set jog distance (Z)
   <numpad>0        - Safe go to machine home
   <numpad>.        - Absolute move (XY) to table position (submenu)
 
-  Settings
+  Joystick
   ---------------------------------------------------------------------
-  /          - Set jog distance (XY)
-  *          - Set jog distance (Z)
-  v/V        - Set verbose level (-/+) (loop)
+  j                - Enable/disable joystick
+  J                - Restart joystick connection
+  <xy>             - XY jog (including diagonals)
+  <z>-/+           - Z jog (up/down)
+  <extraU><x>      - Change jog distance (XY) (+-1)
+  <extraU><y>      - Change jog distance (XY) (+-10)
+  <extraD><x>      - Change jog distance (Z) (+-1)
+  <extraD><y>      - Change jog distance (Z) (+-10)
   """)
 
 
