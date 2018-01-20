@@ -636,8 +636,8 @@ def processUserInput():
       minY = mch.getMin('y')
       maxX = mch.getMax('x')
       maxY = mch.getMax('y')
-      wX = maxX-minX if minX<0 else minX-maxX
-      wY = maxY-minY if minY<0 else minY-maxY
+      wX = abs(maxX-minX) if minX<0 else abs(minX-maxX)
+      wY = abs(maxY-minY) if minY<0 else abs(minY-maxY)
       cX = minX-(wX/2) if minX>0 else minX+(wX/2)
       cY = minY-(wY/2) if minX>0 else minY+(wY/2)
 
