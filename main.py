@@ -200,7 +200,7 @@ def processUserInput():
 
   if key == kb.COMBO_0X:  # Combined code 0+x
     char = kb.getch()
-    key=ord(char)
+    key=kb.ch2key(char)
 
     if key == 999999:
       pass
@@ -310,7 +310,7 @@ def processUserInput():
 
   elif key == kb.COMBO_224X:  # Combined code 224x
     char = kb.getch()
-    key=ord(char)
+    key=kb.ch2key(char)
 
     if key == 999999:
       pass
@@ -363,7 +363,7 @@ def processUserInput():
 
       ui.inputMsg('Select command...')
       char = kb.getch()
-      key=ord(char)
+      key=kb.ch2key(char)
 
       if char in 'lL':
         ui.keyPressMessage('lL - List macros', key, char)
@@ -441,7 +441,7 @@ def processUserInput():
 
       ui.inputMsg('Select command...')
       char = kb.getch()
-      key=ord(char)
+      key=kb.ch2key(char)
 
       if char in 'sS':
         ui.keyPressMessage('sS - Table position scan', key, char)
@@ -483,7 +483,7 @@ def processUserInput():
 
       ui.inputMsg('Select command...')
       char = kb.getch()
-      key=ord(char)
+      key=kb.ch2key(char)
 
       if char in 'xX':
         ui.keyPressMessage('xX - Reset X to current position', key, char)
@@ -649,7 +649,7 @@ def processUserInput():
 
       ui.inputMsg('Select command...')
       char = kb.getch()
-      key=ord(char)
+      key=kb.ch2key(char)
 
       if char == '.':
         ui.keyPressMessage('. - ONE AXIS ONLY', key, char)
@@ -664,7 +664,7 @@ def processUserInput():
 
         ui.inputMsg('Select command...')
         char = kb.getch()
-        key=ord(char)
+        key=kb.ch2key(char)
 
         if char == '2':
           ui.keyPressMessage('2 - ONE AXIS ONLY - Absolute move to axis limits - [B]', key, char)
