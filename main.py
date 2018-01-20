@@ -305,8 +305,8 @@ def processUserInput():
       if ui.getVerboseLevelStr() == 'DEBUG':
         ui.keyPressMessage('Pressed unknown COMBINED key 0+{:d}'.format(key), key, char)
       else:
+        ui.keyPressMessage('Unknown command', key, char)
         pass
-        #ui.keyPressMessage('Unknown command', key, char)
 
   elif key == kb.COMBO_224X:  # Combined code 224x
     char = kb.getch()
@@ -324,8 +324,8 @@ def processUserInput():
       if ui.getVerboseLevelStr() == 'DEBUG':
         ui.keyPressMessage('Pressed unknown COMBINED key 224+{:d}'.format(key), key, char)
       else:
+        ui.keyPressMessage('Unknown command', key, char)
         pass
-        #ui.keyPressMessage('Unknown command', key, char)
 
   else:  # Standard keys
 
@@ -585,7 +585,7 @@ def processUserInput():
 
       if char == '0':
         ui.keyPressMessage('<numpad>0 - Z0 + X0Y0 (safe home)', key, char)
-      mch.goToMachineHome()
+        mch.goToMachineHome()
       elif char in 'wW':
         ui.keyPressMessage('w - XY0', key, char)
         mch.goToMachineHome_XY()
