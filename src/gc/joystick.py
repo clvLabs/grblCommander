@@ -43,8 +43,8 @@ class Joystick:
       'y-': False,
       'z+': False,
       'z-': False,
-      'extra+': False,
-      'extra-': False,
+      'extraD': False,
+      'extraU': False,
     }
 
 

@@ -734,7 +734,50 @@ def processJoystickInput():
   ps = mch.status['parserState']
   unitsDesc = ps['units']['desc']
 
-  if joy.status['y-'] and joy.status['x-']:
+  # Special actions with 'extraU' pushed
+  if joy.status['extraU']:
+    if joy.status['x+']:
+      gXYJog = ut.genericValueChanger(gXYJog, +1, 1, 100, loop=True, valueName='xyJog')
+      ui.keyPressMessage('JoyJog [XY+] ({:})'.format(gXYJog), 0, '')
+
+    elif joy.status['x-']:
+      gXYJog = ut.genericValueChanger(gXYJog, -1, 1, 100, loop=True, valueName='xyJog')
+      ui.keyPressMessage('JoyJog [XY-] ({:})'.format(gXYJog), 0, '')
+
+    elif joy.status['y+']:
+      gXYJog = ut.genericValueChanger(gXYJog, +10, 1, 100, loop=True, valueName='xyJog')
+      ui.keyPressMessage('JoyJog [XY++] ({:})'.format(gXYJog), 0, '')
+
+    elif joy.status['y-']:
+      gXYJog = ut.genericValueChanger(gXYJog, -10, 1, 100, loop=True, valueName='xyJog')
+      ui.keyPressMessage('JoyJog [XY--] ({:})'.format(gXYJog), 0, '')
+
+    else:
+      processed = False
+
+  # Special actions with 'extraD' pushed
+  elif joy.status['extraD']:
+    if joy.status['x+']:
+      gZJog = ut.genericValueChanger(gZJog, +1, 1, 20, loop=True, valueName='zJog')
+      ui.keyPressMessage('JoyJog [Z+] ({:})'.format(gZJog), 0, '')
+
+    elif joy.status['x-']:
+      gZJog = ut.genericValueChanger(gZJog, -1, 1, 20, loop=True, valueName='zJog')
+      ui.keyPressMessage('JoyJog [Z-] ({:})'.format(gZJog), 0, '')
+
+    elif joy.status['y+']:
+      gZJog = ut.genericValueChanger(gZJog, +10, 1, 20, loop=True, valueName='zJog')
+      ui.keyPressMessage('JoyJog [Z++] ({:})'.format(gZJog), 0, '')
+
+    elif joy.status['y-']:
+      gZJog = ut.genericValueChanger(gZJog, -10, 1, 20, loop=True, valueName='zJog')
+      ui.keyPressMessage('JoyJog [Z--] ({:})'.format(gZJog), 0, '')
+
+    else:
+      processed = False
+
+  # Normal actions
+  elif joy.status['y-'] and joy.status['x-']:
     ui.keyPressMessage('JoyJog - [DL] ({:} {:})'.format(gXYJog, unitsDesc), 0, '')
     mch.moveRelative(x=gXYJog*-1,y=gXYJog*-1)
 

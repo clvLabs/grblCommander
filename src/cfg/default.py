@@ -63,8 +63,8 @@ cfg = {
     },
     'buttons': {
       0: 'z-',
-      1: 'extra-',
-      3: 'extra+',
+      1: 'extraD',
+      3: 'extraU',
       4: 'z+',
     },
   },
