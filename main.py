@@ -119,32 +119,27 @@ def showHelp():
 def showMachineStatus():
   mch.getMachineStatus()
 
-  ui.logBlock(
-  """
-  Current status: [{:}]
+  statusStr = ''
 
-  Alarm   [{:s}]
-  Msg     [{:s}]
+  statusStr += 'Current status: [{:}]\n'.format(mch.getColoredMachineStateStr())
+  statusStr += '\n'
+  statusStr += 'Alarm   [{:s}]\n'.format(ui.setStrColor(mch.getAlarmStr(), 'ui.errorMsg'))
+  statusStr += 'Msg     [{:s}]\n'.format(ui.setStrColor(mch.getLastMessage(), 'ui.msg'))
+  statusStr += '\n'
+  statusStr += 'MPos    [{:s}]\n'.format(mch.getMachinePosStr())
+  statusStr += 'WCO     [{:s}]\n'.format(mch.getWorkCoordinatesStr())
+  statusStr += 'WPos    [{:s}]\n'.format(mch.getWorkPosStr())
+  statusStr += '\n'
+  statusStr += 'INPins  [{:s}]\n'.format(ui.setStrColor(mch.getInputPinStateStr(), 'machineState.Alarm'))
+  statusStr += 'Parser  [{:s}]\n'.format(mch.getSimpleSettingsStr())
+  statusStr += '\n'
+  statusStr += 'Software config:\n'
+  statusStr += 'Jog distance (XY) = {:}\n'.format(ui.coordStr(gXYJog))
+  statusStr += 'Jog distance (Z)  = {:}\n'.format(ui.coordStr(gZJog))
+  statusStr += 'VerboseLevel      = {:d}/{:d} ({:s})\n'.format(ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
+  # statusStr += '\n'.format()
 
-  MPos    [{:s}]
-  WCO     [{:s}]
-  WPos    [{:s}]
-
-  Software config:
-  Jog distance (XY) = {:}
-  Jog distance (Z)  = {:}
-  VerboseLevel      = {:d}/{:d} ({:s})
-  """.format(
-      mch.getColoredMachineStateStr(),
-      ui.setStrColor(mch.getAlarmStr(), 'ui.errorMsg'),
-      ui.setStrColor(mch.getLastMessage(), 'ui.msg'),
-      mch.getMachinePosStr(),
-      mch.getWorkCoordinatesStr(),
-      mch.getWorkPosStr(),
-      ui.coordStr(gXYJog),
-      ui.coordStr(gZJog),
-      ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
-    )
+  ui.logBlock(statusStr)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showMachineLongStatus():
