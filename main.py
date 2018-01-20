@@ -14,6 +14,7 @@ import src.gc.ui as ui
 import src.gc.keyboard as kb
 import src.gc.joystick as joystick
 import src.gc.grbl.grbl as grbl
+import src.gc.grbl.probe as probe
 import src.gc.macro as macro
 import src.gc.test as test
 from src.gc.config import cfg, loadedCfg
@@ -29,6 +30,9 @@ gVERSION = '0.7.0'
 
 # grbl machine manager
 mch = grbl.Grbl(cfg)
+
+# grbl probe manager
+prb = probe.Probe(mch)
 
 # joystick manager
 joy = joystick.Joystick(cfg)
@@ -102,6 +106,7 @@ def showHelp():
   [space]    - Send raw GCode command (start empty)
   <ENTER>/?  - Force status re-query
   º          - Repeat last GCode command
+  pP         - Probe (submenu)
   mM         - Macro (submenu)
   tT         - Tests (submenu)
   rR         - Reset work coordinate (submenu)
@@ -146,6 +151,7 @@ def showMachineStatus():
   statusStr += 'MPos     [{:s}]\n'.format(mch.getMachinePosStr())
   statusStr += 'WCO      [{:s}]\n'.format(mch.getWorkCoordinatesStr())
   statusStr += 'WPos     [{:s}]\n'.format(mch.getWorkPosStr())
+  statusStr += 'PRB      {:s}\n'.format(mch.getProbePosStr())
   statusStr += '\n'
   statusStr += 'INPins   {:s}\n'.format(mch.getInputPinStateLongStr())
   statusStr += 'Parser   [{:s}]\n'.format(mch.getSimpleSettingsStr())
@@ -350,6 +356,33 @@ def processUserInput():
         'unlock'):
         pass
 
+    elif char in 'pP':
+      ui.keyPressMessage('pP - Probe', key, char)
+
+      ui.logBlock(
+      """
+      Available commands:
+
+      1   - Basic probe
+      2   - Two stage probe
+      """)
+
+      ui.inputMsg('Select command...')
+      char = kb.getch()
+      key=kb.ch2key(char)
+
+      if char == '1':
+        ui.keyPressMessage('1 - Basic probe', key, char)
+        prb.basic()
+
+      elif char == '2':
+        ui.keyPressMessage('2 - Two stage probe', key, char)
+        prb.twoStage()
+
+      else:
+        ui.keyPressMessage('Unknown command', key, char)
+
+
     elif char in 'mM':
       ui.keyPressMessage('mM - Macro', key, char)
 
@@ -476,6 +509,7 @@ def processUserInput():
       wW  - Reset XY to current position
       zZ  - Reset Z to current position
       aA  - Reset XYZ to current position
+      pP  - Reset Z to current PRB:Z
       mM  - Manual [XYZ] reset
       -   - Reset XY to max machine travel
       +   - Reset XY to max machine travel, Z to home
@@ -509,6 +543,10 @@ def processUserInput():
         mch.resetWCoord('x')
         mch.resetWCoord('y')
         mch.resetWCoord('z')
+
+      elif char in 'pP':
+        ui.keyPressMessage('pP - Reset Z to current PRB:Z', key, char)
+        mch.resetWCoord('z', prb.axisPos('z'))
 
       elif char in 'mM':
         ui.keyPressMessage('mM - Manual [XYZ] reset', key, char)

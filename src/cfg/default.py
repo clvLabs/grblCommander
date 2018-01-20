@@ -36,6 +36,14 @@ cfg = {
     'seekSpeed': 2000,
     'feedSpeed': 400,
     'homingTimeout': 20,
+    'probing': {
+      'feed': 100,
+      'interStagePulloff': 0.5,
+      'feedStage2': 10,
+      'pulloff': 1.0,
+      'touchPlateHeight': 1.0,
+      'timeout': 10,
+    },
     'preferredParserState': {
       'coolant': 'M9',          # Change to fit your preferences
       'distanceMode': 'G90',    # Change to fit your preferences

@@ -60,12 +60,25 @@ class Grbl:
     self.alarm = ''
     self.status = {
       'str': '',
-      'MPos': {'desc':'machinePos', 'x':0, 'y':0, 'z':0},
-      'WPos': {'desc':'workPos', 'x':0, 'y':0, 'z':0},
-      'WCO': {'desc':'workCoords', 'x':0, 'y':0, 'z':0},
+      'MPos': {'desc':'machinePos', 'x':0.000, 'y':0.000, 'z':0.000},
+      'WPos': {'desc':'workPos', 'x':0.000, 'y':0.000, 'z':0.000},
+      'WCO': {'desc':'workCoords', 'x':0.000, 'y':0.000, 'z':0.000},
       'settings': {},
       'parserState': {
         'str': '',
+      },
+      'GCodeParams': {
+        'G54': {'x':0.000, 'y':0.000, 'z':0.000},
+        'G55': {'x':0.000, 'y':0.000, 'z':0.000},
+        'G56': {'x':0.000, 'y':0.000, 'z':0.000},
+        'G57': {'x':0.000, 'y':0.000, 'z':0.000},
+        'G58': {'x':0.000, 'y':0.000, 'z':0.000},
+        'G59': {'x':0.000, 'y':0.000, 'z':0.000},
+        'G28': {'x':0.000, 'y':0.000, 'z':0.000},
+        'G30': {'x':0.000, 'y':0.000, 'z':0.000},
+        'G92': {'x':0.000, 'y':0.000, 'z':0.000},
+        'PRB': {'x':0.000, 'y':0.000, 'z':0.000, 'success': False},
+        'TLO': 0.000,
       },
       'inputPinState': self.parseInputPinState('')
     }
@@ -349,6 +362,11 @@ class Grbl:
             event()
         self.lastParserStateStr=parserState
 
+      # gcode parameters
+      elif line[:1] == "[":
+        parserParam = line[1:-1]
+        self.parseGCodeParam(parserParam)
+
       # User-defined startup line
       elif line[:2] == "$N":
         pass
@@ -367,6 +385,8 @@ class Grbl:
           ui.log('[WARNING] Unexpected machine response',c='ui.msg',v='DETAIL')
 
       if showLine:
+        if self.isRunning():
+          ui.log()
         ui.log('<<<<< {:}'.format(originalLine), color='comms.recv')
 
       if errorCode:
@@ -401,6 +421,42 @@ class Grbl:
           self.status['parserState'][modalGroup] = {}
           self.status['parserState'][modalGroup]['val'] = value
           self.status['parserState'][modalGroup]['desc'] = commandName
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def parseGCodeParam(self,parserParam):
+    ''' Parses a GCode param string and updates self.status
+    '''
+    # Separate ID and value
+    parts = parserParam.split(':')
+
+    # ID/value pair found?
+    if len(parts) < 2:
+      return
+
+    # Separate parts (possible suffix after value, separated by ':')
+    id = parts[0]
+    value = parts[1]
+    suffix = suffix = parts[2] if len(parts) > 2 else ''
+
+    # Save xyz for common params
+    if id in ['G54','G55','G56','G57','G58','G59','G28','G30','G92','PRB']:
+      axes = value.split(',')
+
+      if len(axes) < 3:
+        return
+
+      self.status['GCodeParams'][id]['x'] = float(axes[0])
+      self.status['GCodeParams'][id]['y'] = float(axes[1])
+      self.status['GCodeParams'][id]['z'] = float(axes[2])
+
+    # PRB (probe) has an additional parameter
+    if id == 'PRB':
+      self.status['GCodeParams']['PRB']['success'] = True if int(suffix) else False
+
+    # TLO (tool offset)
+    if id == 'TLO':
+      self.status['GCodeParams']['TLO'] = float(value)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -718,6 +774,17 @@ class Grbl:
     if not wpos:
       return '<NONE>'
     return ui.xyzStr(wpos['x'], wpos['y'], wpos['z'])
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getProbePosStr(self):
+    ''' TODO: comment
+    '''
+    prb = self.status['GCodeParams']['PRB']
+    coords = ui.xyzStr(prb['x'], prb['y'], prb['z'])
+    lastRun = ui.setStrColor('SUCCESS','ui.successMsg') if prb['success'] else ui.setStrColor('FAIL','ui.errorMsg')
+
+    return '[{:}] ({:})'.format(coords, lastRun)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
