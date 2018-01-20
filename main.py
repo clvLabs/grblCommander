@@ -114,7 +114,7 @@ def showHelp():
   <numpad>-/+      - Z jog (up/down)
   /                - Set jog distance (XY)
   *                - Set jog distance (Z)
-  <numpad>0        - Safe go to machine home
+  <numpad>0        - Go to machine home (submenu)
   <numpad>.        - Absolute move (XY) to table position (submenu)
 
   Joystick
@@ -568,8 +568,32 @@ def processUserInput():
       mch.moveRelative(x=0,y=0,z=gZJog*-1)
 
     elif char == '0':
-      ui.keyPressMessage('0 - Safe go to machine home', key, char)
+      ui.keyPressMessage('0 - Go to machine home', key, char)
+
+      ui.logBlock(
+      """
+      Available commands:
+
+      <numpad>0 - Z0 + X0Y0 (safe home)
+      wW        - XY0
+      zZ        - Z0
+      """)
+
+      ui.inputMsg('Select command...')
+      char = kb.getch()
+      key=kb.ch2key(char)
+
+      if char == '0':
+        ui.keyPressMessage('<numpad>0 - Z0 + X0Y0 (safe home)', key, char)
       mch.goToMachineHome()
+      elif char in 'wW':
+        ui.keyPressMessage('w - XY0', key, char)
+        mch.goToMachineHome_XY()
+      elif char in 'zZ':
+        ui.keyPressMessage('z - Z0', key, char)
+        mch.goToMachineHome_Z()
+      else:
+        ui.keyPressMessage('Unknown command', key, char)
 
     elif char == '1':
       ui.keyPressMessage('1 - Jog - [DL] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
