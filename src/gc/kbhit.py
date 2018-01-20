@@ -24,7 +24,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 NOTES:
-- Modified on 2015/01/11 -> NOT disabling termios.ECHO, messes with input()
 - Modified on 2015/01/11 -> Code reorganized
 '''
 
@@ -56,12 +55,12 @@ class KBHit:
     else:
       # Save the terminal settings
       self.fd = sys.stdin.fileno()
-      self.new_term = termios.tcgetattr(self.fd)
       self.old_term = termios.tcgetattr(self.fd)
 
       # New terminal setting unbuffered
-      #self.new_term[3] = (self.new_term[3] & ~termios.ICANON & ~termios.ECHO)
-      self.new_term[3] = (self.new_term[3] & ~termios.ICANON)
+      self.new_term = termios.tcgetattr(self.fd)
+      self.new_term[3] = (self.new_term[3] & ~termios.ICANON & ~termios.ECHO)
+
       self.setOwnTerm()
 
       # Support normal-terminal reset at exit
@@ -81,7 +80,7 @@ class KBHit:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def getch(self):
+  def getch(self, display=False):
     ''' Returns a keyboard character after kbhit() has been called.
     '''
 
@@ -90,7 +89,8 @@ class KBHit:
 
     else:
       char = sys.stdin.read(1)
-      sys.stdout.write('\b')
+      if display:
+        sys.stdout.write(char)
       return char
 
 
@@ -99,9 +99,33 @@ class KBHit:
     ''' Substitution for python's input(), switching terminals
     '''
 
-    self.resetTerm()
-    retVal = input(prompt)
-    self.setOwnTerm()
+    sys.stdout.write(prompt)
+
+    # Set non-blocking flag for stdio
+    os.set_blocking(self.fd, False)
+
+    # Flush keyboard buffer into return value
+    kbBuffer = ''
+    enterBuffered = False
+    char = self.getch(True)
+
+    while char:
+      kbBuffer += char
+
+      if ord(char) == 10:
+        enterBuffered = True
+
+      char = self.getch(True)
+
+    # Reet blocking flag for stdio
+    os.set_blocking(self.fd, True)
+
+    if enterBuffered:
+      retVal = kbBuffer
+    else:
+      self.resetTerm()
+      retVal = kbBuffer + input()
+      self.setOwnTerm()
 
     return retVal
 
