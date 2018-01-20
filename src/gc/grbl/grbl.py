@@ -760,7 +760,7 @@ class Grbl:
     pins = self.status['inputPinState']
     for pin in pins:
       if pins[pin]['val']:
-        stateStr += '{:}({:}) '.format(pin,pins[pin]['desc'])
+        stateStr += '[{:} ({:})] '.format(ui.setStrColor(pin, 'machineState.Alarm'),pins[pin]['desc'])
 
     return stateStr.rstrip()
 

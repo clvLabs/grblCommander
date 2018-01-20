@@ -145,7 +145,7 @@ def showMachineStatus():
   statusStr += 'WCO      [{:s}]\n'.format(mch.getWorkCoordinatesStr())
   statusStr += 'WPos     [{:s}]\n'.format(mch.getWorkPosStr())
   statusStr += '\n'
-  statusStr += 'INPins   [{:s}]\n'.format(ui.setStrColor(mch.getInputPinStateStr(), 'machineState.Alarm'))
+  statusStr += 'INPins   {:s}\n'.format(mch.getInputPinStateLongStr())
   statusStr += 'Parser   [{:s}]\n'.format(mch.getSimpleSettingsStr())
 
   statusStr += 'Joystick [{:s}] [{:s}]\n'.format(
