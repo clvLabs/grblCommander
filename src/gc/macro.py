@@ -107,7 +107,7 @@ class Macro:
           else:
             if not silent:
               ui.log('[{:}]'.format(macroShortName), color='ui.errorMsg', end=' ')
-        except ImportError:
+        except:
           if not silent:
             ui.log('[{:}]'.format(macroShortName), color='ui.errorMsg', end=' ')
 
