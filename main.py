@@ -123,6 +123,8 @@ def showHelp():
   J                - Restart joystick connection
   <xy>             - XY jog (including diagonals)
   <z>-/+           - Z jog (up/down)
+  <extraU><z+>     - Go to machine home Z
+  <extraD><z+>     - Go to machine home
   <extraU><x>      - Change jog distance (XY) (+-1)
   <extraU><y>      - Change jog distance (XY) (+-10)
   <extraD><x>      - Change jog distance (Z) (+-1)
@@ -786,6 +788,10 @@ def processJoystickInput():
       gXYJog = ut.genericValueChanger(gXYJog, -10, 1, 100, loop=True, valueName='xyJog')
       ui.keyPressMessage('Change jog distance (XY) (-10) ({:})'.format(gXYJog), 0, '')
 
+    elif joy.status['z+']:
+      ui.keyPressMessage('Go to machine home Z', 0, '')
+      mch.goToMachineHome_Z()
+
     else:
       processed = False
 
@@ -806,6 +812,10 @@ def processJoystickInput():
     elif joy.status['y-']:
       gZJog = ut.genericValueChanger(gZJog, -10, 1, 20, loop=True, valueName='zJog')
       ui.keyPressMessage('Change jog distance (Z) (-10)] ({:})'.format(gZJog), 0, '')
+
+    elif joy.status['z+']:
+      ui.keyPressMessage('Go to machine home', 0, '')
+      mch.goToMachineHome()
 
     else:
       processed = False
