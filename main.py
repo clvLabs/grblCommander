@@ -177,7 +177,7 @@ def processUserInput():
   ps = mch.status['parserState']
 
   char = kb.getch()
-  key=ord(char)
+  key=kb.ch2key(char)
 
   if key == kb.COMBO_0X:  # Combined code 0+x
     char = kb.getch()
