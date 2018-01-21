@@ -11,6 +11,8 @@ Allows:
 * Manually moving X/Y/Z axis at configurable steps
     * Now also using a joystick!
 * Directly going to table corners / individual axis limits
+* Automatic Z probing
+* G54..G59 coordinate system management (x/y/z zero reset)
 * Sending raw g-code commands
 * Running custom macros, stored in separate files in a folder tree
 * Running custom tests (read: configurable/programmable g-code)
