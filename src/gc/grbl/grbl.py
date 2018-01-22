@@ -20,7 +20,7 @@ from . import dict
 # Constants
 GRBL_SOFT_RESET = '%c' % 24
 GRBL_QUERY_MACHINE_STATUS = '?'
-GRBL_QUERY_GCODE_PARSER_STATE = '$G\n'
+GRBL_QUERY_GCODE_PARSER_STATE = '$G'
 
 PERIODIC_QUERY_INTERVAL = 0.5
 PROCESS_SLEEP = 0.05
@@ -212,9 +212,9 @@ class Grbl:
     command = command.rstrip().rstrip('\n').rstrip('\r')
     upperCommand = command.upper()
 
-    if upperCommand == '$G':
+    if upperCommand == GRBL_QUERY_GCODE_PARSER_STATE:
       self.showNextParserState = True
-    elif upperCommand == '?':
+    elif upperCommand == GRBL_QUERY_MACHINE_STATUS:
       self.showNextMachineStatus = True
 
     ui.log('>>>>> {:}'.format(command), color='comms.send' ,v=verbose)
@@ -634,7 +634,7 @@ class Grbl:
     '''
     ui.logTitle('Requesting machine status')
     ui.log('Sending command [?]...', v='DETAIL')
-    self.send('?')
+    self.send(GRBL_QUERY_MACHINE_STATUS)
     self.statusQuerySent = True
     self.waitingMachineStatus = True
     self.lastMachineStatusQuery = time.time()
@@ -904,7 +904,7 @@ class Grbl:
     ''' TODO: comment
     '''
     ui.log('Querying gcode parser state...', v='DEBUG')
-    self.sp.write(GRBL_QUERY_GCODE_PARSER_STATE)
+    self.sp.write(GRBL_QUERY_GCODE_PARSER_STATE + '\n')
     self.lastParserStateQuery = time.time()
 
 
@@ -914,7 +914,7 @@ class Grbl:
     '''
     ui.logTitle('Requesting GCode parser state')
     ui.log('Sending command [$G]...', v='DETAIL')
-    self.send('$G')
+    self.send(GRBL_QUERY_GCODE_PARSER_STATE)
     self.lastParserStateQuery = time.time()
     ui.log()
 
