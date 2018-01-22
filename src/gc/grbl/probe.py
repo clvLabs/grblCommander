@@ -107,6 +107,17 @@ class Probe:
     cmd = 'G38.3Z{:}F{:}'.format(self.mch.getMin('z'), feed)
     self.mch.sendWait(cmd, responseTimeout=self.prbCfg['timeout'])
 
+    if self.success:
+      probeZ = self.axisPos('z')
+      currZ = self.mch.status['MPos']['z']
+      overshoot = probeZ - currZ
+      units = self.mch.status['parserState']['units']['desc']
+      ui.log('Probe Z: {:}'.format(probeZ), c='ui.successMsg')
+      ui.log('Current Z: {:}'.format(currZ), c='ui.successMsg')
+      ui.log('Overshoot: {:.3f} {:}'.format(overshoot, units), c='ui.successMsg')
+
+    return self.success
+
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def probeUp(self, feed):
@@ -121,12 +132,23 @@ class Probe:
     cmd = 'G38.5Z{:}F{:}'.format(self.mch.getMax('z'), feed)
     self.mch.sendWait(cmd, responseTimeout=self.prbCfg['timeout'])
 
+    if self.success:
+      probeZ = self.axisPos('z')
+      currZ = self.mch.status['MPos']['z']
+      overshoot = probeZ - currZ
+      units = self.mch.status['parserState']['units']['desc']
+      ui.log('Probe Z: {:}'.format(probeZ), c='ui.successMsg')
+      ui.log('Current Z: {:}'.format(currZ), c='ui.successMsg')
+      ui.log('Overshoot: {:.3f} {:}'.format(overshoot, units), c='ui.successMsg')
+
+    return self.success
+
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def pullOff(self, distance):
     ''' Pulls Z off by the specified distance
     '''
-    ui.logTitle('Pulling off ({:})'.format(distance))
+    ui.logTitle('Pulling off ({:} {:})'.format(distance, self.mch.status['parserState']['units']['desc']))
     self.mch.rapidRelative(z=distance)
 
 
@@ -136,8 +158,11 @@ class Probe:
     '''
     ui.logTitle('Resetting WCO Z')
     touchPlateHeight = self.prbCfg['touchPlateHeight']
-    ui.log('- Touch plate height: {:}'.format(touchPlateHeight))
+    probeZ = self.axisPos('z')
     newWCOZ = self.axisPos('z') - touchPlateHeight
+    ui.log('Probe Z: {:}'.format(probeZ), c='ui.msg')
+    ui.log('Touch plate height: {:}'.format(touchPlateHeight), c='ui.msg')
+    ui.log('New Z0: {:}'.format(newWCOZ), c='ui.msg')
     self.mch.resetWCoord('z', newWCOZ)
 
 
@@ -145,7 +170,7 @@ class Probe:
   def saveCurrentState(self):
     ''' Gets a few parameters to be restored after probing
     '''
-    ui.logTitle('Saving current motion mode (G0/G1/...) and feed')
+    ui.logTitle('Saving current parser state')
     savedParserMotion = self.parserSt['motion']['val']
     savedFeed = self.parserSt['feed']['val']
 
@@ -159,6 +184,6 @@ class Probe:
   def restoreState(self, state):
     ''' Restores a few parameters after probing
     '''
-    ui.logTitle('Restoring previous motion mode and feed')
+    ui.logTitle('Restoring previous parser state')
     self.mch.sendWait(state['savedParserMotion'])
     self.mch.sendWait('F{:}'.format(state['savedFeed']))
