@@ -523,30 +523,27 @@ def processUserInput():
 
       if char in 'xX':
         ui.keyPressMessage('xX - Reset X to current position', key, char)
-        mch.resetWCoord(char.lower())
+        mch.resetWCOAxis(char.lower(), 'curr')
 
       elif char in 'yY':
         ui.keyPressMessage('yY - Reset Y to current position', key, char)
-        mch.resetWCoord(char.lower())
+        mch.resetWCOAxis(char.lower(), 'curr')
 
       elif char in 'wW':
         ui.keyPressMessage('wW - Reset XY to current position', key, char)
-        mch.resetWCoord('x')
-        mch.resetWCoord('y')
+        mch.resetWCO('curr','curr')
 
       elif char in 'zZ':
         ui.keyPressMessage('zZ - Reset Z to current position', key, char)
-        mch.resetWCoord(char.lower())
+        mch.resetWCOAxis(char.lower(), 'curr')
 
       elif char in 'aA':
         ui.keyPressMessage('aA - Reset XYZ to current position', key, char)
-        mch.resetWCoord('x')
-        mch.resetWCoord('y')
-        mch.resetWCoord('z')
+        mch.resetWCO('curr', 'curr', 'curr')
 
       elif char in 'pP':
         ui.keyPressMessage('pP - Reset Z to current PRB:Z', key, char)
-        mch.resetWCoord('z', prb.axisPos('z'))
+        mch.resetWCOAxis('z', prb.axisPos('z'))
 
       elif char in 'mM':
         ui.keyPressMessage('mM - Manual [XYZ] reset', key, char)
@@ -557,25 +554,19 @@ def processUserInput():
 
       elif char == '-':
         ui.keyPressMessage('- - Reset XY to max machine travel', key, char)
-        mch.resetWCoord('x','away')
-        mch.resetWCoord('y','away')
+        mch.resetWCO('away','away')
 
       elif char == '+':
         ui.keyPressMessage('+ - Reset XY to max machine travel, Z to home', key, char)
-        mch.resetWCoord('x','away')
-        mch.resetWCoord('y','away')
-        mch.resetWCoord('z','home')
+        mch.resetWCO('away','away','away')
 
       elif char == '/':
         ui.keyPressMessage('/ - Reset XY to machine home', key, char)
-        mch.resetWCoord('x','home')
-        mch.resetWCoord('y','home')
+        mch.resetWCO('home','home')
 
       elif char == '*':
         ui.keyPressMessage('* - Reset XYZ to machine home', key, char)
-        mch.resetWCoord('x','home')
-        mch.resetWCoord('y','home')
-        mch.resetWCoord('z','home')
+        mch.resetWCO('home','home','home')
 
       else:
         ui.keyPressMessage('Unknown command', key, char)

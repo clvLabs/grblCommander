@@ -163,7 +163,7 @@ class Probe:
     ui.log('Probe Z: {:}'.format(probeZ), c='ui.msg')
     ui.log('Touch plate height: {:}'.format(touchPlateHeight), c='ui.msg')
     ui.log('New Z0: {:}'.format(newWCOZ), c='ui.msg')
-    self.mch.resetWCoord('z', newWCOZ)
+    self.mch.resetWCOAxis('z', newWCOZ)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -960,10 +960,38 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def resetWCoord(self,axis,val=None):
-    ''' Reset a work coordinate's 0
+  def resetWCO(self, x=None, y=None, z=None):
+    ''' Reset WCO coordinates.
+        NOTE: Special values for x/y/z
+        - 'curr' : Current machine position
+        - 'home' : Machine home position
+        - 'away' : Opposite point from machine home
     '''
-    if val is None:
+    cmd = 'G10L2P0'
+
+    for (val, axis) in [(x,'x'),(y,'y'),(z,'z')]:
+      if val == 'curr':
+        val = self.status['MPos'][axis]
+      elif val == 'home':
+        val = self.getHomingCorner(axis)
+      elif val == 'away':
+        val = self.getAwayCorner(axis)
+
+      if val is not None:
+        cmd += '{:}{:}'.format(axis,val)
+
+    self.send(cmd)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def resetWCOAxis(self,axis,val):
+    ''' Reset single WCO axis
+        NOTE: Special values for x/y/z
+        - 'curr' : Current machine position
+        - 'home' : Machine home position
+        - 'away' : Opposite point from machine home
+    '''
+    if val == 'curr':
       val = self.status['MPos'][axis]
     elif val == 'away':
       val = self.getAwayCorner(axis)
