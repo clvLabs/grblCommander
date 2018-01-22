@@ -836,42 +836,42 @@ class Grbl:
   def getLimitSwitchState(self,axis):
     ''' Helpers to get pin states
     '''
-    return self.status['inputPinState'][axis]
+    return self.status['inputPinState'][axis]['val']
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getProbeState(self):
     ''' Helpers to get pin states
     '''
-    return self.status['inputPinState']['P']
+    return self.status['inputPinState']['P']['val']
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getDoorState(self):
     ''' Helpers to get pin states
     '''
-    return self.status['inputPinState']['D']
+    return self.status['inputPinState']['D']['val']
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getHoldState(self):
     ''' Helpers to get pin states
     '''
-    return self.status['inputPinState']['H']
+    return self.status['inputPinState']['H']['val']
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getSoftResetState(self):
     ''' Helpers to get pin states
     '''
-    return self.status['inputPinState']['R']
+    return self.status['inputPinState']['R']['val']
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getCycleStartState(self):
     ''' Helpers to get pin states
     '''
-    return self.status['inputPinState']['S']
+    return self.status['inputPinState']['S']['val']
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
