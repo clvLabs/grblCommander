@@ -44,14 +44,11 @@ class Probe:
         - Z pulloff
         - Reset WCO
     '''
+    self.mch.getMachineStatus()
     state = self.saveCurrentState()
 
-    self.probeDown(self.prbCfg['feed'])
-
-    if self.success:
-      self.probeUp(self.prbCfg['feed'])
-
-      if self.success:
+    if self.probeDown(self.prbCfg['feed']):
+      if self.probeUp(self.prbCfg['feed']):
         self.pullOff(self.prbCfg['pulloff'])
         self.resetWCOZ()
 
@@ -67,24 +64,16 @@ class Probe:
         - Z pulloff
         - Reset WCO
     '''
+    self.mch.getMachineStatus()
     state = self.saveCurrentState()
 
     # Stage 1 start
-    self.probeDown(self.prbCfg['feed'])
-
-    if self.success:
-      self.probeUp(self.prbCfg['feed'])
-
-      if self.success:
+    if self.probeDown(self.prbCfg['feed']):
+      if self.probeUp(self.prbCfg['feed']):
         self.pullOff(self.prbCfg['interStagePulloff'])
-
         # Stage 2 start
-        self.probeDown(self.prbCfg['feedStage2'])
-
-        if self.success:
-          self.probeUp(self.prbCfg['feedStage2'])
-
-          if self.success:
+        if self.probeDown(self.prbCfg['feedStage2']):
+          if self.probeUp(self.prbCfg['feedStage2']):
             self.pullOff(self.prbCfg['pulloff'])
             self.resetWCOZ()
 
@@ -110,6 +99,11 @@ class Probe:
     ''' Sends a G38.3 to find the touch plate
     '''
     ui.logTitle('Probing toward workpiece')
+
+    if self.mch.getProbeState():
+      ui.log('The probe is contacting the plate before probing down. CANCELLING', c='ui.errorMsg')
+      return False
+
     cmd = 'G38.3Z{:}F{:}'.format(self.mch.getMin('z'), feed)
     self.mch.sendWait(cmd, responseTimeout=self.prbCfg['timeout'])
 
@@ -119,6 +113,11 @@ class Probe:
     ''' Sends a G38.5 to detect last contact point while retracting
     '''
     ui.logTitle('Probing away from workpiece')
+
+    if not self.mch.getProbeState():
+      ui.log('The probe is NOT contacting the plate before probing up. CANCELLING', c='ui.errorMsg')
+      return False
+
     cmd = 'G38.5Z{:}F{:}'.format(self.mch.getMax('z'), feed)
     self.mch.sendWait(cmd, responseTimeout=self.prbCfg['timeout'])
 
