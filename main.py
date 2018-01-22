@@ -520,6 +520,7 @@ def processUserInput():
       ui.inputMsg('Select command...')
       char = kb.getch()
       key=kb.ch2key(char)
+      processed = True
 
       if char in 'xX':
         ui.keyPressMessage('xX - Reset X to current position', key, char)
@@ -569,7 +570,11 @@ def processUserInput():
         mch.resetWCO('home','home','home')
 
       else:
+        processed = False
         ui.keyPressMessage('Unknown command', key, char)
+
+      if processed:
+        mch.getMachineStatus()
 
     elif char == 'j':
       ui.keyPressMessage('j - Enable/disable joystick', key, char)
