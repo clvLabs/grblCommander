@@ -5,7 +5,7 @@ grblCommander - default configuration
 PLEASE DO NOT CHANGE config_default.py UNLESS YOU KNOW WHAT YOU'RE DOING
 
 To change your personal settings please make a copy of this file,
-  rename as config_user.py and edit as needed.
+  rename as user.py and edit as needed.
 """
 
 if __name__ == '__main__':
