@@ -119,7 +119,7 @@ def showHelp():
   <numpad>-/+      - Z jog (up/down)
   /                - Set jog distance (XY)
   *                - Set jog distance (Z)
-  <numpad>0        - Go to machine home (submenu)
+  <numpad>0        - Go home (submenu)
   <numpad>.        - Absolute move (XY) to table position (submenu)
 
   Joystick
@@ -604,15 +604,15 @@ def processUserInput():
       mch.moveRelative(x=0,y=0,z=gZJog*-1)
 
     elif char == '0':
-      ui.keyPressMessage('0 - Go to machine home', key, char)
+      ui.keyPressMessage('0 - Go home', key, char)
 
       ui.logBlock(
       """
       Available commands:
 
-      <numpad>0 - Z0 + X0Y0 (safe home)
-      wW        - XY0
-      zZ        - Z0
+      <numpad>0 - Safe machine home (Z0 + X0Y0)
+      mM        - Machine home (submenu)
+      wW        - WCO home (submenu)
       """)
 
       ui.inputMsg('Select command...')
@@ -620,14 +620,82 @@ def processUserInput():
       key=kb.ch2key(char)
 
       if char == '0':
-        ui.keyPressMessage('<numpad>0 - Z0 + X0Y0 (safe home)', key, char)
+        ui.keyPressMessage('<numpad>0 - Safe machine home (Z0 + X0Y0)', key, char)
         mch.goToMachineHome()
+
+
+      elif char in 'mM':
+        ui.keyPressMessage('m - Machine home', key, char)
+
+        ui.logBlock(
+        """
+        Available commands:
+
+        xX        - x
+        yY        - y
+        zZ        - z
+        wW        - xy
+        aA        - xyz
+        """)
+
+        ui.inputMsg('Select command...')
+        char = kb.getch()
+        key=kb.ch2key(char)
+
+        if char in 'xX':
+          ui.keyPressMessage('x - x', key, char)
+          mch.goToMachineHome_X()
+        elif char in 'yY':
+          ui.keyPressMessage('y - y', key, char)
+          mch.goToMachineHome_Y()
+        elif char in 'zZ':
+          ui.keyPressMessage('z - z', key, char)
+          mch.goToMachineHome_Z()
+        elif char in 'wW':
+          ui.keyPressMessage('w - xy', key, char)
+          mch.goToMachineHome_XY()
+        elif char in 'aA':
+          ui.keyPressMessage('a - xyz', key, char)
+          mch.goToMachineHome()
+        else:
+          ui.keyPressMessage('Unknown command', key, char)
+
       elif char in 'wW':
-        ui.keyPressMessage('w - XY0', key, char)
-        mch.goToMachineHome_XY()
-      elif char in 'zZ':
-        ui.keyPressMessage('z - Z0', key, char)
-        mch.goToMachineHome_Z()
+        ui.keyPressMessage('w - WCO home', key, char)
+
+        ui.logBlock(
+        """
+        Available commands:
+
+        xX        - x
+        yY        - y
+        zZ        - z
+        wW        - xy
+        aA        - xyz
+        """)
+
+        ui.inputMsg('Select command...')
+        char = kb.getch()
+        key=kb.ch2key(char)
+
+        if char in 'xX':
+          ui.keyPressMessage('x - x', key, char)
+          mch.sendWait('G0X0')
+        elif char in 'yY':
+          ui.keyPressMessage('y - y', key, char)
+          mch.sendWait('G0Y0')
+        elif char in 'zZ':
+          ui.keyPressMessage('z - z', key, char)
+          mch.sendWait('G0Z0')
+        elif char in 'wW':
+          ui.keyPressMessage('w - xy', key, char)
+          mch.sendWait('G0X0Y0')
+        elif char in 'aA':
+          ui.keyPressMessage('a - xyz', key, char)
+          mch.sendWait('G0X0Y0Z0')
+        else:
+          ui.keyPressMessage('Unknown command', key, char)
+
       else:
         ui.keyPressMessage('Unknown command', key, char)
 
