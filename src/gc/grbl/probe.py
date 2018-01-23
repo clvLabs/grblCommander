@@ -112,6 +112,7 @@ class Probe:
       currZ = self.mch.status['MPos']['z']
       overshoot = probeZ - currZ
       units = self.mch.status['parserState']['units']['desc']
+      ui.log('Feed: {:}'.format(feed), c='ui.successMsg')
       ui.log('Probe Z: {:}'.format(probeZ), c='ui.successMsg')
       ui.log('Current Z: {:}'.format(currZ), c='ui.successMsg')
       ui.log('Overshoot: {:.3f} {:}'.format(overshoot, units), c='ui.successMsg')
@@ -137,6 +138,7 @@ class Probe:
       currZ = self.mch.status['MPos']['z']
       overshoot = probeZ - currZ
       units = self.mch.status['parserState']['units']['desc']
+      ui.log('Feed: {:}'.format(feed), c='ui.successMsg')
       ui.log('Probe Z: {:}'.format(probeZ), c='ui.successMsg')
       ui.log('Current Z: {:}'.format(currZ), c='ui.successMsg')
       ui.log('Overshoot: {:.3f} {:}'.format(overshoot, units), c='ui.successMsg')
