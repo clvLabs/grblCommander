@@ -104,6 +104,7 @@ def showHelp():
   ---------------------------------------------------------------------
   gfxyz$     - Send raw GCode command
   [space]    - Send raw GCode command (start empty)
+  lL         - Send raw GCode command (FORCE RELATIVE)
   <ENTER>/?  - Force status re-query
   º          - Repeat last GCode command
   pP         - Probe (submenu)
@@ -436,6 +437,18 @@ def processUserInput():
         char = ''
       userCommand = char + kb.input(char)
       sendCommand(userCommand)
+
+    elif char in 'lL':
+      ui.keyPressMessage('lL - Send raw GCode command (FORCE RELATIVE)', key, char)
+      savedDistanceMode = mch.status['parserState']['distanceMode']['val']
+      ui.inputMsg('Enter GCode command...')
+      userCommand = kb.input()
+      if savedDistanceMode != 'G91':
+        userCommand = 'G91 ' + userCommand
+      sendCommand(userCommand)
+      if savedDistanceMode != 'G91':
+        sendCommand(savedDistanceMode)
+
 
     elif char == 'º':
       ui.keyPressMessage('º - Repeat last GCode command', key, char)
