@@ -46,13 +46,23 @@ class Probe:
     '''
     self.mch.getMachineStatus()
     state = self.saveCurrentState()
+    log = []
 
-    if self.probeDown(self.prbCfg['feedSlow']):
-      if self.probeUp(self.prbCfg['feedSlow']):
+    result = self.probe('Stage 1', 'down', self.prbCfg['feedSlow'])
+    if result['success']:
+      log.append(result)
+      result = self.probe('Stage 1', 'up', self.prbCfg['feedSlow'])
+      if result['success']:
+        log.append(result)
         self.pullOff(self.prbCfg['pulloff'])
         self.resetWCOZ()
 
     self.restoreState(state)
+
+    if result['success']:
+      self.showLogTitle()
+      for item in log:
+        self.showLogItem(item)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -66,18 +76,32 @@ class Probe:
     '''
     self.mch.getMachineStatus()
     state = self.saveCurrentState()
+    log = []
 
     # Stage 1 start
-    if self.probeDown(self.prbCfg['feedFast']):
-      if self.probeUp(self.prbCfg['feedFast']):
+    result = self.probe('Stage 1', 'down', self.prbCfg['feedFast'])
+    if result['success']:
+      log.append(result)
+      result = self.probe('Stage 1', 'up', self.prbCfg['feedFast'])
+      if result['success']:
+        log.append(result)
         self.pullOff(self.prbCfg['interStagePulloff'])
         # Stage 2 start
-        if self.probeDown(self.prbCfg['feedSlow']):
-          if self.probeUp(self.prbCfg['feedSlow']):
+        result = self.probe('Stage 2', 'down', self.prbCfg['feedSlow'])
+        if result['success']:
+          log.append(result)
+          result = self.probe('Stage 2', 'up', self.prbCfg['feedSlow'])
+          if result['success']:
+            log.append(result)
             self.pullOff(self.prbCfg['pulloff'])
             self.resetWCOZ()
 
     self.restoreState(state)
+
+    if result['success']:
+      self.showLogTitle()
+      for item in log:
+        self.showLogItem(item)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -95,55 +119,72 @@ class Probe:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def probeDown(self, feed):
-    ''' Sends a G38.3 to find the touch plate
+  def probe(self, comment, direction, feed):
+    ''' Moves the probe up or down to find the contact point
     '''
-    ui.logTitle('Probing toward workpiece')
+    result = {}
 
-    if self.mch.getProbeState():
+    if direction not in ['down', 'up']:
+      ui.log('ERROR: probe.probe() : invalid direction [{:}]'.format(direction), c='ui.errorMsg')
+      result['success'] = False
+      return result
+
+    down = True if direction == 'down' else False
+
+    ui.logTitle('{:}: Probing {:}'.format(comment, direction))
+
+    probeContacting = self.mch.getProbeState()
+    if (down and probeContacting):
       ui.log('The probe is contacting the plate before probing down. CANCELLING', c='ui.errorMsg')
-      return False
+      result['success'] = False
+      return result
+    elif (not down and not probeContacting):
+      ui.log('The probe is NOT contacting the plate before probing up. CANCELLING', c='ui.errorMsg')
+      result['success'] = False
+      return result
 
-    cmd = 'G38.3Z{:}F{:}'.format(self.mch.getMin('z'), feed)
+    if down:
+      cmd = 'G38.3Z{:}F{:}'.format(self.mch.getMin('z'), feed)
+    else:
+      cmd = 'G38.5Z{:}F{:}'.format(self.mch.getMax('z'), feed)
+
     self.mch.sendWait(cmd, responseTimeout=self.prbCfg['timeout'])
 
-    if self.success:
-      probeZ = self.axisPos('z')
-      currZ = self.mch.status['MPos']['z']
-      overshoot = probeZ - currZ
-      units = self.mch.status['parserState']['units']['desc']
-      ui.log('Feed: {:}'.format(feed), c='ui.successMsg')
-      ui.log('Probe Z: {:}'.format(probeZ), c='ui.successMsg')
-      ui.log('Current Z: {:}'.format(currZ), c='ui.successMsg')
-      ui.log('Overshoot: {:.3f} {:}'.format(overshoot, units), c='ui.successMsg')
+    result['comment'] = comment
+    result['direction'] = direction
+    result['feed'] = feed
+    result['success'] = self.success
 
-    return self.success
+    if self.success:
+      result['probeZ'] = self.axisPos('z')
+      result['currZ'] = self.mch.status['MPos']['z']
+      result['overshoot'] = result['probeZ']  - result['currZ']
+      self.showLogTitle()
+      self.showLogItem(result)
+
+    return result
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def probeUp(self, feed):
-    ''' Sends a G38.5 to detect last contact point while retracting
+  def showLogTitle(self):
+    ''' TODO: comment
     '''
-    ui.logTitle('Probing away from workpiece')
+    ui.log('Comment Feed   ProbeZ    CurrZ Overshoot', c='ui.successMsg')
+    ui.log('------- ----   ------   ------ ---------', c='ui.successMsg')
 
-    if not self.mch.getProbeState():
-      ui.log('The probe is NOT contacting the plate before probing up. CANCELLING', c='ui.errorMsg')
-      return False
 
-    cmd = 'G38.5Z{:}F{:}'.format(self.mch.getMax('z'), feed)
-    self.mch.sendWait(cmd, responseTimeout=self.prbCfg['timeout'])
-
-    if self.success:
-      probeZ = self.axisPos('z')
-      currZ = self.mch.status['MPos']['z']
-      overshoot = probeZ - currZ
-      units = self.mch.status['parserState']['units']['desc']
-      ui.log('Feed: {:}'.format(feed), c='ui.successMsg')
-      ui.log('Probe Z: {:}'.format(probeZ), c='ui.successMsg')
-      ui.log('Current Z: {:}'.format(currZ), c='ui.successMsg')
-      ui.log('Overshoot: {:.3f} {:}'.format(overshoot, units), c='ui.successMsg')
-
-    return self.success
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def showLogItem(self, item):
+    ''' TODO: comment
+    '''
+    ui.log('{:} {:4d} {:} {:} {:.3f} {:}'.format(
+      item['comment'],
+      item['feed'],
+      ui.coordStr(item['probeZ']),
+      ui.coordStr(item['currZ']),
+      item['overshoot'],
+      self.mch.status['parserState']['units']['desc']
+      ), c='ui.successMsg')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
