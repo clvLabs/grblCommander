@@ -74,11 +74,26 @@ def sendCommand(command):
   gLastGCodeCommand = command
 
   # Special case for homing ($H)
-  responseTimeout=None
+  responseTimeout = None
+  homing = False
   if command.rstrip(' ').upper() == '$H':
+    homing = True
     responseTimeout=float(mchCfg['homingTimeout'])
 
   mch.sendWait(command, responseTimeout=responseTimeout)
+
+  if homing:
+    sendStartupMacro()
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def sendStartupMacro():
+  ui.logTitle('Sending startup macro')
+  if mch.status['machineState'] == 'Idle':
+    mcr.run(mcrCfg['startup'], silent=True)
+  else:
+    ui.log('WARNING: startup macro NOT executed (machine not ready)',c='ui.msg')
+    ui.log()
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1015,12 +1030,7 @@ def main():
   joy.start()
   ui.log()
 
-  ui.logTitle('Sending startup macro')
-  if mch.status['machineState'] == 'Idle':
-    mcr.run(mcrCfg['startup'], silent=True)
-  else:
-    ui.log('WARNING: startup macro NOT executed (machine not ready)',c='ui.msg')
-    ui.log()
+  sendStartupMacro()
 
   ui.log('System ready!', color='ui.successMsg')
 
