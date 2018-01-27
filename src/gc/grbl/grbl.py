@@ -409,18 +409,22 @@ class Grbl:
     for command in commands:
       modalGroup = self.dct.getModalGroup(command)
       if modalGroup:
+        original = command
         commandName = self.dct.getModalCommandName(command)
         self.status['parserState'][modalGroup] = {}
         self.status['parserState'][modalGroup]['val'] = command
+        self.status['parserState'][modalGroup]['original'] = original
         self.status['parserState'][modalGroup]['desc'] = commandName
       else:
-        value=command[1:]
-        command=command[:1]
+        original = command
+        value = command[1:]
+        command = command[:1]
         modalGroup = self.dct.getModalGroup(command)
         if modalGroup:
           commandName = self.dct.getModalCommandName(command)
           self.status['parserState'][modalGroup] = {}
           self.status['parserState'][modalGroup]['val'] = value
+          self.status['parserState'][modalGroup]['original'] = original
           self.status['parserState'][modalGroup]['desc'] = commandName
 
 
@@ -671,9 +675,10 @@ class Grbl:
     # Configured
     for modalGroupName in self.uiCfg['simpleParserState']:
       val = self.status['parserState'][modalGroupName]['val']
+      original = self.status['parserState'][modalGroupName]['original']
       desc = self.status['parserState'][modalGroupName]['desc']
       preferred = val
-      display = val
+      display = original
       color='ui.successMsg'
 
       if modalGroupName in self.mchCfg['preferredParserState']:
@@ -689,11 +694,12 @@ class Grbl:
     for modalGroupName in self.mchCfg['preferredParserState']:
       if not modalGroupName in self.uiCfg['simpleParserState']:
         desc = self.status['parserState'][modalGroupName]['desc']
+        original = self.status['parserState'][modalGroupName]['original']
         val = self.status['parserState'][modalGroupName]['val']
         preferred = self.mchCfg['preferredParserState'][modalGroupName]
         if val != preferred:
           color='ui.errorMsg'
-          display = '{:}({:})'.format(val, desc)
+          display = '{:}({:})'.format(original, desc)
           settingsStr += '{:} '.format(ui.setStrColor(display, color))
 
     return settingsStr.rstrip()
