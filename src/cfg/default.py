@@ -37,13 +37,13 @@ cfg = {
     'feedSpeed': 400,
     'homingTimeout': 20,
     'probing': {
-      'feedFast': 100,
-      'feedSlow': 10,
+      'feedFast': 250,
       'feedMedium': 50,
+      'feedSlow': 5,
       'interStagePulloff': 0.5,
       'pulloff': 1.0,
       'touchPlateHeight': 1.0,
-      'timeout': 10,
+      'timeout': 20,
     },
     'preferredParserState': {
       'coolant': 'M9',          # Change to fit your preferences
