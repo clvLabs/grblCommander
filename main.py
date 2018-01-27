@@ -520,6 +520,7 @@ def processUserInput():
       +   - Reset XY to max machine travel
       /   - Reset XYZ to machine home
       *   - Reset XY to max machine travel, Z to home
+      gG  - Get GCode command for current WCO
       """)
 
       ui.inputMsg('Select command...')
@@ -554,7 +555,7 @@ def processUserInput():
       elif char in 'mM':
         ui.keyPressMessage('mM - Manual [XYZ] reset', key, char)
         ui.inputMsg('Enter GCode command...')
-        prefix = 'G10L2P0'
+        prefix = mch.getResetWCOStr()
         userCommand = prefix + kb.input(prefix)
         sendCommand(userCommand)
 
@@ -573,6 +574,11 @@ def processUserInput():
       elif char == '*':
         ui.keyPressMessage('* - Reset XY to max machine travel, Z to home', key, char)
         mch.resetWCO('away','away','away')
+
+      elif char in 'gG':
+        ui.keyPressMessage('gG - Get GCode command for current WCO', key, char)
+        cmd = mch.getResetWCOStr('wco','wco','wco')
+        ui.log(cmd, c='ui.msg')
 
       else:
         processed = False

@@ -21,6 +21,7 @@ from . import dict
 GRBL_SOFT_RESET = '%c' % 24
 GRBL_QUERY_MACHINE_STATUS = '?'
 GRBL_QUERY_GCODE_PARSER_STATE = '$G'
+GCODE_RESET_WCO_PREFIX = 'G10L2P0'
 
 PERIODIC_QUERY_INTERVAL = 0.5
 PROCESS_SLEEP = 0.05
@@ -960,14 +961,15 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def resetWCO(self, x=None, y=None, z=None):
-    ''' Reset WCO coordinates.
+  def getResetWCOStr(self, x=None, y=None, z=None):
+    ''' Get reset WCO coordinates GCode command string.
         NOTE: Special values for x/y/z
         - 'curr' : Current machine position
         - 'home' : Machine home position
         - 'away' : Opposite point from machine home
+        - 'wco'  : Current WCO x/y/z
     '''
-    cmd = 'G10L2P0'
+    cmd = GCODE_RESET_WCO_PREFIX
 
     for (val, axis) in [(x,'x'),(y,'y'),(z,'z')]:
       if val == 'curr':
@@ -976,11 +978,21 @@ class Grbl:
         val = self.getHomingCorner(axis)
       elif val == 'away':
         val = self.getAwayCorner(axis)
+      elif val == 'wco':
+        val = self.status['WCO'][axis]
 
       if val is not None:
         cmd += '{:}{:}'.format(axis,val)
 
-    self.send(cmd)
+    return cmd
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def resetWCO(self, x=None, y=None, z=None):
+    ''' Reset WCO coordinates.
+        NOTE: See "Special values for x/y/z" @ getResetWCOStr()
+    '''
+    self.send(self.getResetWCOStr(x,y,z))
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
