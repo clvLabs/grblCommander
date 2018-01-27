@@ -39,7 +39,7 @@ class Probe:
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def basic(self):
     ''' Basic probing cycle:
-        - Send a G38.3 to find the touch plate
+        - Send a G38.3 to find the touch plate @ 'feedSlow' speed
         - Retract with a G38.5
         - Z pulloff
         - Reset WCO
@@ -47,8 +47,8 @@ class Probe:
     self.mch.getMachineStatus()
     state = self.saveCurrentState()
 
-    if self.probeDown(self.prbCfg['feed']):
-      if self.probeUp(self.prbCfg['feed']):
+    if self.probeDown(self.prbCfg['feedSlow']):
+      if self.probeUp(self.prbCfg['feedSlow']):
         self.pullOff(self.prbCfg['pulloff'])
         self.resetWCOZ()
 
@@ -58,9 +58,9 @@ class Probe:
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def twoStage(self):
     ''' Two stage probing cycle:
-        - G38.3 + G38.5 @ 'feed' speed
+        - G38.3 + G38.5 @ 'feedFast' speed
         - First Z pulloff ('interStagePulloff')
-        - G38.3 + G38.5 @ 'feedStage2' speed
+        - G38.3 + G38.5 @ 'feedSlow' speed
         - Z pulloff
         - Reset WCO
     '''
@@ -68,12 +68,12 @@ class Probe:
     state = self.saveCurrentState()
 
     # Stage 1 start
-    if self.probeDown(self.prbCfg['feed']):
-      if self.probeUp(self.prbCfg['feed']):
+    if self.probeDown(self.prbCfg['feedFast']):
+      if self.probeUp(self.prbCfg['feedFast']):
         self.pullOff(self.prbCfg['interStagePulloff'])
         # Stage 2 start
-        if self.probeDown(self.prbCfg['feedStage2']):
-          if self.probeUp(self.prbCfg['feedStage2']):
+        if self.probeDown(self.prbCfg['feedSlow']):
+          if self.probeUp(self.prbCfg['feedSlow']):
             self.pullOff(self.prbCfg['pulloff'])
             self.resetWCOZ()
 

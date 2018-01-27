@@ -37,9 +37,9 @@ cfg = {
     'feedSpeed': 400,
     'homingTimeout': 20,
     'probing': {
-      'feed': 100,
+      'feedFast': 100,
+      'feedSlow': 10,
       'interStagePulloff': 0.5,
-      'feedStage2': 10,
       'pulloff': 1.0,
       'touchPlateHeight': 1.0,
       'timeout': 10,
