@@ -51,9 +51,9 @@ def input(prompt=''):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Key value constants
 
-LF=10
-CR=13
-ENTER=LF
+LF = 10
+CR  =13
+ENTER = LF
 CTRL_R = 18
 CTRL_X = 24
 CTRL_Y = 25

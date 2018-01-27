@@ -35,11 +35,11 @@ def genericValueChanger(value, direction, min, max, loop=False, valueName='', va
     if( newValue > max ):  newValue = min
   else:
     if( newValue < min ):
-      ui.log('ERROR: {:s} below {:d} not allowed!'.format(valueName, min), color='ui.errorMsg', v='ERROR')
+      ui.log('ERROR: {:s} below {:d} not allowed!'.format(valueName, min), c='ui.errorMsg', v='ERROR')
       return value
 
     if( newValue > max ):
-      ui.log('ERROR: {:s} over {:d} not allowed!'.format(valueName, max), color='ui.errorMsg', v='ERROR')
+      ui.log('ERROR: {:s} over {:d} not allowed!'.format(valueName, max), c='ui.errorMsg', v='ERROR')
       return value
 
   if( valueFormatter != None ):

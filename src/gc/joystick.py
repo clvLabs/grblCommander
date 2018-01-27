@@ -90,7 +90,7 @@ class Joystick:
           # print("Detected joystick '%s'" % foundJoy.get_name())
 
           if foundJoy.get_name() == self.joyCfg['name']:
-            ui.log('Joystick found!!.', color='ui.successMsg')
+            ui.log('Joystick found!!.', c='ui.successMsg')
             self._joystick = foundJoy
             self._joystick.init()
     except:
@@ -102,7 +102,7 @@ class Joystick:
       self.flushQueue()
     else:
       self.connected = False
-      ui.log('Joystick not found', color='ui.errorMsg', v='ERROR')
+      ui.log('Joystick not found', c='ui.errorMsg', v='ERROR')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

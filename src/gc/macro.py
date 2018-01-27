@@ -106,10 +106,10 @@ class Macro:
               ui.log('[{:}]'.format(macroShortName), end=' ')
           else:
             if not silent:
-              ui.log('[{:}]'.format(macroShortName), color='ui.errorMsg', end=' ')
+              ui.log('[{:}]'.format(macroShortName), c='ui.errorMsg', end=' ')
         except:
           if not silent:
-            ui.log('[{:}]'.format(macroShortName), color='ui.errorMsg', end=' ')
+            ui.log('[{:}]'.format(macroShortName), c='ui.errorMsg', end=' ')
 
     for item in Path(folder).glob('*'):
       if item.is_dir():
@@ -194,22 +194,22 @@ class Macro:
     macro = self.getMacro(name)
     if not macro:
       ui.log('ERROR: Macro [{:}] does not exist, please check config file.'.format(name),
-        color='ui.errorMsg')
+        color = 'ui.errorMsg')
       return False
 
     commands = macro['commands']
 
     if not silent:
       if isSubCall:
-        ui.logTitle('Macro [{:}] subcall START'.format(name), color='macro.subCallStart')
+        ui.logTitle('Macro [{:}] subcall START'.format(name), c='macro.subCallStart')
       else:
         self.show(name, avoidReload=True)
 
         ui.inputMsg('Press y/Y to execute, any other key to cancel...')
-        char=kb.getch()
+        char = kb.getch()
 
         if not char in 'yY':
-          ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
+          ui.logBlock('MACRO [{:}] CANCELLED'.format(name), c='ui.cancelMsg')
           return False
 
     for command in commands:
@@ -220,20 +220,20 @@ class Macro:
 
       if cmdComment:
         # if not silent:
-        ui.logTitle(cmdComment, color='macro.macroCall' if isMacroCall else 'macro.comment')
+        ui.logTitle(cmdComment, c='macro.macroCall' if isMacroCall else 'macro.comment')
 
       if cmdName:
         if isReservedName:
-          ui.logTitle(cmdName, color='macro.reservedName')
+          ui.logTitle(cmdName, c='macro.reservedName')
 
           if cmdName.lower() == 'pause':
             ui.inputMsg('Paused, press <ENTER> to continue / <ESC> to exit ...')
-            key=0
+            key = 0
             while key != kb.CR and key != kb.LF and key != kb.ESC:
-              key=kb.getKey()
+              key = kb.getKey()
 
             if key == kb.ESC:
-              ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
+              ui.logBlock('MACRO [{:}] CANCELLED'.format(name), c='ui.cancelMsg')
               return False
             elif key == kb.CR or key == kb.LF:
               continue
@@ -248,7 +248,7 @@ class Macro:
 
         if isMacroCall:
           if not self._run(cmdName, silent=silent, isSubCall=True):
-            ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
+            ui.logBlock('MACRO [{:}] CANCELLED'.format(name), c='ui.cancelMsg')
             return False
         else:
           self.grbl.send(cmdName)
@@ -257,14 +257,14 @@ class Macro:
 
       if kb.keyPressed():
         if kb.getKey() == kb.ESC:
-          ui.logBlock('MACRO [{:}] CANCELLED'.format(name), color='ui.cancelMsg')
+          ui.logBlock('MACRO [{:}] CANCELLED'.format(name), c='ui.cancelMsg')
           return False
 
     if not silent:
       if isSubCall:
-        ui.logTitle('Macro [{:}] subCall END'.format(name), color='macro.subCallEnd')
+        ui.logTitle('Macro [{:}] subCall END'.format(name), c='macro.subCallEnd')
       else:
-        ui.logBlock('MACRO [{:}] FINISHED'.format(name), color='ui.finishedMsg')
+        ui.logBlock('MACRO [{:}] FINISHED'.format(name), c='ui.finishedMsg')
 
     if not isSubCall:
       ui.log()
@@ -282,7 +282,7 @@ class Macro:
     macro = self.getMacro(name)
     if not macro:
       ui.log('ERROR: Macro [{:}] does not exist, check config file.'.format(name),
-        color='ui.errorMsg')
+        c='ui.errorMsg')
       return
 
     title = macro['title'] if 'title' in macro else ''

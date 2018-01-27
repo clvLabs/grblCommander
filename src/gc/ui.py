@@ -23,8 +23,8 @@ def colorStr(string, foreColor, backColor=None):
   if backColor is None:
     colors = foreColor.replace(' ', '').split(',')
     if len(colors) > 1:
-      foreColor=colors[0]
-      backColor=colors[1]
+      foreColor = colors[0]
+      backColor = colors[1]
     else:
       backColor = 'black'
 
@@ -56,13 +56,13 @@ def colorStr(string, foreColor, backColor=None):
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Give a string some ANSI color formatting - allows to use config colors
-# Color format examples:
-#  - ui.title
-#  - comms.send
-#  - machineState.Run
-#
 def setStrColor(str, colorName):
+  ''' Give a string some ANSI color formatting - allows to use config colors
+      Color format examples:
+        - ui.title
+        - comms.send
+        - machineState.Run
+  '''
   if '.' in colorName:
     parts = colorName.split('.')
     colorSet = parts[0]
@@ -159,7 +159,7 @@ def readyMsg(extraInfo=None):
 def keyPressMessage(message, key, char):
   # log('\n{:}\n{:}\n'.format(gMSG_SEPARATOR, message)
   log('{:}\n{:}\n'.format(gMSG_SEPARATOR, message)
-    , color='ui.keyPressMsg', v='WARNING')
+    , c='ui.keyPressMsg', v='WARNING')
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -181,9 +181,9 @@ def clearLine():
 def getUserInput(description, dataType='str', default=None):
   titleWidth = uiCfg['inputTitleWidth']
   inputMsg('Enter {:}:'.format(description)[:titleWidth].ljust(titleWidth), end='')
-  userInput=kb.input()
+  userInput = kb.input()
   try:
-    userInput=dataType(userInput)
+    userInput = dataType(userInput)
     return userInput
   except:
     return default
@@ -200,7 +200,7 @@ def waitForEnterOrEscape(message):
   inputMsg(msg)
   while True:
     while not kb.keyPressed():
-      key=kb.getKey()
+      key = kb.getKey()
       if key == kb.ENTER:
         return True
       elif key == kb.ESC:
@@ -215,10 +215,10 @@ def userConfirm(message, password):
     log("""
     {:}
     (please enter '{:}' to continue)
-    """.format(message, password), color='ui.confirmMsg')
+    """.format(message, password), c='ui.confirmMsg')
 
     inputMsg('Enter confirmation text')
-    typedPassword=kb.input()
+    typedPassword = kb.input()
 
     if typedPassword == '':
       continue
@@ -235,7 +235,7 @@ def coordStr(c):
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def ColoredXyzStr(x, y, z, xColor='', yColor='', zColor=''):
+def coloredXyzStr(x, y, z, xColor='', yColor='', zColor=''):
   xyzFmt = uiCfg['xyzFormat']
   return xyzFmt.format(
     setStrColor(coordStr(x), xColor ),

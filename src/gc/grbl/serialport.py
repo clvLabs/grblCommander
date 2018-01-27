@@ -29,7 +29,6 @@ class SerialPort:
     self.serial.baudrate = self.spCfg['baudRate']
     self.serial.timeout = self.spCfg['timeout']
 
-
     # Windows
     if os.name == 'nt':
       self.serial.port = self.spCfg['portWindows'] - 1

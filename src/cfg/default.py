@@ -117,12 +117,12 @@ cfg = {
     'clearScreenLines': 100,
     'inputTitleWidth': 45,
     'readyMsg': '==========================[ Ready ]==========================',
-    'simpleParserState': {
-      'distanceMode': 'G90',    # Change to fit your preferences
-      'motion': 'G0',           # Change to fit your preferences
-      'units': 'G21',           # Change to fit your preferences
-      'wcs': 'G54',             # Change to fit your preferences
-    },
+    'simpleParserState': [
+      'distanceMode',    # Change to fit your preferences
+      'motion',          # Change to fit your preferences
+      'units',           # Change to fit your preferences
+      'wcs',             # Change to fit your preferences
+    ],
     'coordFormat': '{:8.3f}',
     'xyzFormat': '{:}/{:}/{:}',
     'msgSeparatorChar': '-',

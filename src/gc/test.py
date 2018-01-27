@@ -29,7 +29,6 @@ class Test:
     self.tstCfg = self.cfg['test']
     self.mpos = self.grbl.status['MPos']
     self.wpos = self.grbl.status['WPos']
-    self.parserState = self.grbl.status['parserState']
 
     self.testCancelled = False
 
@@ -76,21 +75,21 @@ class Test:
     \n{:}
 
     Please read the code thoroughly before proceeding.
-    """.format(text.rstrip(' ').strip('\r\n')), color='ui.msg')
+    """.format(text.rstrip(' ').strip('\r\n')), c='ui.msg')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def logTestCancelled(self):
     ''' TODO: comment
     '''
-    ui.logBlock('TEST CANCELLED', color='ui.cancelMsg')
+    ui.logBlock('TEST CANCELLED', c='ui.cancelMsg')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def logTestFinished(self):
     ''' TODO: comment
     '''
-    ui.logBlock('TEST FINISHED', color='ui.finishedMsg')
+    ui.logBlock('TEST FINISHED', c='ui.finishedMsg')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -376,30 +375,30 @@ class Test:
 
     showZZParameters('Calculated parameters')
 
-    startRow=ui.getUserInput('startRow (BASE 1!!!) ({:d})'.format(startRow), int, startRow)
-    startCol=ui.getUserInput('startCol (BASE 1!!!) ({:d})'.format(startCol), int, startCol)
-    # startY=ui.getUserInput('StartY ({:f})'.format(startY), float, startY)
-    # startX=ui.getUserInput('StartX ({:f})'.format(startX), float, startX)
+    startRow = ui.getUserInput('startRow (BASE 1!!!) ({:d})'.format(startRow), int, startRow)
+    startCol = ui.getUserInput('startCol (BASE 1!!!) ({:d})'.format(startCol), int, startCol)
+    # startY = ui.getUserInput('StartY ({:f})'.format(startY), float, startY)
+    # startX = ui.getUserInput('StartX ({:f})'.format(startX), float, startX)
     startY = rows[startRow-1]
     startX = cols[startCol-1]
 
-    materialTop=ui.getUserInput('MaterialTop ({:f})'.format(materialTop), float, materialTop)
-    # bitDiameter=ui.getUserInput('Bit diameter (mm) ({:})'.format(bitDiameter), float, bitDiameter)
-    # bitFlutes=ui.getUserInput('Number of flutes ({:})'.format(bitFlutes), int, bitFlutes)
-    # bitRPM=ui.getUserInput('Spindle RPM ({:})'.format(bitRPM), int, bitRPM)
+    materialTop = ui.getUserInput('MaterialTop ({:f})'.format(materialTop), float, materialTop)
+    # bitDiameter = ui.getUserInput('Bit diameter (mm) ({:})'.format(bitDiameter), float, bitDiameter)
+    # bitFlutes = ui.getUserInput('Number of flutes ({:})'.format(bitFlutes), int, bitFlutes)
+    # bitRPM = ui.getUserInput('Spindle RPM ({:})'.format(bitRPM), int, bitRPM)
 
     safeWorkZ = materialTop + 3
-    # safeTravelZ=ui.getUserInput('Z safe TRAVEL height (mm) ({:})'.format(safeTravelZ), float, safeTravelZ)
-    # safeWorkZ=ui.getUserInput('Z safe WORK height (mm) ({:})'.format(safeWorkZ), float, safeWorkZ)
-    # zzRun=ui.getUserInput('Run ({:f}) (0 for straight line)'.format(zzRun), float, zzRun)
-    # zzRise=ui.getUserInput('Rise ({:f})'.format(zzRise), float, zzRise)
-    zzPlunge=ui.getUserInput('Plunge ({:f})'.format(zzPlunge), float, zzPlunge)
-    # zzPlungeSpeed=ui.getUserInput('PlungeSpeed ({:f})'.format(zzPlungeSpeed), float, zzPlungeSpeed)
-    zzInitialFeed=ui.getUserInput('InitialFeed ({:f})'.format(zzInitialFeed), float, zzInitialFeed)
-    zzDeltaFeed=ui.getUserInput('DeltaFeed ({:d})'.format(zzDeltaFeed), int, zzDeltaFeed)
-    # zzZigZagPerIteration=ui.getUserInput('ZigZagPerIteration ({:d})'.format(zzZigZagPerIteration), int, zzZigZagPerIteration)
-    zzIterations=ui.getUserInput('Iterations ({:d})'.format(zzIterations), int, zzIterations)
-    # zzSpacing=ui.getUserInput('Spacing ({:f})'.format(zzSpacing), float, zzSpacing)
+    # safeTravelZ = ui.getUserInput('Z safe TRAVEL height (mm) ({:})'.format(safeTravelZ), float, safeTravelZ)
+    # safeWorkZ = ui.getUserInput('Z safe WORK height (mm) ({:})'.format(safeWorkZ), float, safeWorkZ)
+    # zzRun = ui.getUserInput('Run ({:f}) (0 for straight line)'.format(zzRun), float, zzRun)
+    # zzRise = ui.getUserInput('Rise ({:f})'.format(zzRise), float, zzRise)
+    zzPlunge = ui.getUserInput('Plunge ({:f})'.format(zzPlunge), float, zzPlunge)
+    # zzPlungeSpeed = ui.getUserInput('PlungeSpeed ({:f})'.format(zzPlungeSpeed), float, zzPlungeSpeed)
+    zzInitialFeed = ui.getUserInput('InitialFeed ({:f})'.format(zzInitialFeed), float, zzInitialFeed)
+    zzDeltaFeed = ui.getUserInput('DeltaFeed ({:d})'.format(zzDeltaFeed), int, zzDeltaFeed)
+    # zzZigZagPerIteration = ui.getUserInput('ZigZagPerIteration ({:d})'.format(zzZigZagPerIteration), int, zzZigZagPerIteration)
+    zzIterations = ui.getUserInput('Iterations ({:d})'.format(zzIterations), int, zzIterations)
+    # zzSpacing = ui.getUserInput('Spacing ({:f})'.format(zzSpacing), float, zzSpacing)
 
     zzTotalWidth = ((zzRun + zzSpacing) * zzIterations) - zzSpacing + bitDiameter
     zzTotalHeight = (zzRise * zzZigZagPerIteration * 2) + bitDiameter
@@ -566,20 +565,20 @@ class Test:
 
     showParams('Default parameters')
 
-    startX=ui.getUserInput('StartX ({:f})'.format(startX), float, startX)
-    startY=ui.getUserInput('StartY ({:f})'.format(startY), float, startY)
-    materialTop=ui.getUserInput('MaterialTop ({:f})'.format(materialTop), float, materialTop)
-    targetZ=ui.getUserInput('TargetZ ({:f})'.format(targetZ), float, targetZ)
+    startX = ui.getUserInput('StartX ({:f})'.format(startX), float, startX)
+    startY = ui.getUserInput('StartY ({:f})'.format(startY), float, startY)
+    materialTop = ui.getUserInput('MaterialTop ({:f})'.format(materialTop), float, materialTop)
+    targetZ = ui.getUserInput('TargetZ ({:f})'.format(targetZ), float, targetZ)
 
     safeHeight = materialTop + 5
-    safeHeight=ui.getUserInput('SafeHeight ({:f})'.format(safeHeight), float, safeHeight)
-    pocketWidth=ui.getUserInput('PocketWidth ({:f})'.format(pocketWidth), float, pocketWidth)
-    pocketHeight=ui.getUserInput('PocketHeight ({:f})'.format(pocketHeight), float, pocketHeight)
-    tabWidth=ui.getUserInput('TabWidth ({:f})'.format(tabWidth), float, tabWidth)
-    tabHeight=ui.getUserInput('TabHeight ({:f})'.format(tabHeight), float, tabHeight)
-    plunge=ui.getUserInput('Plunge ({:f})'.format(plunge), float, plunge)
-    plungeSpeed=ui.getUserInput('PlungeSpeed ({:d})'.format(plungeSpeed), int, plungeSpeed)
-    feed=ui.getUserInput('Feed ({:d})'.format(feed), int, feed)
+    safeHeight = ui.getUserInput('SafeHeight ({:f})'.format(safeHeight), float, safeHeight)
+    pocketWidth = ui.getUserInput('PocketWidth ({:f})'.format(pocketWidth), float, pocketWidth)
+    pocketHeight = ui.getUserInput('PocketHeight ({:f})'.format(pocketHeight), float, pocketHeight)
+    tabWidth = ui.getUserInput('TabWidth ({:f})'.format(tabWidth), float, tabWidth)
+    tabHeight = ui.getUserInput('TabHeight ({:f})'.format(tabHeight), float, tabHeight)
+    plunge = ui.getUserInput('Plunge ({:f})'.format(plunge), float, plunge)
+    plungeSpeed = ui.getUserInput('PlungeSpeed ({:d})'.format(plungeSpeed), int, plungeSpeed)
+    feed = ui.getUserInput('Feed ({:d})'.format(feed), int, feed)
 
     if not tabWidth or not tabHeight:
       tabWidth = tabHeight = 0

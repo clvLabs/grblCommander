@@ -21,6 +21,11 @@ from . import dict
 GRBL_SOFT_RESET = '%c' % 24
 GRBL_QUERY_MACHINE_STATUS = '?'
 GRBL_QUERY_GCODE_PARSER_STATE = '$G'
+GRBL_QUERY_BUILD_INFO = '$I'
+GRBL_QUERY_GCODE_PARAMETERS = '$#'
+GRBL_QUERY_GRBL_CONFIG = '$$'
+GRBL_QUERY_STARTUP_BLOCKS = '$N'
+GRBL_ENABLE_SLEEP_MODE = '$SLP'
 GCODE_RESET_WCO_PREFIX = 'G10L2P0'
 
 PERIODIC_QUERY_INTERVAL = 0.5
@@ -101,7 +106,7 @@ class Grbl:
     self.sp.open()
 
     if self.sp.isOpen():
-      ui.log('Serial port open.', color='ui.successMsg')
+      ui.log('Serial port open.', c='ui.successMsg')
       ui.log()
 
       self.waitForStartup()
@@ -113,7 +118,7 @@ class Grbl:
       self.viewGCodeParameters()
 
     else:
-      ui.log('ERROR opening serial port, exiting program', color='ui.errorMsg', v='ERROR')
+      ui.log('ERROR opening serial port, exiting program', c='ui.errorMsg', v='ERROR')
       quit()
 
 
@@ -218,7 +223,7 @@ class Grbl:
     elif upperCommand == GRBL_QUERY_MACHINE_STATUS:
       self.showNextMachineStatus = True
 
-    ui.log('>>>>> {:}'.format(command), color='comms.send' ,v=verbose)
+    ui.log('>>>>> {:}'.format(command), c='comms.send' ,v=verbose)
     self.sp.write(command+'\n')
 
     return self.readResponse(responseTimeout=responseTimeout,verbose=verbose)
@@ -244,7 +249,7 @@ class Grbl:
 
     startTime = time.time()
     receivedLines = 0
-    self.response=[]
+    self.response = []
     self.waitingResponse = True
 
     while self.waitingResponse and (time.time() - startTime) < responseTimeout:
@@ -254,7 +259,7 @@ class Grbl:
       ui.log(  'readResponse() - Successfully received {:d} data lines from serial'.format(
         len(self.response)), v='SUPER')
     else:
-      ui.log('readResponse() - TIMEOUT Waiting for response from serial', color='ui.errorMsg', v='ERROR')
+      ui.log('readResponse() - TIMEOUT Waiting for response from serial', c='ui.errorMsg', v='ERROR')
       self.response = []
       self.waitingResponse = False
 
@@ -274,7 +279,7 @@ class Grbl:
       self.process()
 
     if not self.waitingStartup:
-      ui.log('Startup message received, machine ready', color='ui.successMsg')
+      ui.log('Startup message received, machine ready', c='ui.successMsg')
       ui.log()
     else:
       self.status['str'] = ''
@@ -334,7 +339,7 @@ class Grbl:
           self.waitingMachineStatus = False
           self.statusQuerySent = False
         except:
-          ui.log("UNKNOWN machine data [{:}]".format(line), color='ui.errorMsg', v='ERROR')
+          ui.log("UNKNOWN machine data [{:}]".format(line), c='ui.errorMsg', v='ERROR')
 
       # Messages
       elif line[:5] == "[MSG:":
@@ -361,7 +366,7 @@ class Grbl:
         if self.lastParserStateStr and self.lastParserStateStr != parserState:
           for event in self.onParserStateChanged:
             event()
-        self.lastParserStateStr=parserState
+        self.lastParserStateStr = parserState
 
       # gcode parameters
       elif line[:1] == "[":
@@ -388,13 +393,13 @@ class Grbl:
       if showLine:
         if self.isRunning():
           ui.log()
-        ui.log('<<<<< {:}'.format(originalLine), color='comms.recv')
+        ui.log('<<<<< {:}'.format(originalLine), c='comms.recv')
 
       if errorCode:
-        ui.log('ERROR [{:}]: {:}'.format(errorCode, self.dct.errors[errorCode]), color='ui.errorMsg')
+        ui.log('ERROR [{:}]: {:}'.format(errorCode, self.dct.errors[errorCode]), c='ui.errorMsg')
 
       if isAlarm:
-        ui.log('ALARM [{:}]: {:}'.format(self.alarm, self.getAlarmStr()), color='ui.errorMsg')
+        ui.log('ALARM [{:}]: {:}'.format(self.alarm, self.getAlarmStr()), c='ui.errorMsg')
         if self.waitingResponse:
           self.waitingResponse = False
 
@@ -608,7 +613,7 @@ class Grbl:
       'val': value,
     }
 
-    ui.log('<<<<< {:} ({:})'.format(settingStr, self.dct.settings[setting]), color='comms.recv')
+    ui.log('<<<<< {:} ({:})'.format(settingStr, self.dct.settings[setting]), c='comms.recv')
 
     # $2 - Step port invert, mask
     # $3 -  Direction port invert, mask
@@ -679,13 +684,13 @@ class Grbl:
       desc = self.status['parserState'][modalGroupName]['desc']
       preferred = val
       display = original
-      color='ui.successMsg'
+      color = 'ui.successMsg'
 
       if modalGroupName in self.mchCfg['preferredParserState']:
         preferred = self.mchCfg['preferredParserState'][modalGroupName]
 
       if val != preferred:
-        color='ui.errorMsg'
+        color = 'ui.errorMsg'
         display = '{:}({:})'.format(val, desc)
 
       settingsStr += '{:} '.format(ui.setStrColor(display, color))
@@ -698,7 +703,7 @@ class Grbl:
         val = self.status['parserState'][modalGroupName]['val']
         preferred = self.mchCfg['preferredParserState'][modalGroupName]
         if val != preferred:
-          color='ui.errorMsg'
+          color = 'ui.errorMsg'
           display = '{:}({:})'.format(original, desc)
           settingsStr += '{:} '.format(ui.setStrColor(display, color))
 
@@ -901,8 +906,7 @@ class Grbl:
     ''' TODO: comment
     '''
     ui.logTitle('Requesting build info')
-    ui.log('Sending command [$I]...', v='DETAIL')
-    self.send('$I')
+    self.send(GRBL_QUERY_BUILD_INFO)
     ui.log()
 
 
@@ -920,7 +924,6 @@ class Grbl:
     ''' TODO: comment
     '''
     ui.logTitle('Requesting GCode parser state')
-    ui.log('Sending command [$G]...', v='DETAIL')
     self.send(GRBL_QUERY_GCODE_PARSER_STATE)
     self.lastParserStateQuery = time.time()
     ui.log()
@@ -931,8 +934,7 @@ class Grbl:
     ''' TODO: comment
     '''
     ui.logTitle('Requesting GCode parameters')
-    ui.log('Sending command [$#]...', v='DETAIL')
-    self.send('$#')
+    self.send(GRBL_QUERY_GCODE_PARAMETERS)
     ui.log()
 
 
@@ -941,8 +943,7 @@ class Grbl:
     ''' TODO: comment
     '''
     ui.logTitle('Requesting grbl config')
-    ui.log('Sending command [$$]...', v='DETAIL')
-    self.send('$$')
+    self.send(GRBL_QUERY_GRBL_CONFIG)
     ui.log()
 
 
@@ -951,8 +952,7 @@ class Grbl:
     ''' TODO: comment
     '''
     ui.logTitle('Requesting startup blocks')
-    ui.log('Sending command [$N]...', v='DETAIL')
-    self.send('$N')
+    self.send(GRBL_QUERY_STARTUP_BLOCKS)
     ui.log()
 
 
@@ -961,8 +961,7 @@ class Grbl:
     ''' TODO: comment
     '''
     ui.logTitle('Requesting sleep mode enable')
-    ui.log('Sending command [$SLP]...', v='DETAIL')
-    self.send('$SLP')
+    self.send(GRBL_ENABLE_SLEEP_MODE)
     ui.log()
 
 
@@ -1016,7 +1015,7 @@ class Grbl:
     elif val == 'home':
       val = self.getHomingCorner(axis)
 
-    self.send('G10L2P0{:}{:}'.format(axis,val))
+    self.send('{:}{:}{:}'.format(GCODE_RESET_WCO_PREFIX,axis,val))
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

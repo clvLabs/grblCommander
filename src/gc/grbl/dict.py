@@ -58,7 +58,7 @@ alarms = {
   '6': "Homing fail. Reset during active homing cycle.",
   '7': "Homing fail. Safety door was opened during active homing cycle.",
   '8': "Homing fail. Cycle failed to clear limit switch when pulling off. Try increasing pull-off setting or check wiring.",
-  '9': "Homing fail. Could not find limit switch within search distance. Defined as 1.5 * max_travel on search and 5 * pulloff on locate phases.  ",
+  '9': "Homing fail. Could not find limit switch within search distance. Defined as 1.5 * max_travel on search and 5 * pulloff on locate phases.",
 }
 
 
@@ -103,24 +103,24 @@ settings = {
 
 # See: https://github.com/gnea/grbl/blob/master/doc/csv/build_option_codes_en_US.csv
 options = {
-  'V': "Variable spindle ",
-  'N': "Line numbers ",
+  'V': "Variable spindle",
+  'N': "Line numbers",
   'M': "Mist coolant M7",
-  'C': "CoreXY ",
-  'P': "Parking motion ",
+  'C': "CoreXY",
+  'P': "Parking motion",
   'Z': "Homing force origin",
   'H': "Homing single axis commands",
-  'T': "Two limit switches on axis ",
+  'T': "Two limit switches on axis",
   'A': "Allow feed rate overrides in probe cycles",
   'D': "Use spindle direction as enable pin",
   '0': "Spindle enable off when speed is zero",
   'S': "Software limit pin debouncing",
-  'R': "Parking override control ",
-  '*': "Restore all EEPROM command ",
+  'R': "Parking override control",
+  '*': "Restore all EEPROM command",
   '$': "Restore EEPROM `$` settings command",
   '#': "Restore EEPROM parameter data command",
-  'I': "Build info write user string command ",
-  'E': "Force sync upon EEPROM write ",
+  'I': "Build info write user string command",
+  'E': "Force sync upon EEPROM write",
   'W': "Force sync upon work coordinate offset change",
   'L': "Homing initialization auto-lock",
 }

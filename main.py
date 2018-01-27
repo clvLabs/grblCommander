@@ -78,7 +78,7 @@ def sendCommand(command):
   homing = False
   if command.rstrip(' ').upper() == '$H':
     homing = True
-    responseTimeout=float(mchCfg['homingTimeout'])
+    responseTimeout = float(mchCfg['homingTimeout'])
 
   mch.sendWait(command, responseTimeout=responseTimeout)
 
@@ -220,11 +220,12 @@ def processUserInput():
   ps = mch.status['parserState']
 
   char = kb.getch()
-  key=kb.ch2key(char)
+  key = kb.ch2key(char)
 
   if key == kb.COMBO_0X:  # Combined code 0+x
     char = kb.getch()
-    key=kb.ch2key(char)
+    key = kb.ch2key(char)
+    unitsDesc = ps['units']['desc']
 
     if key == 999999:
       pass
@@ -260,68 +261,67 @@ def processUserInput():
         mcr.run(mcrCfg['hotKeys']['F10'], silent=True)
 
     elif key == kb.KP_END:
-      ui.keyPressMessage('End - Jog - [DL] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
+      ui.keyPressMessage('End - Jog - [DL] [*2] ({:} {:})'.format(gXYJog*2, unitsDesc), key, char)
       mch.moveRelative(x=gXYJog*-2,y=gXYJog*-2)
 
     elif key == kb.KP_DOWN:
-      ui.keyPressMessage('Down - Jog - [D] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
+      ui.keyPressMessage('Down - Jog - [D] [*2] ({:} {:})'.format(gXYJog*2, unitsDesc), key, char)
       mch.moveRelative(y=gXYJog*-2)
 
     elif key == kb.KP_PGDN:
-      ui.keyPressMessage('Pgdn - Jog - [DR] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
+      ui.keyPressMessage('Pgdn - Jog - [DR] [*2] ({:} {:})'.format(gXYJog*2, unitsDesc), key, char)
       mch.moveRelative(x=gXYJog*2,y=gXYJog*-2)
 
     elif key == kb.KP_LEFT:
-      ui.keyPressMessage('Left - Jog - [L] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
+      ui.keyPressMessage('Left - Jog - [L] [*2] ({:} {:})'.format(gXYJog*2, unitsDesc), key, char)
       mch.moveRelative(x=gXYJog*-2)
 
     elif key == kb.KP_RIGHT:
-      ui.keyPressMessage('Right - Jog - [R] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
+      ui.keyPressMessage('Right - Jog - [R] [*2] ({:} {:})'.format(gXYJog*2, unitsDesc), key, char)
       mch.moveRelative(x=gXYJog*2)
 
     elif key == kb.KP_HOME:
-      ui.keyPressMessage('Home - Jog - [UL] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
+      ui.keyPressMessage('Home - Jog - [UL] [*2] ({:} {:})'.format(gXYJog*2, unitsDesc), key, char)
       mch.moveRelative(x=gXYJog*-2,y=gXYJog*2)
 
     elif key == kb.KP_UP:
-      ui.keyPressMessage('Up - Jog - [U] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
+      ui.keyPressMessage('Up - Jog - [U] [*2] ({:} {:})'.format(gXYJog*2, unitsDesc), key, char)
       mch.moveRelative(y=gXYJog*2)
 
     elif key == kb.KP_PGUP:
-      ui.keyPressMessage('Pgup - Jog - [UR] [*2] ({:} {:})'.format(gXYJog*2, ps['units']['desc']), key, char)
+      ui.keyPressMessage('Pgup - Jog - [UR] [*2] ({:} {:})'.format(gXYJog*2, unitsDesc), key, char)
       mch.moveRelative(x=gXYJog*2,y=gXYJog*2)
 
-
     elif key == kb.CTRL_KP_END:
-      ui.keyPressMessage('End - Jog - [DL] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
+      ui.keyPressMessage('End - Jog - [DL] [/2] ({:} {:})'.format(gXYJog/2, unitsDesc), key, char)
       mch.moveRelative(x=(gXYJog/2)*-1,y=(gXYJog/2)*-1)
 
     elif key == kb.CTRL_KP_DOWN:
-      ui.keyPressMessage('Down - Jog - [D] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
+      ui.keyPressMessage('Down - Jog - [D] [/2] ({:} {:})'.format(gXYJog/2, unitsDesc), key, char)
       mch.moveRelative(y=(gXYJog/2)*-1)
 
     elif key == kb.CTRL_KP_PGDN:
-      ui.keyPressMessage('Pgdn - Jog - [DR] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
+      ui.keyPressMessage('Pgdn - Jog - [DR] [/2] ({:} {:})'.format(gXYJog/2, unitsDesc), key, char)
       mch.moveRelative(x=gXYJog/2,y=(gXYJog/2)*-1)
 
     elif key == kb.CTRL_KP_LEFT:
-      ui.keyPressMessage('Left - Jog - [L] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
+      ui.keyPressMessage('Left - Jog - [L] [/2] ({:} {:})'.format(gXYJog/2, unitsDesc), key, char)
       mch.moveRelative(x=(gXYJog/2)*-1)
 
     elif key == kb.CTRL_KP_RIGHT:
-      ui.keyPressMessage('Right - Jog - [R] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
+      ui.keyPressMessage('Right - Jog - [R] [/2] ({:} {:})'.format(gXYJog/2, unitsDesc), key, char)
       mch.moveRelative(x=gXYJog/2)
 
     elif key == kb.CTRL_KP_HOME:
-      ui.keyPressMessage('Home - Jog - [UL] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
+      ui.keyPressMessage('Home - Jog - [UL] [/2] ({:} {:})'.format(gXYJog/2, unitsDesc), key, char)
       mch.moveRelative(x=(gXYJog/2)*-1,y=gXYJog/2)
 
     elif key == kb.CTRL_KP_UP:
-      ui.keyPressMessage('Up - Jog - [U] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
+      ui.keyPressMessage('Up - Jog - [U] [/2] ({:} {:})'.format(gXYJog/2, unitsDesc), key, char)
       mch.moveRelative(y=gXYJog/2)
 
     elif key == kb.CTRL_KP_PGUP:
-      ui.keyPressMessage('Pgup - Jog - [UR] [/2] ({:} {:})'.format(gXYJog/2, ps['units']['desc']), key, char)
+      ui.keyPressMessage('Pgup - Jog - [UR] [/2] ({:} {:})'.format(gXYJog/2, unitsDesc), key, char)
       mch.moveRelative(x=gXYJog/2,y=gXYJog/2)
 
     else:  # Rest of keys
@@ -334,7 +334,7 @@ def processUserInput():
 
   elif key == kb.COMBO_224X:  # Combined code 224x
     char = kb.getch()
-    key=kb.ch2key(char)
+    key = kb.ch2key(char)
 
     if key == 999999:
       pass
@@ -386,7 +386,7 @@ def processUserInput():
 
       ui.inputMsg('Select command...')
       char = kb.getch()
-      key=kb.ch2key(char)
+      key = kb.ch2key(char)
 
       if char == '1':
         ui.keyPressMessage('1 - Basic probe', key, char)
@@ -419,7 +419,7 @@ def processUserInput():
 
       ui.inputMsg('Select command...')
       char = kb.getch()
-      key=kb.ch2key(char)
+      key = kb.ch2key(char)
 
       if char in 'lL':
         ui.keyPressMessage('lL - List macros', key, char)
@@ -509,7 +509,7 @@ def processUserInput():
 
       ui.inputMsg('Select command...')
       char = kb.getch()
-      key=kb.ch2key(char)
+      key = kb.ch2key(char)
 
       if char in 'sS':
         ui.keyPressMessage('sS - Table position scan', key, char)
@@ -553,7 +553,7 @@ def processUserInput():
 
       ui.inputMsg('Select command...')
       char = kb.getch()
-      key=kb.ch2key(char)
+      key = kb.ch2key(char)
       processed = True
 
       if char in 'xX':
@@ -656,7 +656,7 @@ def processUserInput():
 
       ui.inputMsg('Select command...')
       char = kb.getch()
-      key=kb.ch2key(char)
+      key = kb.ch2key(char)
 
       if char == '0':
         ui.keyPressMessage('<numpad>0 - Safe machine home (Z0 + X0Y0)', key, char)
@@ -679,7 +679,7 @@ def processUserInput():
 
         ui.inputMsg('Select command...')
         char = kb.getch()
-        key=kb.ch2key(char)
+        key = kb.ch2key(char)
 
         if char in 'xX':
           ui.keyPressMessage('x - x', key, char)
@@ -715,7 +715,7 @@ def processUserInput():
 
         ui.inputMsg('Select command...')
         char = kb.getch()
-        key=kb.ch2key(char)
+        key = kb.ch2key(char)
 
         if char in 'xX':
           ui.keyPressMessage('x - x', key, char)
@@ -792,7 +792,7 @@ def processUserInput():
 
       ui.inputMsg('Select command...')
       char = kb.getch()
-      key=kb.ch2key(char)
+      key = kb.ch2key(char)
 
       if char == '.':
         ui.keyPressMessage('. - ONE AXIS ONLY', key, char)
@@ -807,7 +807,7 @@ def processUserInput():
 
         ui.inputMsg('Select command...')
         char = kb.getch()
-        key=kb.ch2key(char)
+        key = kb.ch2key(char)
 
         if char == '2':
           ui.keyPressMessage('2 - ONE AXIS ONLY - Absolute move to axis limits - [B]', key, char)
@@ -1013,7 +1013,7 @@ def processJoystickInput():
 def main():
   ui.clearScreen()
 
-  ui.logBlock('    grblCommander v{:}'.format(gVERSION), color='ui.header')
+  ui.logBlock('    grblCommander v{:}'.format(gVERSION), c='ui.header')
 
   ui.logTitle('Loading configuration')
   ui.log('Using configuration file: {:}'.format(loadedCfg))
@@ -1032,10 +1032,10 @@ def main():
 
   sendStartupMacro()
 
-  ui.log('System ready!', color='ui.successMsg')
+  ui.log('System ready!', c='ui.successMsg')
 
   showMachineStatus()
-  ui.log('Type [hH] for help', color='ui.msg')
+  ui.log('Type [hH] for help', c='ui.msg')
 
   readyMsg()
 
@@ -1056,7 +1056,7 @@ def main():
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def execTestCode():
 
-  ui.logBlock('  TEST ACTIVE - TEST ACTIVE - TEST ACTIVE - TEST ACTIVE - TEST ACTIVE', color='ui.cancelMsg')
+  ui.logBlock('  TEST ACTIVE - TEST ACTIVE - TEST ACTIVE - TEST ACTIVE - TEST ACTIVE', c='ui.cancelMsg')
 
   # <TEST CODE>
   pass
