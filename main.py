@@ -365,6 +365,7 @@ def processUserInput():
 
       1   - Basic probe
       2   - Two stage probe
+      3   - Three stage probe
       """)
 
       ui.inputMsg('Select command...')
@@ -378,6 +379,10 @@ def processUserInput():
       elif char == '2':
         ui.keyPressMessage('2 - Two stage probe', key, char)
         prb.twoStage()
+
+      elif char == '3':
+        ui.keyPressMessage('3 - Three stage probe', key, char)
+        prb.threeStage()
 
       else:
         ui.keyPressMessage('Unknown command', key, char)

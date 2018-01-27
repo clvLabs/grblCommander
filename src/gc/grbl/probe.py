@@ -39,8 +39,7 @@ class Probe:
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def basic(self):
     ''' Basic probing cycle:
-        - Send a G38.3 to find the touch plate @ 'feedSlow' speed
-        - Retract with a G38.5
+        - G38.3 + G38.5 @ 'feedSlow' speed
         - Z pulloff
         - Reset WCO
     '''
@@ -68,7 +67,49 @@ class Probe:
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def twoStage(self):
     ''' Two stage probing cycle:
+        - G38.3 + G38.5 @ 'feedMedium' speed
+        - First Z pulloff ('interStagePulloff')
+        - G38.3 + G38.5 @ 'feedSlow' speed
+        - Z pulloff
+        - Reset WCO
+    '''
+    self.mch.getMachineStatus()
+    state = self.saveCurrentState()
+    log = []
+
+    # Stage 1 start
+    result = self.probe('Stage 1', 'down', self.prbCfg['feedMedium'])
+    if result['success']:
+      log.append(result)
+      result = self.probe('Stage 1', 'up', self.prbCfg['feedMedium'])
+      if result['success']:
+        log.append(result)
+        self.pullOff(self.prbCfg['interStagePulloff'])
+        # Stage 2 start
+        result = self.probe('Stage 2', 'down', self.prbCfg['feedSlow'])
+        if result['success']:
+          log.append(result)
+          result = self.probe('Stage 2', 'up', self.prbCfg['feedSlow'])
+          if result['success']:
+            log.append(result)
+            self.pullOff(self.prbCfg['pulloff'])
+            self.resetWCOZ()
+
+    self.restoreState(state)
+
+    if result['success']:
+      self.showLogTitle()
+      for item in log:
+        self.showLogItem(item)
+
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def threeStage(self):
+    ''' Two stage probing cycle:
         - G38.3 + G38.5 @ 'feedFast' speed
+        - First Z pulloff ('interStagePulloff')
+        - G38.3 + G38.5 @ 'feedMedium' speed
         - First Z pulloff ('interStagePulloff')
         - G38.3 + G38.5 @ 'feedSlow' speed
         - Z pulloff
@@ -86,15 +127,25 @@ class Probe:
       if result['success']:
         log.append(result)
         self.pullOff(self.prbCfg['interStagePulloff'])
+
         # Stage 2 start
-        result = self.probe('Stage 2', 'down', self.prbCfg['feedSlow'])
+        result = self.probe('Stage 2', 'down', self.prbCfg['feedMedium'])
         if result['success']:
           log.append(result)
-          result = self.probe('Stage 2', 'up', self.prbCfg['feedSlow'])
+          result = self.probe('Stage 2', 'up', self.prbCfg['feedMedium'])
           if result['success']:
             log.append(result)
-            self.pullOff(self.prbCfg['pulloff'])
-            self.resetWCOZ()
+            self.pullOff(self.prbCfg['interStagePulloff'])
+
+            # Stage 3 start
+            result = self.probe('Stage 3', 'down', self.prbCfg['feedSlow'])
+            if result['success']:
+              log.append(result)
+              result = self.probe('Stage 3', 'up', self.prbCfg['feedSlow'])
+              if result['success']:
+                log.append(result)
+                self.pullOff(self.prbCfg['pulloff'])
+                self.resetWCOZ()
 
     self.restoreState(state)
 
@@ -131,7 +182,10 @@ class Probe:
 
     down = True if direction == 'down' else False
 
-    ui.logTitle('{:}: Probing {:}'.format(comment, direction))
+    ui.logTitle('{:}: Probing {:} (feed {:})'.format(
+      comment,
+      direction,
+      feed))
 
     probeContacting = self.mch.getProbeState()
     if (down and probeContacting):
@@ -191,8 +245,9 @@ class Probe:
   def pullOff(self, distance):
     ''' Pulls Z off by the specified distance
     '''
-    ui.logTitle('Pulling off ({:} {:})'.format(distance, self.mch.status['parserState']['units']['desc']))
-    self.mch.rapidRelative(z=distance)
+    if distance:
+      ui.logTitle('Pulling off ({:} {:})'.format(distance, self.mch.status['parserState']['units']['desc']))
+      self.mch.rapidRelative(z=distance)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

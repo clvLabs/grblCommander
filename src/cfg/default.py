@@ -39,6 +39,7 @@ cfg = {
     'probing': {
       'feedFast': 100,
       'feedSlow': 10,
+      'feedMedium': 50,
       'interStagePulloff': 0.5,
       'pulloff': 1.0,
       'touchPlateHeight': 1.0,
