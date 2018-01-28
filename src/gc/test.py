@@ -1,9 +1,9 @@
 #!/usr/bin/python3
-"""
+'''
 grblCommander - test
 =====================
 Test code (useful macros)
-"""
+'''
 
 if __name__ == '__main__':
   print('This file is a module, it should not be executed directly')
@@ -69,13 +69,13 @@ class Test:
   def logTestHeader(self,text):
     ''' TODO: comment
     '''
-    ui.log("""
+    ui.log('''
     WARNING !!!!!
     =============
     \n{:}
 
     Please read the code thoroughly before proceeding.
-    """.format(text.rstrip(' ').strip('\r\n')), c='ui.msg')
+    '''.format(text.rstrip(' ').strip('\r\n')), c='ui.msg')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -141,12 +141,12 @@ class Test:
     '''
     self.testCancelled = False
 
-    self.logTestHeader("""
+    self.logTestHeader('''
     This test will move the spindle around a 3x3 grid representing the coordinates:
     [UL] [UC] [UR]
     [CL] [CC] [CR]
     [DL] [DC] [DR]
-    """)
+    ''')
 
     if not self.confirmStart():
       return
@@ -189,10 +189,10 @@ class Test:
     '''
     self.testCancelled = False
 
-    self.logTestHeader("""
+    self.logTestHeader('''
     This test understands your 0,0 is set to the upper right corner
     of your machine, so it will send NEGATIVE COORDINATES.
-    """)
+    ''')
 
     if not self.confirmStart():
       return
@@ -260,17 +260,17 @@ class Test:
     '''
     self.testCancelled = False
 
-    self.logTestHeader("""
+    self.logTestHeader('''
     This test will start a series of zig-zag patterns
     using incremental feed speeds to determine
     optimal speed-feed for a given material.
 
     Based on:
     http://www.precisebits.com/tutorials/calibrating_feeds_n_speeds.htm
-    """)
+    ''')
 
     def showZZParameters(title):
-      ui.log("""
+      ui.log('''
       {:s}:
         startRow              {:d}
         startCol              {:d}
@@ -297,7 +297,7 @@ class Test:
           Width               {:f}
           EndY                {:f}
           EndX                {:f}
-        """.format(
+        '''.format(
           title,
           startRow,
           startCol,
@@ -443,7 +443,7 @@ class Test:
         ui.logTitle('Iteration {:}/{:} Plunge'.format(currIteration+1,zzIterations))
         self.mchFeed(z=(materialTop-zzPlunge), speed=zzPlungeSpeed)
 
-        # "Draw" the zig-zag patterns
+        # 'Draw' the zig-zag patterns
         for zigZag in range(zzZigZagPerIteration):
           if not self.testCancelled:
             ui.logTitle('Iteration {:}/{:} ZigZag {:}/{:}'.format(
@@ -499,7 +499,7 @@ class Test:
     '''
     self.testCancelled = False
 
-    self.logTestHeader("""
+    self.logTestHeader('''
     This is a DUMMY test, it can contain ANYTHING.
     Please read the code thoroughly before proceeding.
 
@@ -507,10 +507,10 @@ class Test:
 
     - Mill a configurable horizontal pocket (designed for making my holding clamps)
     - Add a tab in the center of each horizontal cut
-    """)
+    ''')
 
     def showParams(title):
-      ui.log("""
+      ui.log('''
       {:s}:
         StartX                {:f}
         StartY                {:f}
@@ -527,7 +527,7 @@ class Test:
 
         TOTAL
           ZPasses             {:d}
-        """.format(
+        '''.format(
           title,
           startX,
           startY,

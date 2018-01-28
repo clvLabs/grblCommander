@@ -12,10 +12,10 @@
 # Initialize macro
 macro = {
   'title': 'Advanced macro example',
-  'description': """
+  'description': '''
   This example drills a horizontal series of holes with increasing depth.
   Check out the code, most parameters are configurable!
-  """,
+  ''',
   'commands': [],
 }
 

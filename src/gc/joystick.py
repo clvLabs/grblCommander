@@ -1,9 +1,9 @@
 #!/usr/bin/python3
-"""
+'''
 grblCommander - joystick
 =======================
 joystick management class
-"""
+'''
 
 if __name__ == '__main__':
   print('This file is a module, it should not be executed directly')
@@ -55,8 +55,8 @@ class Joystick:
 
     ui.log('Starting pygame...')
     # Don't use drivers we don't need
-    environ["SDL_VIDEODRIVER"] = "dummy"
-    environ["SDL_AUDIODRIVER"] = "dummy"
+    environ['SDL_VIDEODRIVER'] = 'dummy'
+    environ['SDL_AUDIODRIVER'] = 'dummy'
     pygame.init()
 
     self.searchJoystick()
@@ -87,7 +87,7 @@ class Joystick:
     try:
       for i in range(0, pygame.joystick.get_count()):
           foundJoy = pygame.joystick.Joystick(i)
-          # print("Detected joystick '%s'" % foundJoy.get_name())
+          # print('Detected joystick '%s'' % foundJoy.get_name())
 
           if foundJoy.get_name() == self.joyCfg['name']:
             ui.log('Joystick found!!.', c='ui.successMsg')
@@ -133,11 +133,11 @@ class Joystick:
 
     # Ignore events from other joysticks
     if not self._joystick or event.joy != self._joystick.get_id():
-      # print("IGNORING event from joystick {:d}".format(event.joy))
+      # print('IGNORING event from joystick {:d}'.format(event.joy))
       return
 
     if event.type == JOYAXISMOTION:
-      # print("Joystick axis {:d} value {:0.3f}".format(event.axis,event.value))
+      # print('Joystick axis {:d} value {:0.3f}'.format(event.axis,event.value))
       if event.axis in self.joyCfg['axes']:
         axisCfg = self.joyCfg['axes'][event.axis]
         axis = axisCfg['axis']
@@ -161,7 +161,7 @@ class Joystick:
           self.status[axis + move] = True
 
     elif event.type == JOYBUTTONDOWN:
-      # print("Joystick button {:d} down.".format(event.button))
+      # print('Joystick button {:d} down.'.format(event.button))
       if event.button in self.joyCfg['buttons']:
         buttonFunction = self.joyCfg['buttons'][event.button]
         self.status[buttonFunction] = True
@@ -171,7 +171,7 @@ class Joystick:
         buttonFunction = self.joyCfg['buttons'][event.button]
         self.status[buttonFunction] = False
 
-          # print("Joystick button {:d} up.".format(event.button))
+          # print('Joystick button {:d} up.'.format(event.button))
     # elif event.type == JOYHATMOTION:
-    #     print("Joystick hat motion.")
+    #     print('Joystick hat motion.')
 

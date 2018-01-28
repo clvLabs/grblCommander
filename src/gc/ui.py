@@ -1,9 +1,9 @@
 #!/usr/bin/python3
-"""
+'''
 grblCommander - ui
 ==================
 User interface management
-"""
+'''
 
 if __name__ == '__main__':
   print('This file is a module, it should not be executed directly')
@@ -193,8 +193,8 @@ def getUserInput(description, dataType='str', default=None):
 def waitForEnterOrEscape(message):
   ''' TODO: comment
   '''
-  msg = """{:}
-  (press <ENTER> or <ESC>)""".format(message)
+  msg = '''{:}
+  (press <ENTER> or <ESC>)'''.format(message)
 
   log()
   inputMsg(msg)
@@ -212,10 +212,10 @@ def userConfirm(message, password):
   ''' TODO: comment
   '''
   while True:
-    log("""
+    log('''
     {:}
     (please enter '{:}' to continue)
-    """.format(message, password), c='ui.confirmMsg')
+    '''.format(message, password), c='ui.confirmMsg')
 
     inputMsg('Enter confirmation text')
     typedPassword = kb.input()

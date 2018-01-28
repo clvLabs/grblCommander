@@ -4,7 +4,7 @@ from . import vars
 macro = {
   'title': 'Macro demo - sample 1mm feeds XYZ',
 
-  'description': """
+  'description': '''
   This is an example on using grblCommanders' macros:
   - Each line can contain a command and/or a comment
   - Empty lines are allowed as display spacers
@@ -14,7 +14,7 @@ macro = {
     - 'STARTUP' command can be used to recall startup sequence
   - Any settings or commands can be stored in an external .py file
       to share amongst macros in the same folder
-  """,
+  ''',
 
   'commands': [
     ['',                   'Prepare machine modal settings'],

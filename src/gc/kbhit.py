@@ -1,9 +1,9 @@
 #!/usr/bin/python3
-"""
+'''
 grblCommander - kbhit
 =======================
 (copied) Keyboard hit detector
-"""
+'''
 
 # if __name__ == '__main__':
 #   print('This file is a module, it should not be executed directly')

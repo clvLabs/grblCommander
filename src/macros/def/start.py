@@ -1,7 +1,7 @@
 macro = {
   'title': 'grblCommander - Startup sequence - DEFAULT',
 
-  'description': """
+  'description': '''
   This is the default startup sequence for grblCommander.
 
   WARNING!! It forces working in millimeters, absolute mode and a few other settings.
@@ -9,7 +9,7 @@ macro = {
   PLEASE DO NOT CHANGE THIS FILE.
   To set a custom startup sequence with your preferred settings, modify [macro][startup]
   on your user config file to point to a custom macro with your settings.
-  """,
+  ''',
 
   'commands': [
     ['G0',      'Rapid positioning'],

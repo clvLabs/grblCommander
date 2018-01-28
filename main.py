@@ -1,9 +1,9 @@
 #!/usr/bin/python3
-"""
+'''
 grblCommander
 =============
 Allows to control a CNC driven by a grblShield
-"""
+'''
 
 import sys
 import time
@@ -99,7 +99,7 @@ def sendStartupMacro():
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showHelp():
   ui.logBlock(
-  """
+  '''
   General commands
   ---------------------------------------------------------------------
   qQ         - Quit
@@ -151,7 +151,7 @@ def showHelp():
   <extraU><y>      - Change jog distance (XY) (+-10)
   <extraD><x>      - Change jog distance (Z) (+-1)
   <extraD><y>      - Change jog distance (Z) (+-10)
-  """)
+  ''')
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showMachineStatus():
@@ -218,11 +218,11 @@ def showMachineFullStatus():
   machineStatus=mch.getMachineStatus()
 
   ui.logBlock(
-  """
+  '''
   Machine FULL status: [{:}]
 
   {:s}
-  """.format(
+  '''.format(
       mch.getColoredMachineStateStr(),
       pprint.pformat(machineStatus, indent=2, width=uiCfg['maxLineLen'])
     ))
@@ -396,13 +396,13 @@ def processUserInput():
       ui.keyPressMessage('pP - Probe', key, char)
 
       ui.logBlock(
-      """
+      '''
       Available commands:
 
       1   - Basic probe
       2   - Two stage probe
       3   - Three stage probe
-      """)
+      ''')
 
       ui.inputMsg('Select command...')
       char = kb.getch()
@@ -428,14 +428,14 @@ def processUserInput():
       ui.keyPressMessage('mM - Macro', key, char)
 
       ui.logBlock(
-      """
+      '''
       Available commands:
 
       lL  - List macros
       rR  - Run macro
       sS  - Show macro
       xX  - Reload macros
-      """)
+      ''')
 
       ui.inputMsg('Select command...')
       char = kb.getch()
@@ -522,14 +522,14 @@ def processUserInput():
       ui.keyPressMessage('tT - Tests', key, char)
 
       ui.logBlock(
-      """
+      '''
       Available commands:
 
       sS  - Table position scan
       lL  - Base levelling holes
       zZ  - Zig-zag pattern
       *   - DUMMY Test
-      """)
+      ''')
 
       ui.inputMsg('Select command...')
       char = kb.getch()
@@ -558,7 +558,7 @@ def processUserInput():
       ui.keyPressMessage('rR - Reset work coordinate', key, char)
 
       ui.logBlock(
-      """
+      '''
       Available commands:
 
       xX  - Reset X to current position
@@ -573,7 +573,7 @@ def processUserInput():
       /   - Reset XYZ to machine home
       *   - Reset XY to max machine travel, Z to home
       gG  - Get GCode command for current WCO
-      """)
+      ''')
 
       ui.inputMsg('Select command...')
       char = kb.getch()
@@ -670,13 +670,13 @@ def processUserInput():
       ui.keyPressMessage('0 - Go home', key, char)
 
       ui.logBlock(
-      """
+      '''
       Available commands:
 
       <numpad>0 - Safe machine home (Z0 + X0Y0)
       mM        - Machine home (submenu)
       wW        - WCO home (submenu)
-      """)
+      ''')
 
       ui.inputMsg('Select command...')
       char = kb.getch()
@@ -691,7 +691,7 @@ def processUserInput():
         ui.keyPressMessage('m - Machine home', key, char)
 
         ui.logBlock(
-        """
+        '''
         Available commands:
 
         xX        - x
@@ -699,7 +699,7 @@ def processUserInput():
         zZ        - z
         wW        - xy
         aA        - xyz
-        """)
+        ''')
 
         ui.inputMsg('Select command...')
         char = kb.getch()
@@ -727,7 +727,7 @@ def processUserInput():
         ui.keyPressMessage('w - WCO home', key, char)
 
         ui.logBlock(
-        """
+        '''
         Available commands:
 
         xX        - x
@@ -735,7 +735,7 @@ def processUserInput():
         zZ        - z
         wW        - xy
         aA        - xyz
-        """)
+        ''')
 
         ui.inputMsg('Select command...')
         char = kb.getch()
@@ -807,12 +807,12 @@ def processUserInput():
       cY = minY-(wY/2) if minX>0 else minY+(wY/2)
 
       ui.logBlock(
-      """
+      '''
       Available commands:
 
       <numpad>  - Absolute table positions
       .         - One axis only (submenu)
-      """)
+      ''')
 
       ui.inputMsg('Select command...')
       char = kb.getch()
@@ -822,12 +822,12 @@ def processUserInput():
         ui.keyPressMessage('. - ONE AXIS ONLY', key, char)
 
         ui.logBlock(
-        """
+        '''
         Available commands:
 
         <numpad>46  - Absolute X axis limits
         <numpad>28  - Absolute Y axis limits
-        """)
+        ''')
 
         ui.inputMsg('Select command...')
         char = kb.getch()

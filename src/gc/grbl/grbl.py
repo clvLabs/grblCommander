@@ -1,9 +1,9 @@
 #!/usr/bin/python3
-"""
+'''
 grbl - grbl
 ===========
 Main grbl class
-"""
+'''
 
 if __name__ == '__main__':
   print('This file is a module, it should not be executed directly')
@@ -197,7 +197,7 @@ class Grbl:
       self.queryGCodeParserState()
       self.showNextParserState = False
 
-    # Show "live" machine status if running
+    # Show 'live' machine status if running
     if self.isRunning():
       ui.clearLine()
       ui.log('\r{:}'.format(self.getSimpleMachineStatusStr()), end='')
@@ -313,10 +313,10 @@ class Grbl:
 
       if line == 'ok':
         isResponse = True
-      elif line[:6] == "error:":
+      elif line[:6] == 'error:':
         errorCode = line[6:]
         isResponse = True
-      elif line[:6] == "ALARM:":
+      elif line[:6] == 'ALARM:':
         self.alarm = line[6:]
         self.status['machineState'] = 'Alarm'
         isAlarm = True
@@ -339,22 +339,22 @@ class Grbl:
           self.waitingMachineStatus = False
           self.statusQuerySent = False
         except:
-          ui.log("UNKNOWN machine data [{:}]".format(line), c='ui.errorMsg', v='ERROR')
+          ui.log('UNKNOWN machine data [{:}]'.format(line), c='ui.errorMsg', v='ERROR')
 
       # Messages
-      elif line[:5] == "[MSG:":
+      elif line[:5] == '[MSG:':
         self.lastMessage = line[5:-1]
 
       # Version info
-      elif line[:5] == "[VER:":
+      elif line[:5] == '[VER:':
         self.status['version'] = line[5:-1]
 
       # Build options
-      elif line[:5] == "[OPT:":
+      elif line[:5] == '[OPT:':
         self.status['buildOptions'] = line[5:-1]
 
       # gcode parser state
-      elif line[:4] == "[GC:":
+      elif line[:4] == '[GC:':
         if not self.showNextParserState:
           self.showNextParserState = True
           showLine = False
@@ -369,16 +369,16 @@ class Grbl:
         self.lastParserStateStr = parserState
 
       # gcode parameters
-      elif line[:1] == "[":
+      elif line[:1] == '[':
         parserParam = line[1:-1]
         self.parseGCodeParam(parserParam)
 
       # User-defined startup line
-      elif line[:2] == "$N":
+      elif line[:2] == '$N':
         pass
 
       # Settings
-      elif line[:1] == "$":
+      elif line[:1] == '$':
         settingStr = line[1:]
         self.parseSetting(settingStr)
         showLine = False
@@ -1054,7 +1054,7 @@ class Grbl:
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def resetWCO(self, x=None, y=None, z=None):
     ''' Reset WCO coordinates.
-        NOTE: See "Special values for x/y/z" @ getResetWCOStr()
+        NOTE: See 'Special values for x/y/z' @ getResetWCOStr()
     '''
     self.send(self.getResetWCOStr(x,y,z))
 
@@ -1101,7 +1101,7 @@ class Grbl:
   def getHomingCorner(self, axis):
     ''' TODO: comment
     '''
-    # '27': "Homing switch pull-off distance, millimeters"
+    # '27': 'Homing switch pull-off distance, millimeters'
     pos = float(self.status['settings'][27]['val'])
 
     if pos < self.mchCfg['softLimitsMargin']:
@@ -1129,7 +1129,7 @@ class Grbl:
   def getMin(self, axis):
     ''' calculate min axis(xyz) coord given current WCO
     '''
-    # '23': "Homing direction invert, mask"
+    # '23': 'Homing direction invert, mask'
     if self.status['settings'][23]['parsed'][axis]:
       min = self.getHomingCorner(axis)
     else:
@@ -1142,7 +1142,7 @@ class Grbl:
   def getMax(self, axis):
     ''' calculate max axis(xyz) coord given current WCO
     '''
-    # '23': "Homing direction invert, mask"
+    # '23': 'Homing direction invert, mask'
     if self.status['settings'][23]['parsed'][axis]:
       max = self.getAwayCorner(axis)
     else:
@@ -1163,10 +1163,10 @@ class Grbl:
   def goToMachineHome_Z(self):
     ''' TODO: comment
     '''
-    # '27': "Homing switch pull-off distance, millimeters"
+    # '27': 'Homing switch pull-off distance, millimeters'
     pullOff = float(self.status['settings'][27]['val'])
 
-    # '23': "Homing direction invert, mask"
+    # '23': 'Homing direction invert, mask'
     if not self.status['settings'][23]['parsed']['z']:
       pullOff *= -1
 
@@ -1177,11 +1177,11 @@ class Grbl:
   def goToMachineHome_XY(self):
     ''' TODO: comment
     '''
-    # '27': "Homing switch pull-off distance, millimeters"
+    # '27': 'Homing switch pull-off distance, millimeters'
     xPullOff = float(self.status['settings'][27]['val'])
     yPullOff = xPullOff
 
-    # '23': "Homing direction invert, mask"
+    # '23': 'Homing direction invert, mask'
     if not self.status['settings'][23]['parsed']['x']:
       xPullOff *= -1
 

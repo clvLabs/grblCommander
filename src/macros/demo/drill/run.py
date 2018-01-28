@@ -4,10 +4,10 @@ from . import vars
 macro = {
   'title': 'Macro demo - drill pattern',
 
-  'description': """
+  'description': '''
   This example drills a series of holes using a macro for making the holes.
   It assumes the material goes from Z0 to Z5 and uses a safe height of Z8.
-  """,
+  ''',
 
   'commands': [
     ['',                   'Prepare machine modal settings'],

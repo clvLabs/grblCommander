@@ -4,9 +4,9 @@ from . import vars
 macro = {
   'title': 'Single drill',
 
-  'description': """
+  'description': '''
   Drill a single 5mm hole in 1mm steps.
-  """,
+  ''',
 
   'commands': [
     ['',          'Preparing drill'],

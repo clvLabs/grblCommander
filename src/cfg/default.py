@@ -1,12 +1,12 @@
 #!/usr/bin/python3
-"""
+'''
 grblCommander - default configuration
 =====================================
 PLEASE DO NOT CHANGE config_default.py UNLESS YOU KNOW WHAT YOU'RE DOING
 
 To change your personal settings please make a copy of this file,
   rename as user.py and edit as needed.
-"""
+'''
 
 if __name__ == '__main__':
   print('This is a configuration file, it should not be executed directly')
