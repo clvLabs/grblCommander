@@ -672,16 +672,51 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def getSimpleSettingsStr(self):
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getCompleteParserState(self):
+    ''' TODO: comment
+    '''
+    result = []
+
+    for modalGroupName in self.status['parserState']:
+      if modalGroupName == 'str':
+        continue
+
+      mg = self.status['parserState'][modalGroupName]
+      val = mg['val']
+      original = mg['original']
+      desc = mg['desc']
+
+      if modalGroupName in self.mchCfg['preferredParserState']:
+        preferred = self.mchCfg['preferredParserState'][modalGroupName]
+      else:
+        preferred = val
+
+      color = 'ui.successMsg' if val == preferred else 'ui.errorMsg'
+
+      line = '{:15s} {:6s} {:20s}'.format(modalGroupName, original, desc)
+      line = ui.setStrColor(line, color)
+
+      if val != preferred:
+        line += ui.setStrColor(' ({:})'.format(preferred), 'ui.successMsg')
+
+      result.append(line)
+
+    return result
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getSimpleParserState(self):
     ''' TODO: comment
     '''
     settingsStr = ''
 
     # Configured
     for modalGroupName in self.uiCfg['simpleParserState']:
-      val = self.status['parserState'][modalGroupName]['val']
-      original = self.status['parserState'][modalGroupName]['original']
-      desc = self.status['parserState'][modalGroupName]['desc']
+      mg = self.status['parserState'][modalGroupName]
+      val = mg['val']
+      original = mg['original']
+      desc = mg['desc']
       preferred = val
       display = original
       color = 'ui.successMsg'
@@ -698,9 +733,10 @@ class Grbl:
     # The rest if != preferred
     for modalGroupName in self.mchCfg['preferredParserState']:
       if not modalGroupName in self.uiCfg['simpleParserState']:
-        desc = self.status['parserState'][modalGroupName]['desc']
-        original = self.status['parserState'][modalGroupName]['original']
-        val = self.status['parserState'][modalGroupName]['val']
+        mg = self.status['parserState'][modalGroupName]
+        desc = mg['desc']
+        original = mg['original']
+        val = mg['val']
         preferred = self.mchCfg['preferredParserState'][modalGroupName]
         if val != preferred:
           color = 'ui.errorMsg'
@@ -726,7 +762,7 @@ class Grbl:
       content = 'W[{:}] M[{:}] [{:}]'.format(
         self.getWorkPosStr().replace(' ',''),
         self.getMachinePosStr().replace(' ',''),
-        self.getSimpleSettingsStr()
+        self.getSimpleParserState()
         )
     elif  machineState in ['Run', 'Home', 'Hold', 'Jog']:
       content = 'W[{:}] M[{:}] F[{:}]'.format(

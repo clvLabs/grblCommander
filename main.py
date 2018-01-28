@@ -152,7 +152,6 @@ def showHelp():
   <extraD><y>      - Change jog distance (Z) (+-10)
   """)
 
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def showMachineStatus():
   mch.getMachineStatus()
@@ -170,7 +169,12 @@ def showMachineStatus():
   statusStr += 'PRB      {:s}\n'.format(mch.getProbePosStr())
   statusStr += '\n'
   statusStr += 'INPins   {:s}\n'.format(mch.getInputPinStateLongStr())
-  statusStr += 'Parser   [{:s}]\n'.format(mch.getSimpleSettingsStr())
+
+  statusStr += 'Parser:\n'
+  settings = mch.getCompleteParserState()
+  for s in settings:
+    statusStr += '  - {:}\n'.format(s)
+  statusStr += '\n'
 
   statusStr += 'Joystick [{:s}] [{:s}]\n'.format(
     ui.setStrColor('CONNECTED', 'ui.successMsg') if joy.connected else ui.setStrColor('DISCONNECTED', 'ui.errorMsg'),

@@ -13,7 +13,6 @@ macro = {
   'commands': [
     ['$I',      'Build info'],
     ['$N',      'Startup blocks'],
-    ['$G',      'GCode parser state'],
     ['$#',      'GCode parameters'],
     ['$$',      'grbl config'],
   ],
