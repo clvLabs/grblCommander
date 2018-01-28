@@ -150,13 +150,14 @@ cfg = {
       },
 
       'macro': {
-        '':             'white',    # Default
-        'command':      'white+',
-        'comment':      'green+',
-        'macroCall':    'white+, blue',
-        'reservedName': 'green+, blue',
-        'subCallStart': 'white+, green',
-        'subCallEnd':   'white+, red',
+        '':               'white',    # Default
+        'command':        'white+',
+        'comment':        'green',
+        'headerComment':  'green+',
+        'macroCall':      'white+, blue',
+        'reservedName':   'green+, blue',
+        'subCallStart':   'white+, green',
+        'subCallEnd':     'white+, red',
       },
 
       'comms': {

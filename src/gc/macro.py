@@ -219,8 +219,13 @@ class Macro:
       isMacroCall = self.isMacro(cmdName)
 
       if cmdComment:
-        # if not silent:
-        ui.logTitle(cmdComment, c='macro.macroCall' if isMacroCall else 'macro.comment')
+        color = 'macro.comment'
+        if not cmdName:
+          color = 'macro.headerComment'
+        if isMacroCall:
+          color = 'macro.macroCall'
+
+        ui.logTitle(cmdComment, c=color)
 
       if cmdName:
         if isReservedName:
@@ -311,8 +316,12 @@ class Macro:
       isReservedName = cmdName.lower() in self.mcrCfg['reservedNames']
       cmdColor = 'macro.macroCall' if isMacroCall else 'macro.reservedName' if isReservedName else 'macro.command'
 
+      commentColor = 'macro.comment'
+      if not cmdName:
+        commentColor = 'macro.headerComment'
+
       block += '{:}   {:}\n'.format(
         ui.setStrColor(cmdName.ljust(maxCommandLen), cmdColor),
-        ui.setStrColor(cmdComment, 'macro.comment') )
+        ui.setStrColor(cmdComment, commentColor) )
 
     ui.logBlock(block)
