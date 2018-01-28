@@ -606,7 +606,7 @@ class Grbl:
     ''' TODO: Comment
     '''
     components = settingStr.split('=')
-    setting = components[0]
+    setting = int(components[0])
     value = components[1]
     self.status['settings'][setting] = {
       'desc': self.dct.settings[setting],
@@ -618,7 +618,7 @@ class Grbl:
     # $2 - Step port invert, mask
     # $3 -  Direction port invert, mask
     # $23 - Homing direction invert, mask
-    if setting in ['2', '3', '23']:
+    if setting in [2, 3, 23]:
       mask = int(value)
       self.status['settings'][setting]['parsed'] = {
         'x': (mask & 0x1 == 1),
@@ -672,6 +672,26 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def getCompleteGrblSettings(self):
+    ''' TODO: comment
+    '''
+    result = []
+
+    for key in sorted(self.status['settings']):
+      s = self.status['settings'][key]
+      id = '${:}'.format(key)
+      val = s['val']
+      desc = s['desc']
+      color = 'ui.successMsg'
+
+      line = '{:6s} {:10s} {:s}'.format(id, val, desc)
+      line = ui.setStrColor(line, color)
+
+      result.append(line)
+
+    return result
+
+
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getCompleteParserState(self):
     ''' TODO: comment
@@ -1079,12 +1099,12 @@ class Grbl:
     ''' TODO: comment
     '''
     # '27': "Homing switch pull-off distance, millimeters"
-    pos = float(self.status['settings']['27']['val'])
+    pos = float(self.status['settings'][27]['val'])
 
     if pos < self.mchCfg['softLimitsMargin']:
       pos = self.mchCfg['softLimitsMargin']
 
-    if self.status['settings']['23']['parsed'][axis]:
+    if self.status['settings'][23]['parsed'][axis]:
       return pos
     else:
       return pos * -1
@@ -1096,7 +1116,7 @@ class Grbl:
     '''
     pos = self.mchCfg['maxTravel'][axis] - self.mchCfg['softLimitsMargin']
 
-    if self.status['settings']['23']['parsed'][axis]:
+    if self.status['settings'][23]['parsed'][axis]:
       return pos
     else:
       return pos * -1
@@ -1107,7 +1127,7 @@ class Grbl:
     ''' calculate min axis(xyz) coord given current WCO
     '''
     # '23': "Homing direction invert, mask"
-    if self.status['settings']['23']['parsed'][axis]:
+    if self.status['settings'][23]['parsed'][axis]:
       min = self.getHomingCorner(axis)
     else:
       min = self.getAwayCorner(axis)
@@ -1120,7 +1140,7 @@ class Grbl:
     ''' calculate max axis(xyz) coord given current WCO
     '''
     # '23': "Homing direction invert, mask"
-    if self.status['settings']['23']['parsed'][axis]:
+    if self.status['settings'][23]['parsed'][axis]:
       max = self.getAwayCorner(axis)
     else:
       max = self.getHomingCorner(axis)
@@ -1141,10 +1161,10 @@ class Grbl:
     ''' TODO: comment
     '''
     # '27': "Homing switch pull-off distance, millimeters"
-    pullOff = float(self.status['settings']['27']['val'])
+    pullOff = float(self.status['settings'][27]['val'])
 
     # '23': "Homing direction invert, mask"
-    if not self.status['settings']['23']['parsed']['z']:
+    if not self.status['settings'][23]['parsed']['z']:
       pullOff *= -1
 
     self.rapidAbsolute(z=pullOff, machineCoords=True)
@@ -1155,14 +1175,14 @@ class Grbl:
     ''' TODO: comment
     '''
     # '27': "Homing switch pull-off distance, millimeters"
-    xPullOff = float(self.status['settings']['27']['val'])
+    xPullOff = float(self.status['settings'][27]['val'])
     yPullOff = xPullOff
 
     # '23': "Homing direction invert, mask"
-    if not self.status['settings']['23']['parsed']['x']:
+    if not self.status['settings'][23]['parsed']['x']:
       xPullOff *= -1
 
-    if not self.status['settings']['23']['parsed']['y']:
+    if not self.status['settings'][23]['parsed']['y']:
       yPullOff *= -1
 
     self.rapidAbsolute(x=xPullOff, y=yPullOff, machineCoords=True)

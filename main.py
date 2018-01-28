@@ -114,6 +114,7 @@ def showHelp():
   hH         - Show this help text
   s/S        - Show current status (short/LONG)
   @          - Show current status (FULL)
+  eE         - Show grbl settings
 
   Machine control
   ---------------------------------------------------------------------
@@ -189,6 +190,21 @@ def showMachineStatus():
   # statusStr += '\n'.format()
 
   ui.logBlock(statusStr)
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def showGrblSettings():
+
+  settingsStr = ''
+
+  settingsStr += 'grbl settings:\n'
+  settingsStr += '\n'
+  settings = mch.getCompleteGrblSettings()
+  for s in settings:
+    settingsStr += '  - {:}\n'.format(s)
+  settingsStr += '\n'
+
+  ui.logBlock(settingsStr)
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -484,6 +500,10 @@ def processUserInput():
     elif char == '@':
       ui.keyPressMessage('@ - Show current status (FULL)', key, char)
       showMachineFullStatus()
+
+    elif char in 'eE':
+      ui.keyPressMessage('eE - Show grbl settings', key, char)
+      showGrblSettings()
 
     elif key == kb.CTRL_R:
       ui.keyPressMessage('<CTRL>r - Reset serial connection', key, char)
