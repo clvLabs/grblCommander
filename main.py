@@ -107,26 +107,28 @@ def showHelp():
   <CTRL>x    - grbl soft reset
   =          - Lock grblCommander
   cC         - Clear screen
-  v/V        - Set verbose level (-/+) (loop)
 
   Info
   ---------------------------------------------------------------------
   hH         - Show this help text
+  <ENTER>/?  - Force status re-query
   s/S        - Show current status (short/LONG)
   @          - Show current status (FULL)
   eE         - Show grbl settings
+  v/V        - Set verbose level (-/+) (loop)
 
   Machine control
   ---------------------------------------------------------------------
+  <numpad>0  - Go home (submenu)
+  <numpad>.  - Absolute move (XY) to table position (submenu)
   gfxyz$     - Send raw GCode command
   [space]    - Send raw GCode command (start empty)
   lL         - Send raw GCode command (FORCE RELATIVE)
-  <ENTER>/?  - Force status re-query
   º          - Repeat last GCode command
+  rR         - Reset work coordinate (submenu)
   pP         - Probe (submenu)
   mM         - Macro (submenu)
   tT         - Tests (submenu)
-  rR         - Reset work coordinate (submenu)
 
   Jog
   ---------------------------------------------------------------------
@@ -136,8 +138,6 @@ def showHelp():
   <numpad>-/+      - Z jog (up/down)
   /                - Set jog distance (XY)
   *                - Set jog distance (Z)
-  <numpad>0        - Go home (submenu)
-  <numpad>.        - Absolute move (XY) to table position (submenu)
 
   Joystick
   ---------------------------------------------------------------------

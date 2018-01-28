@@ -223,7 +223,7 @@ class Probe:
   def showLogTitle(self):
     ''' TODO: comment
     '''
-    ui.log('Name     Dir  Feed   ProbeZ    CurrZ Overshoot', c='ui.successMsg')
+    ui.log('Name     Dir  Feed   ProbeZ   StopZ  Overshoot', c='ui.successMsg')
     ui.log('-------- ---- ----   ------   ------ ----------', c='ui.successMsg')
 
 
@@ -259,9 +259,9 @@ class Probe:
     touchPlateHeight = self.prbCfg['touchPlateHeight']
     probeZ = self.axisPos('z')
     newWCOZ = self.axisPos('z') - touchPlateHeight
-    ui.log('Probe Z: {:}'.format(probeZ), c='ui.msg')
-    ui.log('Touch plate height: {:}'.format(touchPlateHeight), c='ui.msg')
-    ui.log('New Z0: {:}'.format(newWCOZ), c='ui.msg')
+    ui.log('Probe Z: {:}'.format(probeZ), c='ui.successMsg')
+    ui.log('Touch plate height: {:}'.format(touchPlateHeight), c='ui.successMsg')
+    ui.log('New Z0: {:}'.format(newWCOZ), c='ui.finishedMsg')
     self.mch.resetWCOAxis('z', newWCOZ)
 
 

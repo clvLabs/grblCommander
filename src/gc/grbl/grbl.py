@@ -698,7 +698,7 @@ class Grbl:
     '''
     result = []
 
-    for modalGroupName in self.status['parserState']:
+    for modalGroupName in sorted(self.status['parserState']):
       if modalGroupName == 'str':
         continue
 
@@ -715,6 +715,9 @@ class Grbl:
       color = 'ui.successMsg' if val == preferred else 'ui.errorMsg'
 
       line = '{:15s} {:6s} {:20s}'.format(modalGroupName, original, desc)
+      line = line.rstrip()
+      if val != original:
+        line += ': {:}'.format(val)
       line = ui.setStrColor(line, color)
 
       if val != preferred:
