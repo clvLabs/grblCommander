@@ -223,16 +223,17 @@ class Probe:
   def showLogTitle(self):
     ''' TODO: comment
     '''
-    ui.log('Comment Feed   ProbeZ    CurrZ Overshoot', c='ui.successMsg')
-    ui.log('------- ----   ------   ------ ---------', c='ui.successMsg')
+    ui.log('Name     Dir  Feed   ProbeZ    CurrZ Overshoot', c='ui.successMsg')
+    ui.log('-------- ---- ----   ------   ------ ----------', c='ui.successMsg')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def showLogItem(self, item):
     ''' TODO: comment
     '''
-    ui.log('{:} {:4d} {:} {:} {:.3f} {:}'.format(
+    ui.log('{:8s} {:4s} {:4d} {:} {:} {:7.3f} {:}'.format(
       item['comment'],
+      item['direction'],
       item['feed'],
       ui.coordStr(item['probeZ']),
       ui.coordStr(item['currZ']),
