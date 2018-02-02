@@ -294,12 +294,12 @@ class Macro:
 
     commands = macro['commands']
 
-    block = ui.setStrColor('Macro [{:}] - {:} ({:} lines)\n\n'.format(
+    block = ui.color('Macro [{:}] - {:} ({:} lines)\n\n'.format(
       name, title, len(commands)), 'ui.title')
 
     if 'description' in macro:
       description = macro['description'].rstrip(' ').strip('\r\n')
-      block += ui.setStrColor(description, 'ui.msg') + '\n\n'
+      block += ui.color(description, 'ui.msg') + '\n\n'
 
     maxCommandLen = 0
     for command in commands:
@@ -321,7 +321,7 @@ class Macro:
         commentColor = 'macro.headerComment'
 
       block += '{:}   {:}\n'.format(
-        ui.setStrColor(cmdName.ljust(maxCommandLen), cmdColor),
-        ui.setStrColor(cmdComment, commentColor) )
+        ui.color(cmdName.ljust(maxCommandLen), cmdColor),
+        ui.color(cmdComment, commentColor) )
 
     ui.logBlock(block)

@@ -161,8 +161,8 @@ def showMachineStatus():
 
   statusStr += 'Current status: [{:}]\n'.format(mch.getColoredMachineStateStr())
   statusStr += '\n'
-  statusStr += 'Alarm    [{:s}]\n'.format(ui.setStrColor(mch.getAlarmStr(), 'ui.errorMsg'))
-  statusStr += 'Msg      [{:s}]\n'.format(ui.setStrColor(mch.getLastMessage(), 'ui.msg'))
+  statusStr += 'Alarm    [{:s}]\n'.format(ui.color(mch.getAlarmStr(), 'ui.errorMsg'))
+  statusStr += 'Msg      [{:s}]\n'.format(ui.color(mch.getLastMessage(), 'ui.msg'))
   statusStr += '\n'
   statusStr += 'MPos     [{:s}]\n'.format(mch.getMachinePosStr())
   statusStr += 'WCO      [{:s}]\n'.format(mch.getWorkCoordinatesStr())
@@ -178,8 +178,8 @@ def showMachineStatus():
   statusStr += '\n'
 
   statusStr += 'Joystick [{:s}] [{:s}]\n'.format(
-    ui.setStrColor('CONNECTED', 'ui.successMsg') if joy.connected else ui.setStrColor('DISCONNECTED', 'ui.errorMsg'),
-    ui.setStrColor('ENABLED', 'ui.successMsg') if joy.enabled else ui.setStrColor('DISABLED', 'ui.errorMsg')
+    ui.color('CONNECTED', 'ui.successMsg') if joy.connected else ui.color('DISCONNECTED', 'ui.errorMsg'),
+    ui.color('ENABLED', 'ui.successMsg') if joy.enabled else ui.color('DISABLED', 'ui.errorMsg')
   )
 
   statusStr += '\n'
@@ -644,8 +644,8 @@ def processUserInput():
       joy.enabled = not joy.enabled
 
       ui.log('Joystick [{:s}] [{:s}]\n'.format(
-        ui.setStrColor('CONNECTED', 'ui.successMsg') if joy.connected else ui.setStrColor('DISCONNECTED', 'ui.errorMsg'),
-        ui.setStrColor('ENABLED', 'ui.successMsg') if joy.enabled else ui.setStrColor('DISABLED', 'ui.errorMsg')
+        ui.color('CONNECTED', 'ui.successMsg') if joy.connected else ui.color('DISCONNECTED', 'ui.errorMsg'),
+        ui.color('ENABLED', 'ui.successMsg') if joy.enabled else ui.color('DISABLED', 'ui.errorMsg')
       ))
 
     elif char == 'J':
@@ -654,8 +654,8 @@ def processUserInput():
 
       ui.log()
       ui.log('Joystick [{:s}] [{:s}]\n'.format(
-        ui.setStrColor('CONNECTED', 'ui.successMsg') if joy.connected else ui.setStrColor('DISCONNECTED', 'ui.errorMsg'),
-        ui.setStrColor('ENABLED', 'ui.successMsg') if joy.enabled else ui.setStrColor('DISABLED', 'ui.errorMsg')
+        ui.color('CONNECTED', 'ui.successMsg') if joy.connected else ui.color('DISCONNECTED', 'ui.errorMsg'),
+        ui.color('ENABLED', 'ui.successMsg') if joy.enabled else ui.color('DISABLED', 'ui.errorMsg')
       ))
 
     elif char == '-':

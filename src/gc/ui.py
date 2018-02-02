@@ -56,7 +56,7 @@ def colorStr(string, foreColor, backColor=None):
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def setStrColor(str, colorName):
+def color(str, colorName):
   ''' Give a string some ANSI color formatting - allows to use config colors
       Color format examples:
         - ui.title
@@ -112,7 +112,7 @@ def log(message='', **kwargs):
       print('{:d}| '.format(verboseLevel), end='')
 
     if color is not None:
-      message = setStrColor(message, color)
+      message = color(message, color)
 
     print(message, **kwargs)
 
@@ -152,7 +152,7 @@ def readyMsg(extraInfo=None):
   log()
   if extraInfo:
     log('{:}'.format(extraInfo))
-  log('{:}'.format(setStrColor(uiCfg['readyMsg'], 'ui.readyMsg')))
+  log('{:}'.format(color(uiCfg['readyMsg'], 'ui.readyMsg')))
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -238,9 +238,9 @@ def coordStr(c):
 def coloredXyzStr(x, y, z, xColor='', yColor='', zColor=''):
   xyzFmt = uiCfg['xyzFormat']
   return xyzFmt.format(
-    setStrColor(coordStr(x), xColor ),
-    setStrColor(coordStr(y), yColor ),
-    setStrColor(coordStr(z), zColor ),
+    color(coordStr(x), xColor ),
+    color(coordStr(y), yColor ),
+    color(coordStr(z), zColor ),
     )
 
 

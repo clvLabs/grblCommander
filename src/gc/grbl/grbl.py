@@ -685,7 +685,7 @@ class Grbl:
       color = 'ui.successMsg'
 
       line = '{:6s} {:10s} {:s}'.format(id, val, desc)
-      line = ui.setStrColor(line, color)
+      line = ui.color(line, color)
 
       result.append(line)
 
@@ -718,10 +718,10 @@ class Grbl:
       line = line.rstrip()
       if val != original:
         line += ': {:}'.format(val)
-      line = ui.setStrColor(line, color)
+      line = ui.color(line, color)
 
       if val != preferred:
-        line += ui.setStrColor(' ({:})'.format(preferred), 'ui.successMsg')
+        line += ui.color(' ({:})'.format(preferred), 'ui.successMsg')
 
       result.append(line)
 
@@ -751,7 +751,7 @@ class Grbl:
         color = 'ui.errorMsg'
         display = '{:}({:})'.format(val, desc)
 
-      settingsStr += '{:} '.format(ui.setStrColor(display, color))
+      settingsStr += '{:} '.format(ui.color(display, color))
 
     # The rest if != preferred
     for modalGroupName in self.mchCfg['preferredParserState']:
@@ -764,7 +764,7 @@ class Grbl:
         if val != preferred:
           color = 'ui.errorMsg'
           display = '{:}({:})'.format(original, desc)
-          settingsStr += '{:} '.format(ui.setStrColor(display, color))
+          settingsStr += '{:} '.format(ui.color(display, color))
 
     return settingsStr.rstrip()
 
@@ -793,11 +793,11 @@ class Grbl:
         self.getMachinePosStr(),
         self.status['F']['val']
         )
-      content = ui.setStrColor(content, 'ui.onlineMachinePos')
+      content = ui.color(content, 'ui.onlineMachinePos')
 
     # Suffix
     if self.getInputPinStateStr():
-      suffix = '[{:}]'.format(ui.setStrColor(self.getInputPinStateStr(), 'machineState.Alarm'))
+      suffix = '[{:}]'.format(ui.color(self.getInputPinStateStr(), 'machineState.Alarm'))
 
     # Build string
     string = prefix
@@ -814,7 +814,7 @@ class Grbl:
     ''' TODO: comment
     '''
     machineStateStr = self.status['machineState']
-    return ui.setStrColor(machineStateStr, 'machineState.{:}'.format(machineStateStr))
+    return ui.color(machineStateStr, 'machineState.{:}'.format(machineStateStr))
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -853,7 +853,7 @@ class Grbl:
     '''
     prb = self.status['GCodeParams']['PRB']
     coords = ui.xyzStr(prb['x'], prb['y'], prb['z'])
-    lastRun = ui.setStrColor('SUCCESS','ui.successMsg') if prb['success'] else ui.setStrColor('FAIL','ui.errorMsg')
+    lastRun = ui.color('SUCCESS','ui.successMsg') if prb['success'] else ui.color('FAIL','ui.errorMsg')
 
     return '[{:}] ({:})'.format(coords, lastRun)
 
@@ -898,7 +898,7 @@ class Grbl:
     pins = self.status['inputPinState']
     for pin in pins:
       if pins[pin]['val']:
-        stateStr += '[{:} ({:})] '.format(ui.setStrColor(pin, 'machineState.Alarm'),pins[pin]['desc'])
+        stateStr += '[{:} ({:})] '.format(ui.color(pin, 'machineState.Alarm'),pins[pin]['desc'])
 
     return stateStr.rstrip()
 
