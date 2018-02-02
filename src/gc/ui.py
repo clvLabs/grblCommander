@@ -18,7 +18,7 @@ uiCfg = cfg['ui']
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Give a string some ANSI color formatting
-def colorStr(string, foreColor, backColor=None):
+def getAnsiColorStr(string, foreColor, backColor=None):
 
   if backColor is None:
     colors = foreColor.replace(' ', '').split(',')
@@ -77,7 +77,7 @@ def color(str, colorName):
       if colorName in uiCfg['colors'][colorSet]:
         color = uiCfg['colors'][colorSet][colorName]
 
-  return colorStr(str, color)
+  return getAnsiColorStr(str, color)
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
