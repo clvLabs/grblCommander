@@ -56,16 +56,6 @@ def readyMsg(extraInfo=None):
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def onParserStateChanged():
-  # While running, machine is already displaying status
-  if not mch.isRunning():
-    ui.log(mch.getSimpleMachineStatusStr())
-
-# Register
-mch.onParserStateChanged.append(onParserStateChanged)
-
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def sendCommand(command):
   if not command:
     return
@@ -250,35 +240,25 @@ def processUserInput():
     if key == 999999:
       pass
     elif key == kb.F1:
-      if mcrCfg['hotKeys']['F1']:
-        mcr.run(mcrCfg['hotKeys']['F1'], silent=True)
+      mcr.runHotKeyMacro('F1')
     elif key == kb.F2:
-      if mcrCfg['hotKeys']['F2']:
-        mcr.run(mcrCfg['hotKeys']['F2'], silent=True)
+      mcr.runHotKeyMacro('F2')
     elif key == kb.F3:
-      if mcrCfg['hotKeys']['F3']:
-        mcr.run(mcrCfg['hotKeys']['F3'], silent=True)
+      mcr.runHotKeyMacro('F3')
     elif key == kb.F4:
-      if mcrCfg['hotKeys']['F4']:
-        mcr.run(mcrCfg['hotKeys']['F4'], silent=True)
+      mcr.runHotKeyMacro('F4')
     elif key == kb.F5:
-      if mcrCfg['hotKeys']['F5']:
-        mcr.run(mcrCfg['hotKeys']['F5'], silent=True)
+      mcr.runHotKeyMacro('F5')
     elif key == kb.F6:
-      if mcrCfg['hotKeys']['F6']:
-        mcr.run(mcrCfg['hotKeys']['F6'], silent=True)
+      mcr.runHotKeyMacro('F6')
     elif key == kb.F7:
-      if mcrCfg['hotKeys']['F7']:
-        mcr.run(mcrCfg['hotKeys']['F7'], silent=True)
+      mcr.runHotKeyMacro('F7')
     elif key == kb.F8:
-      if mcrCfg['hotKeys']['F8']:
-        mcr.run(mcrCfg['hotKeys']['F8'], silent=True)
+      mcr.runHotKeyMacro('F8')
     elif key == kb.F9:
-      if mcrCfg['hotKeys']['F9']:
-        mcr.run(mcrCfg['hotKeys']['F9'], silent=True)
+      mcr.runHotKeyMacro('F9')
     elif key == kb.F10:
-      if mcrCfg['hotKeys']['F10']:
-        mcr.run(mcrCfg['hotKeys']['F10'], silent=True)
+      mcr.runHotKeyMacro('F10')
 
     elif key == kb.KP_END:
       ui.keyPressMessage('End - Jog - [DL] [*2] ({:} {:})'.format(gXYJog*2, unitsDesc), key, char)
@@ -1034,6 +1014,13 @@ def processJoystickInput():
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def onParserStateChanged():
+  # While running, machine is already displaying status
+  if not mch.isRunning():
+    ui.log(mch.getSimpleMachineStatusStr())
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def main():
   ui.clearScreen()
 
@@ -1048,6 +1035,9 @@ def main():
   ui.log()
 
   ui.logTitle('Grbl connection')
+  # Register parserStateChanged listener
+  mch.onParserStateChanged.append(onParserStateChanged)
+  # Start connection
   mch.start()
 
   ui.logTitle('Joystick connection')

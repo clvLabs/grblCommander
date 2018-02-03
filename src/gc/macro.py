@@ -60,7 +60,7 @@ class Macro:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def loadFolder(self,folder='', silent=False):
+  def loadFolder(self, folder='', silent=False):
     ''' TODO: comment
     '''
     dotBasePath = 'src.macros.'
@@ -152,7 +152,7 @@ class Macro:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def run(self,name, silent=False, isSubCall=False):
+  def run(self, name, silent=False, isSubCall=False):
     ''' TODO: comment
     '''
     success = self._run(name, silent=silent)
@@ -165,7 +165,13 @@ class Macro:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def isMacro(self,name):
+  def runHotKeyMacro(self, hotKey):
+    if self.mcrCfg['hotKeys'][hotKey]:
+      self.run(self.mcrCfg['hotKeys'][hotKey], silent=True)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def isMacro(self, name):
     ''' TODO: comment
     '''
     for macroName in self.macros:
@@ -175,7 +181,7 @@ class Macro:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def getMacro(self,name):
+  def getMacro(self, name):
     ''' TODO: comment
     '''
     for macroName in self.macros:
@@ -185,7 +191,7 @@ class Macro:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def _run(self,name, silent=False, isSubCall=False):
+  def _run(self, name, silent=False, isSubCall=False):
     ''' TODO: comment
     '''
     if self.mcrCfg['autoReload']:
@@ -278,7 +284,7 @@ class Macro:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def show(self,name, avoidReload=False):
+  def show(self, name, avoidReload=False):
     ''' TODO: comment
     '''
     if self.mcrCfg['autoReload'] and not avoidReload:
