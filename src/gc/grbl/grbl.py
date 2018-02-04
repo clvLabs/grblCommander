@@ -1152,25 +1152,31 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def goToMachineHome(self):
-    ''' TODO: comment
-    '''
-    self.goToMachineHome_Z()
-    self.goToMachineHome_XY()
-
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def goToMachineHome_Z(self):
+  def goToMachineHome_X(self):
     ''' TODO: comment
     '''
     # '27': 'Homing switch pull-off distance, millimeters'
-    pullOff = float(self.status['settings'][27]['val'])
+    xPullOff = float(self.status['settings'][27]['val'])
 
     # '23': 'Homing direction invert, mask'
-    if not self.status['settings'][23]['parsed']['z']:
-      pullOff *= -1
+    if not self.status['settings'][23]['parsed']['x']:
+      xPullOff *= -1
 
-    self.rapidAbsolute(z=pullOff, machineCoords=True)
+    self.rapidAbsolute(x=xPullOff, machineCoords=True)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def goToMachineHome_Y(self):
+    ''' TODO: comment
+    '''
+    # '27': 'Homing switch pull-off distance, millimeters'
+    yPullOff = float(self.status['settings'][27]['val'])
+
+    # '23': 'Homing direction invert, mask'
+    if not self.status['settings'][23]['parsed']['y']:
+      yPullOff *= -1
+
+    self.rapidAbsolute(y=yPullOff, machineCoords=True)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1189,6 +1195,28 @@ class Grbl:
       yPullOff *= -1
 
     self.rapidAbsolute(x=xPullOff, y=yPullOff, machineCoords=True)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def goToMachineHome_Z(self):
+    ''' TODO: comment
+    '''
+    # '27': 'Homing switch pull-off distance, millimeters'
+    pullOff = float(self.status['settings'][27]['val'])
+
+    # '23': 'Homing direction invert, mask'
+    if not self.status['settings'][23]['parsed']['z']:
+      pullOff *= -1
+
+    self.rapidAbsolute(z=pullOff, machineCoords=True)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def goToMachineHome(self):
+    ''' TODO: comment
+    '''
+    self.goToMachineHome_Z()
+    self.goToMachineHome_XY()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
