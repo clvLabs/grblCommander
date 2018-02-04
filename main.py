@@ -234,11 +234,6 @@ def lockGrblCommander():
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def processUserInput():
-  return mnu.process()
-
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def _processUserInput():
   global gXYJog
   global gZJog
@@ -739,124 +734,124 @@ def dummy():
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def setupMenu():
 
-  absoluteXYAxisLimitsSubmenu = menu.Menu(kb, {
-    '2':   {'n':'ONE AXIS ONLY - Absolute move to axis limits - [D]',  'h':absoluteXYAxisLimits, 'ha':{'d':'D'}},
-    '8':   {'n':'ONE AXIS ONLY - Absolute move to axis limits - [U]',  'h':absoluteXYAxisLimits, 'ha':{'d':'U'}},
-    '4':   {'n':'ONE AXIS ONLY - Absolute move to axis limits - [L]',  'h':absoluteXYAxisLimits, 'ha':{'d':'L'}},
-    '6':   {'n':'ONE AXIS ONLY - Absolute move to axis limits - [R]',  'h':absoluteXYAxisLimits, 'ha':{'d':'R'}},
-  })
+  absoluteXYAxisLimitsSubmenu = menu.Menu(kb, [
+    {'k':'2',   'n':'ONE AXIS ONLY - Absolute move to axis limits - [D]',  'h':absoluteXYAxisLimits, 'ha':{'d':'D'}},
+    {'k':'8',   'n':'ONE AXIS ONLY - Absolute move to axis limits - [U]',  'h':absoluteXYAxisLimits, 'ha':{'d':'U'}},
+    {'k':'4',   'n':'ONE AXIS ONLY - Absolute move to axis limits - [L]',  'h':absoluteXYAxisLimits, 'ha':{'d':'L'}},
+    {'k':'6',   'n':'ONE AXIS ONLY - Absolute move to axis limits - [R]',  'h':absoluteXYAxisLimits, 'ha':{'d':'R'}},
+  ])
 
-  absoluteTablePositionSubmenu = menu.Menu(kb, {
-    '.':   {'n':'One axis only (submenu)',                 'h':absoluteXYAxisLimitsSubmenu},
-    '1':   {'n':'Absolute move to table position - [DL]',  'h':absoluteTablePosition, 'ha':{'p':'DL'}},
-    '2':   {'n':'Absolute move to table position - [DC]',  'h':absoluteTablePosition, 'ha':{'p':'DC'}},
-    '3':   {'n':'Absolute move to table position - [DR]',  'h':absoluteTablePosition, 'ha':{'p':'DR'}},
-    '4':   {'n':'Absolute move to table position - [CL]',  'h':absoluteTablePosition, 'ha':{'p':'CL'}},
-    '5':   {'n':'Absolute move to table position - [CC]',  'h':absoluteTablePosition, 'ha':{'p':'CC'}},
-    '6':   {'n':'Absolute move to table position - [CR]',  'h':absoluteTablePosition, 'ha':{'p':'CR'}},
-    '7':   {'n':'Absolute move to table position - [UL]',  'h':absoluteTablePosition, 'ha':{'p':'UL'}},
-    '8':   {'n':'Absolute move to table position - [UC]',  'h':absoluteTablePosition, 'ha':{'p':'UC'}},
-    '9':   {'n':'Absolute move to table position - [UR]',  'h':absoluteTablePosition, 'ha':{'p':'UR'}},
-  })
+  absoluteTablePositionSubmenu = menu.Menu(kb, [
+    {'k':'.',   'n':'One axis only (submenu)',                 'h':absoluteXYAxisLimitsSubmenu},
+    {'k':'1',   'n':'Absolute move to table position - [DL]',  'h':absoluteTablePosition, 'ha':{'p':'DL'}},
+    {'k':'2',   'n':'Absolute move to table position - [DC]',  'h':absoluteTablePosition, 'ha':{'p':'DC'}},
+    {'k':'3',   'n':'Absolute move to table position - [DR]',  'h':absoluteTablePosition, 'ha':{'p':'DR'}},
+    {'k':'4',   'n':'Absolute move to table position - [CL]',  'h':absoluteTablePosition, 'ha':{'p':'CL'}},
+    {'k':'5',   'n':'Absolute move to table position - [CC]',  'h':absoluteTablePosition, 'ha':{'p':'CC'}},
+    {'k':'6',   'n':'Absolute move to table position - [CR]',  'h':absoluteTablePosition, 'ha':{'p':'CR'}},
+    {'k':'7',   'n':'Absolute move to table position - [UL]',  'h':absoluteTablePosition, 'ha':{'p':'UL'}},
+    {'k':'8',   'n':'Absolute move to table position - [UC]',  'h':absoluteTablePosition, 'ha':{'p':'UC'}},
+    {'k':'9',   'n':'Absolute move to table position - [UR]',  'h':absoluteTablePosition, 'ha':{'p':'UR'}},
+  ])
 
-  machineHomeSubmenu = menu.Menu(kb, {
-    'xX':  {'n':'x',        'h':mch.goToMachineHome_X},
-    'yY':  {'n':'y',        'h':mch.goToMachineHome_Y},
-    'zZ':  {'n':'z',        'h':mch.goToMachineHome_Z},
-    'wW':  {'n':'xy',       'h':mch.goToMachineHome_XY},
-    'aA':  {'n':'xyz',      'h':mch.goToMachineHome},
-  })
+  machineHomeSubmenu = menu.Menu(kb, [
+    {'k':'xX',  'n':'x',        'h':mch.goToMachineHome_X},
+    {'k':'yY',  'n':'y',        'h':mch.goToMachineHome_Y},
+    {'k':'zZ',  'n':'z',        'h':mch.goToMachineHome_Z},
+    {'k':'wW',  'n':'xy',       'h':mch.goToMachineHome_XY},
+    {'k':'aA',  'n':'xyz',      'h':mch.goToMachineHome},
+  ])
 
-  wcoHomeSubmenu = menu.Menu(kb, {
-    'xX':  {'n':'x',        'h':mch.sendWait, 'ha':{'command':'G0X0'}},
-    'yY':  {'n':'y',        'h':mch.sendWait, 'ha':{'command':'G0Y0'}},
-    'zZ':  {'n':'z',        'h':mch.sendWait, 'ha':{'command':'G0Z0'}},
-    'wW':  {'n':'xy',       'h':mch.sendWait, 'ha':{'command':'G0X0Y0'}},
-    'aA':  {'n':'xyz',      'h':goToWCHOHome},
-  })
+  wcoHomeSubmenu = menu.Menu(kb, [
+    {'k':'xX',  'n':'x',        'h':mch.sendWait, 'ha':{'command':'G0X0'}},
+    {'k':'yY',  'n':'y',        'h':mch.sendWait, 'ha':{'command':'G0Y0'}},
+    {'k':'zZ',  'n':'z',        'h':mch.sendWait, 'ha':{'command':'G0Z0'}},
+    {'k':'wW',  'n':'xy',       'h':mch.sendWait, 'ha':{'command':'G0X0Y0'}},
+    {'k':'aA',  'n':'xyz',      'h':goToWCHOHome},
+  ])
 
-  goHomeSubmenu = menu.Menu(kb, {
-    '0':   {'n':'Safe machine home (Z0 + X0Y0)', 'h':mch.goToMachineHome},
-    'mM':  {'n':'Machine home (submenu)',        'h':machineHomeSubmenu},
-    'wW':  {'n':'WCO home (submenu)',            'h':wcoHomeSubmenu},
-  })
+  goHomeSubmenu = menu.Menu(kb, [
+    {'k':'0',   'n':'Safe machine home (Z0 + X0Y0)', 'h':mch.goToMachineHome},
+    {'k':'mM',  'n':'Machine home (submenu)',        'h':machineHomeSubmenu},
+    {'k':'wW',  'n':'WCO home (submenu)',            'h':wcoHomeSubmenu},
+  ])
 
-  macroSubmenu = menu.Menu(kb, {
-    'lL':  {'n':'List macros',     'h':mcr.list},
-    'rR':  {'n':'Run macro',       'h':runMacro},
-    'sS':  {'n':'Show macro',      'h':showMacro},
-    'xX':  {'n':'Reload macros',   'h':mcr.load},
-  })
+  macroSubmenu = menu.Menu(kb, [
+    {'k':'lL',  'n':'List macros',     'h':mcr.list},
+    {'k':'rR',  'n':'Run macro',       'h':runMacro},
+    {'k':'sS',  'n':'Show macro',      'h':showMacro},
+    {'k':'xX',  'n':'Reload macros',   'h':mcr.load},
+  ])
 
-  testsSubmenu = menu.Menu(kb, {
-    'sS':  {'n':'Table position scan',  'h':tst.tablePositionScan},
-    'lL':  {'n':'Base levelling holes', 'h':tst.baseLevelingHoles},
-    'zZ':  {'n':'Zig-zag pattern',      'h':tst.zigZagPattern},
-    '*':   {'n':'DUMMY Test',           'h':tst.dummy},
-  })
+  testsSubmenu = menu.Menu(kb, [
+    {'k':'sS',  'n':'Table position scan',  'h':tst.tablePositionScan},
+    {'k':'lL',  'n':'Base levelling holes', 'h':tst.baseLevelingHoles},
+    {'k':'zZ',  'n':'Zig-zag pattern',      'h':tst.zigZagPattern},
+    {'k':'*',   'n':'DUMMY Test',           'h':tst.dummy},
+  ])
 
-  resetSubmenu = menu.Menu(kb, {
-    'xX':   {'n':'Reset X to current position',                'h':mch.resetWCOAxis,      'ha':{'axis':'x', 'val':'curr'}},
-    'yY':   {'n':'Reset Y to current position',                'h':mch.resetWCOAxis,      'ha':{'axis':'y', 'val':'curr'}},
-    'wW':   {'n':'Reset XY to current position',               'h':mch.resetWCO,          'ha':{'x':'curr', 'y':'curr'}},
-    'zZ':   {'n':'Reset Z to current position',                'h':mch.resetWCOAxis,      'ha':{'axis':'z', 'val':'curr'}},
-    'aA':   {'n':'Reset XYZ to current position',              'h':mch.resetWCO,          'ha':{'x':'curr', 'y':'curr', 'z':'curr'}},
-    'pP':   {'n':'Reset Z to current PRB:Z',                   'h':resetZToCurrProbeZ},
-    'mM':   {'n':'Manual [XYZ] reset',                         'h':manualXYZReset, 'ha':{}},
-    '-':    {'n':'Reset XY to machine home',                   'h':mch.resetWCO, 'ha':{'x':'home', 'y':'home'}},
-    '+':    {'n':'Reset XY to max machine travel',             'h':mch.resetWCO, 'ha':{'x':'away', 'y':'away'}},
-    '/':    {'n':'Reset XYZ to machine home',                  'h':mch.resetWCO, 'ha':{'x':'home', 'y':'home', 'z':'home'}},
-    '*':    {'n':'Reset XY to max machine travel, Z to home',  'h':mch.resetWCO, 'ha':{'x':'away', 'y':'away', 'z':'away'}},
-    'gG':   {'n':'Get GCode command for current WCO',          'h':getWCOResetCommand},
-  })
+  resetSubmenu = menu.Menu(kb, [
+    {'k':'xX',   'n':'Reset X to current position',                'h':mch.resetWCOAxis,      'ha':{'axis':'x', 'val':'curr'}},
+    {'k':'yY',   'n':'Reset Y to current position',                'h':mch.resetWCOAxis,      'ha':{'axis':'y', 'val':'curr'}},
+    {'k':'wW',   'n':'Reset XY to current position',               'h':mch.resetWCO,          'ha':{'x':'curr', 'y':'curr'}},
+    {'k':'zZ',   'n':'Reset Z to current position',                'h':mch.resetWCOAxis,      'ha':{'axis':'z', 'val':'curr'}},
+    {'k':'aA',   'n':'Reset XYZ to current position',              'h':mch.resetWCO,          'ha':{'x':'curr', 'y':'curr', 'z':'curr'}},
+    {'k':'pP',   'n':'Reset Z to current PRB:Z',                   'h':resetZToCurrProbeZ},
+    {'k':'mM',   'n':'Manual [XYZ] reset',                         'h':manualXYZReset},
+    {'k':'-',    'n':'Reset XY to machine home',                   'h':mch.resetWCO, 'ha':{'x':'home', 'y':'home'}},
+    {'k':'+',    'n':'Reset XY to max machine travel',             'h':mch.resetWCO, 'ha':{'x':'away', 'y':'away'}},
+    {'k':'/',    'n':'Reset XYZ to machine home',                  'h':mch.resetWCO, 'ha':{'x':'home', 'y':'home', 'z':'home'}},
+    {'k':'*',    'n':'Reset XY to max machine travel, Z to home',  'h':mch.resetWCO, 'ha':{'x':'away', 'y':'away', 'z':'away'}},
+    {'k':'gG',   'n':'Get GCode command for current WCO',          'h':getWCOResetCommand},
+  ])
 
-  probeSubmenu = menu.Menu(kb, {
-    '1':   {'n':'Basic probe',       'h':prb.basic},
-    '2':   {'n':'Two stage probe',   'h':prb.twoStage},
-    '3':   {'n':'Three stage probe', 'h':prb.threeStage},
-  })
+  probeSubmenu = menu.Menu(kb, [
+    {'k':'1',   'n':'Basic probe',       'h':prb.basic},
+    {'k':'2',   'n':'Two stage probe',   'h':prb.twoStage},
+    {'k':'3',   'n':'Three stage probe', 'h':prb.threeStage},
+  ])
 
-  mnu.setOptions({
-    'qQ':  {'n':'Quit',                                       'h':mnu.quit},
-    'hH':  {'n':'Show help',                                  'h':mnu.showOptions},
-    's':   {'n':'Show current status (short)',                'h':showMachineStatus},
-    'S':   {'n':'Show current status (LONG)',                 'h':showMachineLongStatus},
-    '@':   {'n':'Show current status (FULL)',                 'h':showMachineFullStatus},
-    '=':   {'n':'Lock grblCommander',                         'h':lockGrblCommander},
-    'eE':  {'n':'Show grbl settings',                         'h':showGrblSettings},
-    'cC':  {'n':'Clear screen',                               'h':ui.clearScreen},
-    'tT':  {'n':'Tests (submenu)',                            'h':testsSubmenu},
-    'mM':  {'n':'Macro (submenu)',                            'h':macroSubmenu},
-    'rR':  {'n':'Reset work coordinate (submenu)',            'h':resetSubmenu},
-    'pP':  {'n':'Probe (submenu)',                            'h':probeSubmenu},
+  mnu.setOptions([
+    {'k':'qQ',  'n':'Quit',                                       'h':mnu.quit},
+    {'k':'hH',  'n':'Show help',                                  'h':mnu.showOptions},
+    {'k':'s',   'n':'Show current status (short)',                'h':showMachineStatus},
+    {'k':'S',   'n':'Show current status (LONG)',                 'h':showMachineLongStatus},
+    {'k':'@',   'n':'Show current status (FULL)',                 'h':showMachineFullStatus},
+    {'k':'=',   'n':'Lock grblCommander',                         'h':lockGrblCommander},
+    {'k':'eE',  'n':'Show grbl settings',                         'h':showGrblSettings},
+    {'k':'cC',  'n':'Clear screen',                               'h':ui.clearScreen},
+    {'k':'tT',  'n':'Tests (submenu)',                            'h':testsSubmenu},
+    {'k':'mM',  'n':'Macro (submenu)',                            'h':macroSubmenu},
+    {'k':'rR',  'n':'Reset work coordinate (submenu)',            'h':resetSubmenu},
+    {'k':'pP',  'n':'Probe (submenu)',                            'h':probeSubmenu},
 
-    'gfxyzGFXYZ$ ':  {'n':'Send raw GCode command',           'h':sendRawGCodeCommand, 'ha':{'char':''}},
-    'lL':  {'n':'Send raw GCode command (FORCE RELATIVE)',    'h':sendRawGCodeCommandRELATIVE},
+    {'k':'gfxyzGFXYZ$ ',  'n':'Send raw GCode command',           'h':sendRawGCodeCommand, 'ha':{'char':''}},
+    {'k':'lL',  'n':'Send raw GCode command (FORCE RELATIVE)',    'h':sendRawGCodeCommandRELATIVE},
 
-    'º':   {'n':'Repeat last GCode command',                  'h':repeatLastGCodeCommand},
-    '0':   {'n':'Go home (submenu)',                          'h':goHomeSubmenu},
-    '.':   {'n':'Absolute move to table position (submenu)',  'h':absoluteTablePositionSubmenu},
+    {'k':'º',   'n':'Repeat last GCode command',                  'h':repeatLastGCodeCommand},
+    {'k':'0',   'n':'Go home (submenu)',                          'h':goHomeSubmenu},
+    {'k':'.',   'n':'Absolute move to table position (submenu)',  'h':absoluteTablePositionSubmenu},
 
-    'j':   {'n':'Enable/disable joystick',                    'h':toggleJoystickEnable},
-    'H':   {'n':'Restart joystick connection',                'h':restartJoystickConnection},
+    {'k':'j',   'n':'Enable/disable joystick',                    'h':toggleJoystickEnable},
+    {'k':'H',   'n':'Restart joystick connection',                'h':restartJoystickConnection},
 
-    '1':   {'n':'Jog - [DL]',                                 'h':jogXY, 'ha':{'d':'DL'}},
-    '2':   {'n':'Jog - [D]',                                  'h':jogXY, 'ha':{'d':'D'}},
-    '3':   {'n':'Jog - [DR]',                                 'h':jogXY, 'ha':{'d':'DR'}},
-    '4':   {'n':'Jog - [L]',                                  'h':jogXY, 'ha':{'d':'L'}},
-    '6':   {'n':'Jog - [R]',                                  'h':jogXY, 'ha':{'d':'R'}},
-    '7':   {'n':'Jog - [UL]',                                 'h':jogXY, 'ha':{'d':'UL'}},
-    '8':   {'n':'Jog - [U]',                                  'h':jogXY, 'ha':{'d':'U'}},
-    '9':   {'n':'Jog - [UR]',                                 'h':jogXY, 'ha':{'d':'UR'}},
-    '-':   {'n':'Jog - (Z) [U]',                              'h':jogZ, 'ha':{'d':'U'}},
-    '+':   {'n':'Jog - (Z) [D]',                              'h':jogZ, 'ha':{'d':'D'}},
+    {'k':'1',   'n':'Jog - [DL]',                                 'h':jogXY, 'ha':{'d':'DL'}},
+    {'k':'2',   'n':'Jog - [D]',                                  'h':jogXY, 'ha':{'d':'D'}},
+    {'k':'3',   'n':'Jog - [DR]',                                 'h':jogXY, 'ha':{'d':'DR'}},
+    {'k':'4',   'n':'Jog - [L]',                                  'h':jogXY, 'ha':{'d':'L'}},
+    {'k':'6',   'n':'Jog - [R]',                                  'h':jogXY, 'ha':{'d':'R'}},
+    {'k':'7',   'n':'Jog - [UL]',                                 'h':jogXY, 'ha':{'d':'UL'}},
+    {'k':'8',   'n':'Jog - [U]',                                  'h':jogXY, 'ha':{'d':'U'}},
+    {'k':'9',   'n':'Jog - [UR]',                                 'h':jogXY, 'ha':{'d':'UR'}},
+    {'k':'-',   'n':'Jog - (Z) [U]',                              'h':jogZ, 'ha':{'d':'U'}},
+    {'k':'+',   'n':'Jog - (Z) [D]',                              'h':jogZ, 'ha':{'d':'D'}},
 
-    '/':   {'n':'Set XY jog distance',                        'h':setXYJogDistance},
-    '*':   {'n':'Set Z jog distance',                         'h':setZJogDistance},
+    {'k':'/',   'n':'Set XY jog distance',                        'h':setXYJogDistance},
+    {'k':'*',   'n':'Set Z jog distance',                         'h':setZJogDistance},
 
-    'V':   {'n':'Set verbose level +',                        'h':changeVerboseLevel, 'ha':{'inc':+1}},
-    'v':   {'n':'Set verbose level -',                        'h':changeVerboseLevel, 'ha':{'inc':-1}},
-  })
+    {'k':'V',   'n':'Set verbose level +',                        'h':changeVerboseLevel, 'ha':{'inc':+1}},
+    {'k':'v',   'n':'Set verbose level -',                        'h':changeVerboseLevel, 'ha':{'inc':-1}},
+  ])
 
   #   ui.keyPressMessage('9 - Jog - [UR] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
 
@@ -904,7 +899,7 @@ def main():
 
     processJoystickInput()
 
-    if not processUserInput():
+    if not mnu.process():
       break
 
   ui.log('Closing grbl connection...')

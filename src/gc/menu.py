@@ -81,8 +81,8 @@ class Menu(object):
     ''' Parse a character and run the corresponding handler '''
     processed = False
     key = self.kb.ch2key(char)
-    for optKey in self.options:
-      opt = self.options[optKey]
+    for opt in self.options:
+      optKey = opt['k']
 
       if char in optKey:
         ui.keyPressMessage('{:} - {:}'.format(optKey, opt['n']), key, char)
@@ -111,9 +111,8 @@ class Menu(object):
   def showOptions(self):
     ''' Show option list '''
     print('-----------------------------------------------')
-    for key in self.options:
-      opt = self.options[key]
-      keyName = '{:}'.format(key)
+    for opt in self.options:
+      keyName = '{:}'.format(opt['k'])
       print('{:10s} {:}'.format(keyName, opt['n']))
     print('-----------------------------------------------')
 
