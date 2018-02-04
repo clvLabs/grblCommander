@@ -77,35 +77,49 @@ class Menu(object):
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def isSection(self, opt):
+    return 'SECTION' in opt
+
+  def isInfo(self, opt):
+    return 'INFO' in opt
+
+  def isHidden(self, opt):
+    return 'HIDDEN' in opt
+
+  def isNormal(self, opt):
+    return not self.isSection(opt) and not self.isInfo(opt) and not self.isHidden(opt)
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def parseChar(self, char):
     ''' Parse a character and run the corresponding handler '''
     processed = False
     key = self.kb.ch2key(char)
     for opt in self.options:
-      if 'k' in opt:          # Process ONLY key option lines
-        if char in opt['k']:
-          ui.keyPressMessage('{:} - {:}'.format(opt['k'], opt['n']), key, char)
+      if self.isNormal(opt) or self.isHidden(opt):
+        if 'k' in opt:
+          if char in opt['k']:
+            ui.keyPressMessage('{:} - {:}'.format(opt['k'], opt['n']), key, char)
 
-          if type(opt['h']) is Menu:
-            opt['h'].submenu()        # Run handler as submenu
-          else:
-            # EXTRA handler arguments
-            if 'xha' in opt:
-              if not 'ha' in opt:
-                opt['ha'] = {}
-              for k in opt['xha']:
-                v = opt['xha'][k]
-                if k == 'inChar':
-                  opt['ha'][v] = char
-
-            # Regular handler arguments
-            if 'ha' in opt:
-              opt['h'](**opt['ha'])   # Run handler with arguments
+            if type(opt['h']) is Menu:
+              opt['h'].submenu()        # Run handler as submenu
             else:
-              opt['h']()              # Run handler without arguments
+              # EXTRA handler arguments
+              if 'xha' in opt:
+                if not 'ha' in opt:
+                  opt['ha'] = {}
+                for k in opt['xha']:
+                  v = opt['xha'][k]
+                  if k == 'inChar':
+                    opt['ha'][v] = char
 
-          processed = True
-          break
+              # Regular handler arguments
+              if 'ha' in opt:
+                opt['h'](**opt['ha'])   # Run handler with arguments
+              else:
+                opt['h']()              # Run handler without arguments
+
+            processed = True
+            break
 
     if not processed:
       ui.keyPressMessage('Unknown command {:s} ({:d})'.format(char, key), key, char)
@@ -121,14 +135,20 @@ class Menu(object):
     ''' Show option list '''
     txt = ''
     for opt in self.options:
-      if 'SECTION' in opt:
+      if self.isSection(opt):
         txt += '\n{:}\n{:}\n'.format(
-          ui.color(opt['SECTION'], 'ui.menuSection'),
+          ui.color(opt['n'], 'ui.menuSection'),
           ui.color(ui.gMSG_SEPARATOR, 'ui.menuSection'),
         )
+      elif self.isInfo(opt):
+        keyName = '{:}'.format(opt['k'])
+        optName = '{:20s} {:}'.format(keyName, opt['n'])
+        txt += optName + '\n'
+      elif self.isHidden(opt):
+        pass
       else:
         keyName = '{:}'.format(opt['k'])
-        optName = '{:15s} {:}'.format(keyName, opt['n'])
+        optName = '{:20s} {:}'.format(keyName, opt['n'])
 
         if type(opt['h']) is Menu:
           optName = ui.color(optName, 'ui.menuSubmenu')

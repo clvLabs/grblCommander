@@ -740,7 +740,7 @@ def setupMenu():
   ])
 
   absoluteTablePositionSubmenu = menu.Menu(kb, [
-    {'k':'.',   'n':'One axis only (submenu)',                 'h':absoluteXYAxisLimitsSubmenu},
+    {'k':'.',   'n':'One axis only (*)',                       'h':absoluteXYAxisLimitsSubmenu},
     {'k':'1',   'n':'Absolute move to table position - [DL]',  'h':absoluteTablePosition, 'ha':{'p':'DL'}},
     {'k':'2',   'n':'Absolute move to table position - [DC]',  'h':absoluteTablePosition, 'ha':{'p':'DC'}},
     {'k':'3',   'n':'Absolute move to table position - [DR]',  'h':absoluteTablePosition, 'ha':{'p':'DR'}},
@@ -753,32 +753,32 @@ def setupMenu():
   ])
 
   machineHomeSubmenu = menu.Menu(kb, [
-    {'k':'xX',  'n':'x',        'h':mch.goToMachineHome_X},
-    {'k':'yY',  'n':'y',        'h':mch.goToMachineHome_Y},
-    {'k':'zZ',  'n':'z',        'h':mch.goToMachineHome_Z},
-    {'k':'wW',  'n':'xy',       'h':mch.goToMachineHome_XY},
-    {'k':'aA',  'n':'xyz',      'h':mch.goToMachineHome},
+    {'k':'xX',  'n':'x',   'h':mch.goToMachineHome_X},
+    {'k':'yY',  'n':'y',   'h':mch.goToMachineHome_Y},
+    {'k':'zZ',  'n':'z',   'h':mch.goToMachineHome_Z},
+    {'k':'wW',  'n':'xy',  'h':mch.goToMachineHome_XY},
+    {'k':'aA',  'n':'xyz', 'h':mch.goToMachineHome},
   ])
 
   wcoHomeSubmenu = menu.Menu(kb, [
-    {'k':'xX',  'n':'x',        'h':mch.sendWait, 'ha':{'command':'G0X0'}},
-    {'k':'yY',  'n':'y',        'h':mch.sendWait, 'ha':{'command':'G0Y0'}},
-    {'k':'zZ',  'n':'z',        'h':mch.sendWait, 'ha':{'command':'G0Z0'}},
-    {'k':'wW',  'n':'xy',       'h':mch.sendWait, 'ha':{'command':'G0X0Y0'}},
-    {'k':'aA',  'n':'xyz',      'h':goToWCHOHome},
+    {'k':'xX',  'n':'x',   'h':mch.sendWait, 'ha':{'command':'G0X0'}},
+    {'k':'yY',  'n':'y',   'h':mch.sendWait, 'ha':{'command':'G0Y0'}},
+    {'k':'zZ',  'n':'z',   'h':mch.sendWait, 'ha':{'command':'G0Z0'}},
+    {'k':'wW',  'n':'xy',  'h':mch.sendWait, 'ha':{'command':'G0X0Y0'}},
+    {'k':'aA',  'n':'xyz', 'h':goToWCHOHome},
   ])
 
   goHomeSubmenu = menu.Menu(kb, [
     {'k':'0',   'n':'Safe machine home (Z0 + X0Y0)', 'h':mch.goToMachineHome},
-    {'k':'mM',  'n':'Machine home (submenu)',        'h':machineHomeSubmenu},
-    {'k':'wW',  'n':'WCO home (submenu)',            'h':wcoHomeSubmenu},
+    {'k':'mM',  'n':'Machine home (*)',              'h':machineHomeSubmenu},
+    {'k':'wW',  'n':'WCO home (*)',                  'h':wcoHomeSubmenu},
   ])
 
   macroSubmenu = menu.Menu(kb, [
-    {'k':'lL',  'n':'List macros',     'h':mcr.list},
-    {'k':'rR',  'n':'Run macro',       'h':runMacro},
-    {'k':'sS',  'n':'Show macro',      'h':showMacro},
-    {'k':'xX',  'n':'Reload macros',   'h':mcr.load},
+    {'k':'lL',  'n':'List macros',   'h':mcr.list},
+    {'k':'rR',  'n':'Run macro',     'h':runMacro},
+    {'k':'sS',  'n':'Show macro',    'h':showMacro},
+    {'k':'xX',  'n':'Reload macros', 'h':mcr.load},
   ])
 
   testsSubmenu = menu.Menu(kb, [
@@ -789,23 +789,23 @@ def setupMenu():
   ])
 
   resetSubmenu = menu.Menu(kb, [
-    {'SECTION':'Current position'},
-    {'k':'xX',   'n':'Reset X to current position',                'h':mch.resetWCOAxis,      'ha':{'axis':'x', 'val':'curr'}},
-    {'k':'yY',   'n':'Reset Y to current position',                'h':mch.resetWCOAxis,      'ha':{'axis':'y', 'val':'curr'}},
-    {'k':'wW',   'n':'Reset XY to current position',               'h':mch.resetWCO,          'ha':{'x':'curr', 'y':'curr'}},
-    {'k':'zZ',   'n':'Reset Z to current position',                'h':mch.resetWCOAxis,      'ha':{'axis':'z', 'val':'curr'}},
-    {'k':'aA',   'n':'Reset XYZ to current position',              'h':mch.resetWCO,          'ha':{'x':'curr', 'y':'curr', 'z':'curr'}},
+    {'SECTION':1, 'n':'Reset to current position'},
+    {'k':'xX',   'n':'X',    'h':mch.resetWCO,      'ha':{'x':'curr'}},
+    {'k':'yY',   'n':'Y',    'h':mch.resetWCO,      'ha':{'y':'curr'}},
+    {'k':'zZ',   'n':'Z',    'h':mch.resetWCO,      'ha':{'z':'curr'}},
+    {'k':'wW',   'n':'XY',   'h':mch.resetWCO,      'ha':{'x':'curr', 'y':'curr'}},
+    {'k':'aA',   'n':'XYZ',  'h':mch.resetWCO,      'ha':{'x':'curr', 'y':'curr', 'z':'curr'}},
 
-    {'SECTION':'Machine limits'},
-    {'k':'-',    'n':'Reset XY to machine home',                   'h':mch.resetWCO, 'ha':{'x':'home', 'y':'home'}},
-    {'k':'+',    'n':'Reset XY to max machine travel',             'h':mch.resetWCO, 'ha':{'x':'away', 'y':'away'}},
-    {'k':'/',    'n':'Reset XYZ to machine home',                  'h':mch.resetWCO, 'ha':{'x':'home', 'y':'home', 'z':'home'}},
-    {'k':'*',    'n':'Reset XY to max machine travel, Z to home',  'h':mch.resetWCO, 'ha':{'x':'away', 'y':'away', 'z':'home'}},
+    {'SECTION':1, 'n':'Reset to machine limits'},
+    {'k':'-',    'n':'XY to machine home',                  'h':mch.resetWCO, 'ha':{'x':'home', 'y':'home'}},
+    {'k':'+',    'n':'XY to max machine travel',            'h':mch.resetWCO, 'ha':{'x':'away', 'y':'away'}},
+    {'k':'/',    'n':'XYZ to machine home',                 'h':mch.resetWCO, 'ha':{'x':'home', 'y':'home', 'z':'home'}},
+    {'k':'*',    'n':'XY to max machine travel, Z to home', 'h':mch.resetWCO, 'ha':{'x':'away', 'y':'away', 'z':'home'}},
 
-    {'SECTION':'Misc.'},
-    {'k':'pP',   'n':'Reset Z to current PRB:Z',                   'h':resetZToCurrProbeZ},
-    {'k':'mM',   'n':'Manual [XYZ] reset',                         'h':manualXYZReset},
-    {'k':'gG',   'n':'Get GCode command for current WCO',          'h':getWCOResetCommand},
+    {'SECTION':1, 'n':'Misc.'},
+    {'k':'pP',   'n':'Reset Z to current PRB:Z',          'h':resetZToCurrProbeZ},
+    {'k':'mM',   'n':'Manual [XYZ] reset',                'h':manualXYZReset},
+    {'k':'gG',   'n':'Get GCode command for current WCO', 'h':getWCOResetCommand},
   ])
 
   probeSubmenu = menu.Menu(kb, [
@@ -815,14 +815,14 @@ def setupMenu():
   ])
 
   mnu.setOptions([
-    {'SECTION':'General commands'},
+    {'SECTION':1, 'n':'General commands'},
     {'k':'qQ',           'n':'Quit',                         'h':mnu.quit},
     {'k':'',             'n':'***Reset serial connection',   'h':NOT_IMPLEMENTED},
     {'k':'',             'n':'***grbl soft reset',           'h':NOT_IMPLEMENTED},
     {'k':'=',            'n':'Lock grblCommander',           'h':lockGrblCommander},
     {'k':'cC',           'n':'Clear screen',                 'h':ui.clearScreen},
 
-    {'SECTION':'Info'},
+    {'SECTION':1, 'n':'Info'},
     {'k':'hH',           'n':'Show help',                    'h':mnu.showOptions},
     {'k':'',             'n':'***Force status re-query',     'h':NOT_IMPLEMENTED},
     {'k':'s',            'n':'Show current status (short)',  'h':showMachineStatus},
@@ -832,10 +832,10 @@ def setupMenu():
     {'k':'v',            'n':'Set verbose level -',          'h':changeVerboseLevel, 'ha':{'inc':-1}},
     {'k':'V',            'n':'Set verbose level +',          'h':changeVerboseLevel, 'ha':{'inc':+1}},
 
-    {'SECTION':'Machine control'},
+    {'SECTION':1, 'n':'Machine control'},
     {'k':'0',            'n':'Go home (*)',                             'h':goHomeSubmenu},
     {'k':'.',            'n':'Absolute move to table position (*)',     'h':absoluteTablePositionSubmenu},
-    {'k':'gfxyzGFXYZ$',  'n':'Send raw GCode command',                  'h':sendRawGCodeCommand, 'xha':{'inChar':'char'}},
+    {'k':'gGfFxXyYzZ$',  'n':'Send raw GCode command',                  'h':sendRawGCodeCommand, 'xha':{'inChar':'char'}},
     {'k':' ',            'n':'Send raw GCode command (start EMPTY)',    'h':sendRawGCodeCommand},
     {'k':'lL',           'n':'Send raw GCode command (FORCE RELATIVE)', 'h':sendRawGCodeCommandRELATIVE},
     {'k':'º',            'n':'Repeat last GCode command',               'h':repeatLastGCodeCommand},
@@ -844,21 +844,25 @@ def setupMenu():
     {'k':'mM',           'n':'Macro (*)',                               'h':macroSubmenu},
     {'k':'tT',           'n':'Tests (*)',                               'h':testsSubmenu},
 
-    {'SECTION':'Jog'},
-    {'k':'1',   'n':'Jog - [DL]',          'h':jogXY, 'ha':{'d':'DL'}},
-    {'k':'2',   'n':'Jog - [D]',           'h':jogXY, 'ha':{'d':'D'}},
-    {'k':'3',   'n':'Jog - [DR]',          'h':jogXY, 'ha':{'d':'DR'}},
-    {'k':'4',   'n':'Jog - [L]',           'h':jogXY, 'ha':{'d':'L'}},
-    {'k':'6',   'n':'Jog - [R]',           'h':jogXY, 'ha':{'d':'R'}},
-    {'k':'7',   'n':'Jog - [UL]',          'h':jogXY, 'ha':{'d':'UL'}},
-    {'k':'8',   'n':'Jog - [U]',           'h':jogXY, 'ha':{'d':'U'}},
-    {'k':'9',   'n':'Jog - [UR]',          'h':jogXY, 'ha':{'d':'UR'}},
-    {'k':'-',   'n':'Jog - (Z) [U]',       'h':jogZ, 'ha':{'d':'U'}},
-    {'k':'+',   'n':'Jog - (Z) [D]',       'h':jogZ, 'ha':{'d':'D'}},
+    {'SECTION':1, 'n':'Jog'},
+    {'INFO':1, 'k':'<numpad>',         'n':'XY jog (including diagonals)'},
+    {'INFO':1, 'k':'<SHIFT>+<numpad>', 'n':'XY jog (double distance)'},
+    {'INFO':1, 'k':'<CTRL><numpad>',   'n':'XY jog (half distance)'},
     {'k':'/',   'n':'Set XY jog distance', 'h':setXYJogDistance},
     {'k':'*',   'n':'Set Z jog distance',  'h':setZJogDistance},
 
-    {'SECTION':'Joystick'},
+    {'HIDDEN':1, 'k':'1',   'n':'Jog - [DL]',          'h':jogXY, 'ha':{'d':'DL'}},
+    {'HIDDEN':1, 'k':'2',   'n':'Jog - [D]',           'h':jogXY, 'ha':{'d':'D'}},
+    {'HIDDEN':1, 'k':'3',   'n':'Jog - [DR]',          'h':jogXY, 'ha':{'d':'DR'}},
+    {'HIDDEN':1, 'k':'4',   'n':'Jog - [L]',           'h':jogXY, 'ha':{'d':'L'}},
+    {'HIDDEN':1, 'k':'6',   'n':'Jog - [R]',           'h':jogXY, 'ha':{'d':'R'}},
+    {'HIDDEN':1, 'k':'7',   'n':'Jog - [UL]',          'h':jogXY, 'ha':{'d':'UL'}},
+    {'HIDDEN':1, 'k':'8',   'n':'Jog - [U]',           'h':jogXY, 'ha':{'d':'U'}},
+    {'HIDDEN':1, 'k':'9',   'n':'Jog - [UR]',          'h':jogXY, 'ha':{'d':'UR'}},
+    {'HIDDEN':1, 'k':'-',   'n':'Jog - (Z) [U]',       'h':jogZ,  'ha':{'d':'U'}},
+    {'HIDDEN':1, 'k':'+',   'n':'Jog - (Z) [D]',       'h':jogZ,  'ha':{'d':'D'}},
+
+    {'SECTION':1, 'n':'Joystick'},
     {'k':'j',   'n':'Enable/disable joystick',     'h':toggleJoystickEnable},
     {'k':'J',   'n':'Restart joystick connection', 'h':restartJoystickConnection},
     {'k':'',    'n':'***JOYSTICK KEYS',            'h':NOT_IMPLEMENTED},
