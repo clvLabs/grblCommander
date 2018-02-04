@@ -104,15 +104,15 @@ def log(message='', **kwargs):
 
   verboseStr = kwargs.pop('verbose')
   verboseLevel = getVerboseLevelIndex(verboseStr)
-  color = kwargs.pop('color')
+  _color = kwargs.pop('color')
 
   if( verboseLevel > 0 and verboseLevel <= getVerboseLevel()):  # > 0 to avoid NONE
 
     if(getVerboseLevelStr() == 'DEBUG'):
       print('{:d}| '.format(verboseLevel), end='')
 
-    if color is not None:
-      message = color(message, color)
+    if _color is not None:
+      message = color(message, _color)
 
     print(message, **kwargs)
 
