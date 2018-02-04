@@ -13,7 +13,6 @@ import time
 from pathlib import Path, PurePath
 
 from . import ui as ui
-from . import keyboard as kb
 
 
 # ------------------------------------------------------------------
@@ -21,10 +20,11 @@ from . import keyboard as kb
 
 class Macro:
 
-  def __init__(self, grbl):
+  def __init__(self, grbl, kb):
     ''' Construct a Macro object.
     '''
     self.grbl = grbl
+    self.kb = kb
     self.cfg = grbl.getConfig()
     self.mcrCfg = self.cfg['macro']
 
@@ -212,7 +212,7 @@ class Macro:
         self.show(name, avoidReload=True)
 
         ui.inputMsg('Press y/Y to execute, any other key to cancel...')
-        char = kb.getch()
+        char = self.kb.getch()
 
         if not char in 'yY':
           ui.logBlock('MACRO [{:}] CANCELLED'.format(name), c='ui.cancelMsg')
@@ -240,13 +240,13 @@ class Macro:
           if cmdName.lower() == 'pause':
             ui.inputMsg('Paused, press <ENTER> to continue / <ESC> to exit ...')
             key = 0
-            while key != kb.CR and key != kb.LF and key != kb.ESC:
-              key = kb.getKey()
+            while key != self.kb.CR and key != self.kb.LF and key != self.kb.ESC:
+              key = self.kb.getKey()
 
-            if key == kb.ESC:
+            if key == self.kb.ESC:
               ui.logBlock('MACRO [{:}] CANCELLED'.format(name), c='ui.cancelMsg')
               return False
-            elif key == kb.CR or key == kb.LF:
+            elif key == self.kb.CR or key == self.kb.LF:
               continue
 
           elif cmdName.lower() == 'startup':
@@ -266,8 +266,8 @@ class Macro:
           if not silent:
             self.grbl.waitForMachineIdle()
 
-      if kb.keyPressed():
-        if kb.getKey() == kb.ESC:
+      if self.kb.keyPressed():
+        if self.kb.getKey() == self.kb.ESC:
           ui.logBlock('MACRO [{:}] CANCELLED'.format(name), c='ui.cancelMsg')
           return False
 

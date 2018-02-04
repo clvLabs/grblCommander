@@ -12,7 +12,7 @@ import pprint
 import src.gc.utils as ut
 import src.gc.ui as ui
 import src.gc.menu as menu
-import src.gc.keyboard as kb
+import src.gc.keyboard as keyboard
 import src.gc.joystick as joystick
 import src.gc.grbl.grbl as grbl
 import src.gc.grbl.probe as probe
@@ -29,8 +29,11 @@ mcrCfg = cfg['macro']
 # Current version
 gVERSION = '0.11.0'
 
+# keyboard manager
+kb = keyboard.Keyboard()
+
 # menu manager
-mnu = menu.Menu()
+mnu = menu.Menu(kb)
 
 # grbl machine manager
 mch = grbl.Grbl(cfg)
@@ -41,8 +44,8 @@ prb = probe.Probe(mch)
 # joystick manager
 joy = joystick.Joystick(cfg)
 
-mcr = macro.Macro(mch)
-tst = test.Test(mch)
+mcr = macro.Macro(mch, kb)
+tst = test.Test(mch, kb)
 
 # Jog distance
 gXYJog = mchCfg['xyJogMm']
@@ -385,13 +388,6 @@ def _processUserInput():
     elif key == kb.CTRL_X:
       ui.keyPressMessage('<CTRL>x - grbl soft reset', key, char)
       mch.softReset()
-
-    else:  # Rest of keys
-      processed = False
-      ui.keyPressMessage('Unknown command {:s} ({:d})'.format(char, key), key, char)
-
-  if processed:
-    readyMsg()
 
   return True
 
@@ -743,14 +739,14 @@ def dummy():
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def setupMenu():
 
-  absoluteXYAxisLimitsSubmenu = menu.Menu({
+  absoluteXYAxisLimitsSubmenu = menu.Menu(kb, {
     '2':   {'n':'ONE AXIS ONLY - Absolute move to axis limits - [D]',  'h':absoluteXYAxisLimits, 'ha':{'d':'D'}},
     '8':   {'n':'ONE AXIS ONLY - Absolute move to axis limits - [U]',  'h':absoluteXYAxisLimits, 'ha':{'d':'U'}},
     '4':   {'n':'ONE AXIS ONLY - Absolute move to axis limits - [L]',  'h':absoluteXYAxisLimits, 'ha':{'d':'L'}},
     '6':   {'n':'ONE AXIS ONLY - Absolute move to axis limits - [R]',  'h':absoluteXYAxisLimits, 'ha':{'d':'R'}},
   })
 
-  absoluteTablePositionSubmenu = menu.Menu({
+  absoluteTablePositionSubmenu = menu.Menu(kb, {
     '.':   {'n':'One axis only (submenu)',                 'h':absoluteXYAxisLimitsSubmenu},
     '1':   {'n':'Absolute move to table position - [DL]',  'h':absoluteTablePosition, 'ha':{'p':'DL'}},
     '2':   {'n':'Absolute move to table position - [DC]',  'h':absoluteTablePosition, 'ha':{'p':'DC'}},
@@ -763,7 +759,7 @@ def setupMenu():
     '9':   {'n':'Absolute move to table position - [UR]',  'h':absoluteTablePosition, 'ha':{'p':'UR'}},
   })
 
-  machineHomeSubmenu = menu.Menu({
+  machineHomeSubmenu = menu.Menu(kb, {
     'xX':  {'n':'x',        'h':mch.goToMachineHome_X},
     'yY':  {'n':'y',        'h':mch.goToMachineHome_Y},
     'zZ':  {'n':'z',        'h':mch.goToMachineHome_Z},
@@ -771,7 +767,7 @@ def setupMenu():
     'aA':  {'n':'xyz',      'h':mch.goToMachineHome},
   })
 
-  wcoHomeSubmenu = menu.Menu({
+  wcoHomeSubmenu = menu.Menu(kb, {
     'xX':  {'n':'x',        'h':mch.sendWait, 'ha':{'command':'G0X0'}},
     'yY':  {'n':'y',        'h':mch.sendWait, 'ha':{'command':'G0Y0'}},
     'zZ':  {'n':'z',        'h':mch.sendWait, 'ha':{'command':'G0Z0'}},
@@ -779,27 +775,27 @@ def setupMenu():
     'aA':  {'n':'xyz',      'h':goToWCHOHome},
   })
 
-  goHomeSubmenu = menu.Menu({
+  goHomeSubmenu = menu.Menu(kb, {
     '0':   {'n':'Safe machine home (Z0 + X0Y0)', 'h':mch.goToMachineHome},
     'mM':  {'n':'Machine home (submenu)',        'h':machineHomeSubmenu},
     'wW':  {'n':'WCO home (submenu)',            'h':wcoHomeSubmenu},
   })
 
-  macroSubmenu = menu.Menu({
+  macroSubmenu = menu.Menu(kb, {
     'lL':  {'n':'List macros',     'h':mcr.list},
     'rR':  {'n':'Run macro',       'h':runMacro},
     'sS':  {'n':'Show macro',      'h':showMacro},
     'xX':  {'n':'Reload macros',   'h':mcr.load},
   })
 
-  testsSubmenu = menu.Menu({
+  testsSubmenu = menu.Menu(kb, {
     'sS':  {'n':'Table position scan',  'h':tst.tablePositionScan},
     'lL':  {'n':'Base levelling holes', 'h':tst.baseLevelingHoles},
     'zZ':  {'n':'Zig-zag pattern',      'h':tst.zigZagPattern},
     '*':   {'n':'DUMMY Test',           'h':tst.dummy},
   })
 
-  resetSubmenu = menu.Menu({
+  resetSubmenu = menu.Menu(kb, {
     'xX':   {'n':'Reset X to current position',                'h':mch.resetWCOAxis,      'ha':{'axis':'x', 'val':'curr'}},
     'yY':   {'n':'Reset Y to current position',                'h':mch.resetWCOAxis,      'ha':{'axis':'y', 'val':'curr'}},
     'wW':   {'n':'Reset XY to current position',               'h':mch.resetWCO,          'ha':{'x':'curr', 'y':'curr'}},
@@ -814,7 +810,7 @@ def setupMenu():
     'gG':   {'n':'Get GCode command for current WCO',          'h':getWCOResetCommand},
   })
 
-  probeSubmenu = menu.Menu({
+  probeSubmenu = menu.Menu(kb, {
     '1':   {'n':'Basic probe',       'h':prb.basic},
     '2':   {'n':'Two stage probe',   'h':prb.twoStage},
     '3':   {'n':'Three stage probe', 'h':prb.threeStage},

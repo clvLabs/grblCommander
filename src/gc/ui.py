@@ -190,24 +190,6 @@ def getUserInput(description, dataType='str', default=None):
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def waitForEnterOrEscape(message):
-  ''' TODO: comment
-  '''
-  msg = '''{:}
-  (press <ENTER> or <ESC>)'''.format(message)
-
-  log()
-  inputMsg(msg)
-  while True:
-    while not kb.keyPressed():
-      key = kb.getKey()
-      if key == kb.ENTER:
-        return True
-      elif key == kb.ESC:
-        return False
-
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def userConfirm(message, password):
   ''' TODO: comment
   '''

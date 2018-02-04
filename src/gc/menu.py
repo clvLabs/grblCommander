@@ -9,7 +9,6 @@ if __name__ == '__main__':
   print('This file is a module, it should not be executed directly')
 
 from . import ui as ui
-from . import keyboard as kb
 
 # ------------------------------------------------------------------
 # Menu Option class
@@ -29,8 +28,9 @@ class Option:
 
 class Menu(object):
 
-  def __init__(self, options=None, settings=None):
+  def __init__(self, kb, options=None, settings=None):
     ''' Construct a Menu object '''
+    self.kb = kb
     self.options = options
 
     if settings:
@@ -70,17 +70,17 @@ class Menu(object):
     if not self.options:
       return True
 
-    if not kb.keyPressed():
+    if not self.kb.keyPressed():
       return True
 
-    return self.parseChar(kb.getch())
+    return self.parseChar(self.kb.getch())
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def parseChar(self, char):
     ''' Parse a character and run the corresponding handler '''
     processed = False
-    key = kb.ch2key(char)
+    key = self.kb.ch2key(char)
     for optKey in self.options:
       opt = self.options[optKey]
 
@@ -123,4 +123,4 @@ class Menu(object):
     ''' Run self as a submenu '''
     self.showOptions()
     ui.inputMsg('Select command...')
-    return self.parseChar(kb.getch())
+    return self.parseChar(self.kb.getch())

@@ -13,17 +13,17 @@ import time
 import math
 
 from . import ui as ui
-from . import keyboard as kb
 
 # ------------------------------------------------------------------
 # Test class
 
 class Test:
 
-  def __init__(self, grbl):
+  def __init__(self, grbl, kb):
     ''' Construct a Test object.
     '''
     self.grbl = grbl
+    self.kb = kb
     self.cfg = self.grbl.getConfig()
     self.mchCfg = self.cfg['machine']
     self.tstCfg = self.cfg['test']
@@ -96,8 +96,8 @@ class Test:
   def checkTestCancelled(self):
     ''' TODO: comment
     '''
-    if kb.keyPressed():
-      if kb.getKey() == kb.ESC:
+    if self.kb.keyPressed():
+      if self.kb.getKey() == self.kb.ESC:
         self.testCancelled = True
         self.logTestCancelled()
     return self.testCancelled
@@ -108,12 +108,19 @@ class Test:
     ''' TODO: comment
     '''
     ui.logTitle('Spindle start')
-    if ui.waitForEnterOrEscape('Please start spindle...'):
-      return True
-    else:
-      self.testCancelled = True
-      self.logTestCancelled()
-      return False
+
+    ui.log()
+    ui.inputMsg('''Please start spindle...
+    (press <ENTER> or <ESC>)''')
+    while True:
+      while not self.kb.keyPressed():
+        key = self.kb.getKey()
+        if key == self.kb.ENTER:
+          return True
+        elif key == self.kb.ESC:
+          self.testCancelled = True
+          self.logTestCancelled()
+          return False
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
