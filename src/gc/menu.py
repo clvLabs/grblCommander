@@ -29,9 +29,17 @@ class Option:
 
 class Menu(object):
 
-  def __init__(self, options=None):
-    ''' Construct a Menu object, optionally setting options '''
+  def __init__(self, options=None, settings=None):
+    ''' Construct a Menu object '''
     self.options = options
+
+    if settings:
+      self.settings = settings
+    else:
+      self.settings = {
+        'readyMsg': None
+      }
+
     self._quit = False
 
 
@@ -39,6 +47,12 @@ class Menu(object):
   def setOptions(self, options):
     ''' Set options after construction '''
     self.options = options
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def setSettings(self, settings):
+    ''' Set settings after construction '''
+    self.settings = settings
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -87,7 +101,8 @@ class Menu(object):
     if not processed:
       ui.keyPressMessage('Unknown command {:s} ({:d})'.format(char, key), key, char)
     else:
-      ui.log('READY!')
+      if self.settings['readyMsg']:
+        self.settings['readyMsg']()
 
     return True
 

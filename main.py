@@ -672,7 +672,6 @@ def changeVerboseLevel(inc):
   ui.setVerboseLevel(tempVerboseLevel)
 
 
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def absoluteXYAxisLimits(d):
   minX = mch.getMin('x')
@@ -690,7 +689,6 @@ def absoluteXYAxisLimits(d):
   if 'R' in d:  x = maxX
 
   mch.moveAbsolute(x=x, y=y)
-
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -866,6 +864,9 @@ def setupMenu():
 
   #   ui.keyPressMessage('9 - Jog - [UR] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
 
+  mnu.setSettings({
+    'readyMsg': readyMsg,
+  })
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def main():
