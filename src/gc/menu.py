@@ -82,21 +82,20 @@ class Menu(object):
     processed = False
     key = self.kb.ch2key(char)
     for opt in self.options:
-      optKey = opt['k']
+      if 'k' in opt:          # Process ONLY key option lines
+        if char in opt['k']:
+          ui.keyPressMessage('{:} - {:}'.format(opt['k'], opt['n']), key, char)
 
-      if char in optKey:
-        ui.keyPressMessage('{:} - {:}'.format(optKey, opt['n']), key, char)
-
-        if type(opt['h']) is Menu:
-          opt['h'].submenu()        # Run handler as submenu
-        else:
-          if 'ha' in opt:
-            opt['h'](**opt['ha'])   # Run handler with arguments
+          if type(opt['h']) is Menu:
+            opt['h'].submenu()        # Run handler as submenu
           else:
-            opt['h']()              # Run handler without arguments
+            if 'ha' in opt:
+              opt['h'](**opt['ha'])   # Run handler with arguments
+            else:
+              opt['h']()              # Run handler without arguments
 
-        processed = True
-        break
+          processed = True
+          break
 
     if not processed:
       ui.keyPressMessage('Unknown command {:s} ({:d})'.format(char, key), key, char)
@@ -110,11 +109,25 @@ class Menu(object):
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def showOptions(self):
     ''' Show option list '''
-    print('-----------------------------------------------')
+    txt = ''
     for opt in self.options:
-      keyName = '{:}'.format(opt['k'])
-      print('{:10s} {:}'.format(keyName, opt['n']))
-    print('-----------------------------------------------')
+      if 'SECTION' in opt:
+        txt += '\n{:}\n{:}\n'.format(
+          ui.color(opt['SECTION'], 'ui.menuSection'),
+          ui.color(ui.gMSG_SEPARATOR, 'ui.menuSection'),
+        )
+      else:
+        keyName = '{:}'.format(opt['k'])
+        optName = '{:15s} {:}'.format(keyName, opt['n'])
+
+        if type(opt['h']) is Menu:
+          optName = ui.color(optName, 'ui.menuSubmenu')
+        else:
+          optName = ui.color(optName, 'ui.menuItem')
+
+        txt += optName + '\n'
+
+    ui.logBlock(txt)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

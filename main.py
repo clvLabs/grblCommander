@@ -791,17 +791,22 @@ def setupMenu():
   ])
 
   resetSubmenu = menu.Menu(kb, [
+    {'SECTION':'Current position'},
     {'k':'xX',   'n':'Reset X to current position',                'h':mch.resetWCOAxis,      'ha':{'axis':'x', 'val':'curr'}},
     {'k':'yY',   'n':'Reset Y to current position',                'h':mch.resetWCOAxis,      'ha':{'axis':'y', 'val':'curr'}},
     {'k':'wW',   'n':'Reset XY to current position',               'h':mch.resetWCO,          'ha':{'x':'curr', 'y':'curr'}},
     {'k':'zZ',   'n':'Reset Z to current position',                'h':mch.resetWCOAxis,      'ha':{'axis':'z', 'val':'curr'}},
     {'k':'aA',   'n':'Reset XYZ to current position',              'h':mch.resetWCO,          'ha':{'x':'curr', 'y':'curr', 'z':'curr'}},
-    {'k':'pP',   'n':'Reset Z to current PRB:Z',                   'h':resetZToCurrProbeZ},
-    {'k':'mM',   'n':'Manual [XYZ] reset',                         'h':manualXYZReset},
+
+    {'SECTION':'Machine limits'},
     {'k':'-',    'n':'Reset XY to machine home',                   'h':mch.resetWCO, 'ha':{'x':'home', 'y':'home'}},
     {'k':'+',    'n':'Reset XY to max machine travel',             'h':mch.resetWCO, 'ha':{'x':'away', 'y':'away'}},
     {'k':'/',    'n':'Reset XYZ to machine home',                  'h':mch.resetWCO, 'ha':{'x':'home', 'y':'home', 'z':'home'}},
     {'k':'*',    'n':'Reset XY to max machine travel, Z to home',  'h':mch.resetWCO, 'ha':{'x':'away', 'y':'away', 'z':'home'}},
+
+    {'SECTION':'Misc.'},
+    {'k':'pP',   'n':'Reset Z to current PRB:Z',                   'h':resetZToCurrProbeZ},
+    {'k':'mM',   'n':'Manual [XYZ] reset',                         'h':manualXYZReset},
     {'k':'gG',   'n':'Get GCode command for current WCO',          'h':getWCOResetCommand},
   ])
 
@@ -812,12 +817,14 @@ def setupMenu():
   ])
 
   mnu.setOptions([
+    {'SECTION':'General commands'},
     {'k':'qQ',  'n':'Quit',                                       'h':mnu.quit},
     {'k':'',    'n':'***Reset serial connection',                    'h':NOT_IMPLEMENTED},
     {'k':'',    'n':'***grbl soft reset',                            'h':NOT_IMPLEMENTED},
     {'k':'=',   'n':'Lock grblCommander',                         'h':lockGrblCommander},
     {'k':'cC',  'n':'Clear screen',                               'h':ui.clearScreen},
 
+    {'SECTION':'Info'},
     {'k':'hH',  'n':'Show help',                                  'h':mnu.showOptions},
     {'k':'',    'n':'***Force status re-query',                      'h':NOT_IMPLEMENTED},
     {'k':'s',   'n':'Show current status (short)',                'h':showMachineStatus},
@@ -827,6 +834,7 @@ def setupMenu():
     {'k':'v',   'n':'Set verbose level -',                        'h':changeVerboseLevel, 'ha':{'inc':-1}},
     {'k':'V',   'n':'Set verbose level +',                        'h':changeVerboseLevel, 'ha':{'inc':+1}},
 
+    {'SECTION':'Machine control'},
     {'k':'0',   'n':'Go home (submenu)',                          'h':goHomeSubmenu},
     {'k':'.',   'n':'Absolute move to table position (submenu)',  'h':absoluteTablePositionSubmenu},
     {'k':'gfxyzGFXYZ$',  'n':'***Send raw GCode command',           'h':NOT_IMPLEMENTED},
@@ -838,6 +846,7 @@ def setupMenu():
     {'k':'mM',  'n':'Macro (submenu)',                            'h':macroSubmenu},
     {'k':'tT',  'n':'Tests (submenu)',                            'h':testsSubmenu},
 
+    {'SECTION':'Jog'},
     {'k':'1',   'n':'Jog - [DL]',                                 'h':jogXY, 'ha':{'d':'DL'}},
     {'k':'2',   'n':'Jog - [D]',                                  'h':jogXY, 'ha':{'d':'D'}},
     {'k':'3',   'n':'Jog - [DR]',                                 'h':jogXY, 'ha':{'d':'DR'}},
@@ -851,6 +860,7 @@ def setupMenu():
     {'k':'/',   'n':'Set XY jog distance',                        'h':setXYJogDistance},
     {'k':'*',   'n':'Set Z jog distance',                         'h':setZJogDistance},
 
+    {'SECTION':'Joystick'},
     {'k':'j',   'n':'Enable/disable joystick',                    'h':toggleJoystickEnable},
     {'k':'J',   'n':'Restart joystick connection',                'h':restartJoystickConnection},
     {'k':'',    'n':'***JOYSTICK KEYS',                            'h':NOT_IMPLEMENTED},

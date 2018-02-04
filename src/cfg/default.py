@@ -147,6 +147,9 @@ cfg = {
         'confirmMsg':        'magenta+',
         'finishedMsg':       'white+, green',
         'waiting':           'cyan+',
+        'menuItem':          'white',
+        'menuSubmenu':       'white+',
+        'menuSection':       'green+',
       },
 
       'macro': {
