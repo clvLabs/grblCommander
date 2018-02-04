@@ -89,6 +89,16 @@ class Menu(object):
           if type(opt['h']) is Menu:
             opt['h'].submenu()        # Run handler as submenu
           else:
+            # EXTRA handler arguments
+            if 'xha' in opt:
+              if not 'ha' in opt:
+                opt['ha'] = {}
+              for k in opt['xha']:
+                v = opt['xha'][k]
+                if k == 'inChar':
+                  opt['ha'][v] = char
+
+            # Regular handler arguments
             if 'ha' in opt:
               opt['h'](**opt['ha'])   # Run handler with arguments
             else:

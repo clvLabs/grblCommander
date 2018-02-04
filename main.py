@@ -594,10 +594,8 @@ def getWCOResetCommand():
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def sendRawGCodeCommand(char):
+def sendRawGCodeCommand(char=''):
   ui.inputMsg('Enter GCode command...')
-  if char == ' ':
-    char = ''
   userCommand = char + kb.input(char)
   sendCommand(userCommand)
 
@@ -818,52 +816,52 @@ def setupMenu():
 
   mnu.setOptions([
     {'SECTION':'General commands'},
-    {'k':'qQ',  'n':'Quit',                                       'h':mnu.quit},
-    {'k':'',    'n':'***Reset serial connection',                    'h':NOT_IMPLEMENTED},
-    {'k':'',    'n':'***grbl soft reset',                            'h':NOT_IMPLEMENTED},
-    {'k':'=',   'n':'Lock grblCommander',                         'h':lockGrblCommander},
-    {'k':'cC',  'n':'Clear screen',                               'h':ui.clearScreen},
+    {'k':'qQ',           'n':'Quit',                         'h':mnu.quit},
+    {'k':'',             'n':'***Reset serial connection',   'h':NOT_IMPLEMENTED},
+    {'k':'',             'n':'***grbl soft reset',           'h':NOT_IMPLEMENTED},
+    {'k':'=',            'n':'Lock grblCommander',           'h':lockGrblCommander},
+    {'k':'cC',           'n':'Clear screen',                 'h':ui.clearScreen},
 
     {'SECTION':'Info'},
-    {'k':'hH',  'n':'Show help',                                  'h':mnu.showOptions},
-    {'k':'',    'n':'***Force status re-query',                      'h':NOT_IMPLEMENTED},
-    {'k':'s',   'n':'Show current status (short)',                'h':showMachineStatus},
-    {'k':'S',   'n':'Show current status (LONG)',                 'h':showMachineLongStatus},
-    {'k':'@',   'n':'Show current status (FULL)',                 'h':showMachineFullStatus},
-    {'k':'eE',  'n':'Show grbl settings',                         'h':showGrblSettings},
-    {'k':'v',   'n':'Set verbose level -',                        'h':changeVerboseLevel, 'ha':{'inc':-1}},
-    {'k':'V',   'n':'Set verbose level +',                        'h':changeVerboseLevel, 'ha':{'inc':+1}},
+    {'k':'hH',           'n':'Show help',                    'h':mnu.showOptions},
+    {'k':'',             'n':'***Force status re-query',     'h':NOT_IMPLEMENTED},
+    {'k':'s',            'n':'Show current status (short)',  'h':showMachineStatus},
+    {'k':'S',            'n':'Show current status (LONG)',   'h':showMachineLongStatus},
+    {'k':'@',            'n':'Show current status (FULL)',   'h':showMachineFullStatus},
+    {'k':'eE',           'n':'Show grbl settings',           'h':showGrblSettings},
+    {'k':'v',            'n':'Set verbose level -',          'h':changeVerboseLevel, 'ha':{'inc':-1}},
+    {'k':'V',            'n':'Set verbose level +',          'h':changeVerboseLevel, 'ha':{'inc':+1}},
 
     {'SECTION':'Machine control'},
-    {'k':'0',   'n':'Go home (submenu)',                          'h':goHomeSubmenu},
-    {'k':'.',   'n':'Absolute move to table position (submenu)',  'h':absoluteTablePositionSubmenu},
-    {'k':'gfxyzGFXYZ$',  'n':'***Send raw GCode command',           'h':NOT_IMPLEMENTED},
-    {'k':' $',  'n':'Send raw GCode command (start EMPTY)',           'h':sendRawGCodeCommand, 'ha':{'char':''}},
-    {'k':'lL',  'n':'Send raw GCode command (FORCE RELATIVE)',    'h':sendRawGCodeCommandRELATIVE},
-    {'k':'º',   'n':'Repeat last GCode command',                  'h':repeatLastGCodeCommand},
-    {'k':'rR',  'n':'Reset work coordinate (submenu)',            'h':resetSubmenu},
-    {'k':'pP',  'n':'Probe (submenu)',                            'h':probeSubmenu},
-    {'k':'mM',  'n':'Macro (submenu)',                            'h':macroSubmenu},
-    {'k':'tT',  'n':'Tests (submenu)',                            'h':testsSubmenu},
+    {'k':'0',            'n':'Go home (*)',                             'h':goHomeSubmenu},
+    {'k':'.',            'n':'Absolute move to table position (*)',     'h':absoluteTablePositionSubmenu},
+    {'k':'gfxyzGFXYZ$',  'n':'Send raw GCode command',                  'h':sendRawGCodeCommand, 'xha':{'inChar':'char'}},
+    {'k':' ',            'n':'Send raw GCode command (start EMPTY)',    'h':sendRawGCodeCommand},
+    {'k':'lL',           'n':'Send raw GCode command (FORCE RELATIVE)', 'h':sendRawGCodeCommandRELATIVE},
+    {'k':'º',            'n':'Repeat last GCode command',               'h':repeatLastGCodeCommand},
+    {'k':'rR',           'n':'Reset work coordinate (*)',               'h':resetSubmenu},
+    {'k':'pP',           'n':'Probe (*)',                               'h':probeSubmenu},
+    {'k':'mM',           'n':'Macro (*)',                               'h':macroSubmenu},
+    {'k':'tT',           'n':'Tests (*)',                               'h':testsSubmenu},
 
     {'SECTION':'Jog'},
-    {'k':'1',   'n':'Jog - [DL]',                                 'h':jogXY, 'ha':{'d':'DL'}},
-    {'k':'2',   'n':'Jog - [D]',                                  'h':jogXY, 'ha':{'d':'D'}},
-    {'k':'3',   'n':'Jog - [DR]',                                 'h':jogXY, 'ha':{'d':'DR'}},
-    {'k':'4',   'n':'Jog - [L]',                                  'h':jogXY, 'ha':{'d':'L'}},
-    {'k':'6',   'n':'Jog - [R]',                                  'h':jogXY, 'ha':{'d':'R'}},
-    {'k':'7',   'n':'Jog - [UL]',                                 'h':jogXY, 'ha':{'d':'UL'}},
-    {'k':'8',   'n':'Jog - [U]',                                  'h':jogXY, 'ha':{'d':'U'}},
-    {'k':'9',   'n':'Jog - [UR]',                                 'h':jogXY, 'ha':{'d':'UR'}},
-    {'k':'-',   'n':'Jog - (Z) [U]',                              'h':jogZ, 'ha':{'d':'U'}},
-    {'k':'+',   'n':'Jog - (Z) [D]',                              'h':jogZ, 'ha':{'d':'D'}},
-    {'k':'/',   'n':'Set XY jog distance',                        'h':setXYJogDistance},
-    {'k':'*',   'n':'Set Z jog distance',                         'h':setZJogDistance},
+    {'k':'1',   'n':'Jog - [DL]',          'h':jogXY, 'ha':{'d':'DL'}},
+    {'k':'2',   'n':'Jog - [D]',           'h':jogXY, 'ha':{'d':'D'}},
+    {'k':'3',   'n':'Jog - [DR]',          'h':jogXY, 'ha':{'d':'DR'}},
+    {'k':'4',   'n':'Jog - [L]',           'h':jogXY, 'ha':{'d':'L'}},
+    {'k':'6',   'n':'Jog - [R]',           'h':jogXY, 'ha':{'d':'R'}},
+    {'k':'7',   'n':'Jog - [UL]',          'h':jogXY, 'ha':{'d':'UL'}},
+    {'k':'8',   'n':'Jog - [U]',           'h':jogXY, 'ha':{'d':'U'}},
+    {'k':'9',   'n':'Jog - [UR]',          'h':jogXY, 'ha':{'d':'UR'}},
+    {'k':'-',   'n':'Jog - (Z) [U]',       'h':jogZ, 'ha':{'d':'U'}},
+    {'k':'+',   'n':'Jog - (Z) [D]',       'h':jogZ, 'ha':{'d':'D'}},
+    {'k':'/',   'n':'Set XY jog distance', 'h':setXYJogDistance},
+    {'k':'*',   'n':'Set Z jog distance',  'h':setZJogDistance},
 
     {'SECTION':'Joystick'},
-    {'k':'j',   'n':'Enable/disable joystick',                    'h':toggleJoystickEnable},
-    {'k':'J',   'n':'Restart joystick connection',                'h':restartJoystickConnection},
-    {'k':'',    'n':'***JOYSTICK KEYS',                            'h':NOT_IMPLEMENTED},
+    {'k':'j',   'n':'Enable/disable joystick',     'h':toggleJoystickEnable},
+    {'k':'J',   'n':'Restart joystick connection', 'h':restartJoystickConnection},
+    {'k':'',    'n':'***JOYSTICK KEYS',            'h':NOT_IMPLEMENTED},
   ])
 
   #   ui.keyPressMessage('9 - Jog - [UR] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
