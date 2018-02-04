@@ -11,6 +11,7 @@ import pprint
 
 import src.gc.utils as ut
 import src.gc.ui as ui
+import src.gc.menu as menu
 import src.gc.keyboard as kb
 import src.gc.joystick as joystick
 import src.gc.grbl.grbl as grbl
@@ -27,6 +28,9 @@ mcrCfg = cfg['macro']
 
 # Current version
 gVERSION = '0.11.0'
+
+# menu manager
+mnu = menu.Menu()
 
 # grbl machine manager
 mch = grbl.Grbl(cfg)
@@ -219,7 +223,20 @@ def showMachineFullStatus():
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def lockGrblCommander():
+  while not ui.userConfirm(
+    '================= grblCommander is LOCKED =================',
+    'unlock'):
+    pass
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def processUserInput():
+  return mnu.process()
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def _processUserInput():
   global gXYJog
   global gZJog
 
@@ -353,137 +370,12 @@ def processUserInput():
 
   else:  # Standard keys
 
-    if char in 'qQ':
-      ui.keyPressMessage('qQ - Quit', key, char)
-      return False
-
-    elif char in 'hH':
-      ui.keyPressMessage('hH - Show help text', key, char)
-      showHelp()
+    if False:
+      pass
 
     elif char == '?' or key == kb.ENTER:
       ui.keyPressMessage('<ENTER>/? - Force status re-query', key, char)
       mch.viewMachineStatus()
-
-    elif char == '=':
-      ui.keyPressMessage('= - Lock grblCommander', key, char)
-      while not ui.userConfirm(
-        '================= grblCommander is LOCKED =================',
-        'unlock'):
-        pass
-
-    elif char in 'pP':
-      ui.keyPressMessage('pP - Probe', key, char)
-
-      ui.logBlock(
-      '''
-      Available commands:
-
-      1   - Basic probe
-      2   - Two stage probe
-      3   - Three stage probe
-      ''')
-
-      ui.inputMsg('Select command...')
-      char = kb.getch()
-      key = kb.ch2key(char)
-
-      if char == '1':
-        ui.keyPressMessage('1 - Basic probe', key, char)
-        prb.basic()
-
-      elif char == '2':
-        ui.keyPressMessage('2 - Two stage probe', key, char)
-        prb.twoStage()
-
-      elif char == '3':
-        ui.keyPressMessage('3 - Three stage probe', key, char)
-        prb.threeStage()
-
-      else:
-        ui.keyPressMessage('Unknown command', key, char)
-
-
-    elif char in 'mM':
-      ui.keyPressMessage('mM - Macro', key, char)
-
-      ui.logBlock(
-      '''
-      Available commands:
-
-      lL  - List macros
-      rR  - Run macro
-      sS  - Show macro
-      xX  - Reload macros
-      ''')
-
-      ui.inputMsg('Select command...')
-      char = kb.getch()
-      key = kb.ch2key(char)
-
-      if char in 'lL':
-        ui.keyPressMessage('lL - List macros', key, char)
-        mcr.list()
-
-      elif char in 'rR':
-        ui.keyPressMessage('rR - Run macro', key, char)
-        ui.inputMsg('Enter macro name...')
-        macroName=kb.input()
-        mcr.run(macroName)
-
-      elif char in 'sS':
-        ui.keyPressMessage('sS - Show macro', key, char)
-        ui.inputMsg('Enter macro name...')
-        macroName=kb.input()
-        mcr.show(macroName)
-
-      elif char in 'xX':
-        ui.keyPressMessage('xX - Reload macros', key, char)
-        ui.logTitle('Reloading macros')
-        mcr.load()
-
-      else:
-        ui.keyPressMessage('Unknown command', key, char)
-
-    elif char in 'gfxyzGFXYZ$ ':
-      ui.keyPressMessage(' - Send raw GCode command', key, char)
-      ui.inputMsg('Enter GCode command...')
-      if char == ' ':
-        char = ''
-      userCommand = char + kb.input(char)
-      sendCommand(userCommand)
-
-    elif char in 'lL':
-      ui.keyPressMessage('lL - Send raw GCode command (FORCE RELATIVE)', key, char)
-      savedDistanceMode = mch.status['parserState']['distanceMode']['val']
-      ui.inputMsg('Enter GCode command...')
-      userCommand = kb.input()
-      if savedDistanceMode != 'G91':
-        userCommand = 'G91 ' + userCommand
-      sendCommand(userCommand)
-      if savedDistanceMode != 'G91':
-        sendCommand(savedDistanceMode)
-
-
-    elif char == 'º':
-      ui.keyPressMessage('º - Repeat last GCode command', key, char)
-      sendCommand(gLastGCodeCommand)
-
-    elif char == 's':
-      ui.keyPressMessage('s - Show current status (short)', key, char)
-      showMachineStatus()
-
-    elif char == 'S':
-      ui.keyPressMessage('S - Show current status (LONG)', key, char)
-      showMachineLongStatus()
-
-    elif char == '@':
-      ui.keyPressMessage('@ - Show current status (FULL)', key, char)
-      showMachineFullStatus()
-
-    elif char in 'eE':
-      ui.keyPressMessage('eE - Show grbl settings', key, char)
-      showGrblSettings()
 
     elif key == kb.CTRL_R:
       ui.keyPressMessage('<CTRL>r - Reset serial connection', key, char)
@@ -493,400 +385,6 @@ def processUserInput():
     elif key == kb.CTRL_X:
       ui.keyPressMessage('<CTRL>x - grbl soft reset', key, char)
       mch.softReset()
-
-    elif char in 'cC':
-      ui.keyPressMessage('cC - Clear screen', key, char)
-      ui.clearScreen()
-
-    elif char in 'tT':
-      ui.keyPressMessage('tT - Tests', key, char)
-
-      ui.logBlock(
-      '''
-      Available commands:
-
-      sS  - Table position scan
-      lL  - Base levelling holes
-      zZ  - Zig-zag pattern
-      *   - DUMMY Test
-      ''')
-
-      ui.inputMsg('Select command...')
-      char = kb.getch()
-      key = kb.ch2key(char)
-
-      if char in 'sS':
-        ui.keyPressMessage('sS - Table position scan', key, char)
-        tst.tablePositionScan()
-
-      elif char in 'lL':
-        ui.keyPressMessage('lL - Base levelling holes', key, char)
-        tst.baseLevelingHoles()
-
-      elif char in 'zZ':
-        ui.keyPressMessage('zZ - Zig-zag pattern', key, char)
-        tst.zigZagPattern()
-
-      elif char == '*':
-        ui.keyPressMessage('* - DUMMY Test', key, char)
-        tst.dummy()
-
-      else:
-        ui.keyPressMessage('Unknown command', key, char)
-
-    elif char in 'rR':
-      ui.keyPressMessage('rR - Reset work coordinate', key, char)
-
-      ui.logBlock(
-      '''
-      Available commands:
-
-      xX  - Reset X to current position
-      yY  - Reset Y to current position
-      wW  - Reset XY to current position
-      zZ  - Reset Z to current position
-      aA  - Reset XYZ to current position
-      pP  - Reset Z to current PRB:Z
-      mM  - Manual [XYZ] reset
-      -   - Reset XY to machine home
-      +   - Reset XY to max machine travel
-      /   - Reset XYZ to machine home
-      *   - Reset XY to max machine travel, Z to home
-      gG  - Get GCode command for current WCO
-      ''')
-
-      ui.inputMsg('Select command...')
-      char = kb.getch()
-      key = kb.ch2key(char)
-      processed = True
-
-      if char in 'xX':
-        ui.keyPressMessage('xX - Reset X to current position', key, char)
-        mch.resetWCOAxis(char.lower(), 'curr')
-
-      elif char in 'yY':
-        ui.keyPressMessage('yY - Reset Y to current position', key, char)
-        mch.resetWCOAxis(char.lower(), 'curr')
-
-      elif char in 'wW':
-        ui.keyPressMessage('wW - Reset XY to current position', key, char)
-        mch.resetWCO('curr','curr')
-
-      elif char in 'zZ':
-        ui.keyPressMessage('zZ - Reset Z to current position', key, char)
-        mch.resetWCOAxis(char.lower(), 'curr')
-
-      elif char in 'aA':
-        ui.keyPressMessage('aA - Reset XYZ to current position', key, char)
-        mch.resetWCO('curr', 'curr', 'curr')
-
-      elif char in 'pP':
-        ui.keyPressMessage('pP - Reset Z to current PRB:Z', key, char)
-        mch.resetWCOAxis('z', prb.axisPos('z'))
-
-      elif char in 'mM':
-        ui.keyPressMessage('mM - Manual [XYZ] reset', key, char)
-        ui.inputMsg('Enter GCode command...')
-        prefix = mch.getResetWCOStr()
-        userCommand = prefix + kb.input(prefix)
-        sendCommand(userCommand)
-
-      elif char == '-':
-        ui.keyPressMessage('- - Reset XY to machine home', key, char)
-        mch.resetWCO('home','home')
-
-      elif char == '+':
-        ui.keyPressMessage('+ - Reset XY to max machine travel', key, char)
-        mch.resetWCO('away','away')
-
-      elif char == '/':
-        ui.keyPressMessage('/ - Reset XYZ to machine home', key, char)
-        mch.resetWCO('home','home','home')
-
-      elif char == '*':
-        ui.keyPressMessage('* - Reset XY to max machine travel, Z to home', key, char)
-        mch.resetWCO('away','away','away')
-
-      elif char in 'gG':
-        ui.keyPressMessage('gG - Get GCode command for current WCO', key, char)
-        cmd = mch.getResetWCOStr('wco','wco','wco')
-        ui.log(cmd, c='ui.msg')
-
-      else:
-        processed = False
-        ui.keyPressMessage('Unknown command', key, char)
-
-      if processed:
-        mch.getMachineStatus()
-
-    elif char == 'j':
-      ui.keyPressMessage('j - Enable/disable joystick', key, char)
-      joy.enabled = not joy.enabled
-
-      ui.log('Joystick [{:s}] [{:s}]\n'.format(
-        ui.color('CONNECTED', 'ui.successMsg') if joy.connected else ui.color('DISCONNECTED', 'ui.errorMsg'),
-        ui.color('ENABLED', 'ui.successMsg') if joy.enabled else ui.color('DISABLED', 'ui.errorMsg')
-      ))
-
-    elif char == 'J':
-      ui.keyPressMessage('J - Restart joystick connection', key, char)
-      joy.restart()
-
-      ui.log()
-      ui.log('Joystick [{:s}] [{:s}]\n'.format(
-        ui.color('CONNECTED', 'ui.successMsg') if joy.connected else ui.color('DISCONNECTED', 'ui.errorMsg'),
-        ui.color('ENABLED', 'ui.successMsg') if joy.enabled else ui.color('DISABLED', 'ui.errorMsg')
-      ))
-
-    elif char == '-':
-      ui.keyPressMessage('- - Jog (Z) up ({:} {:})'.format(gZJog, ps['units']['desc']), key, char)
-      mch.moveRelative(x=0,y=0,z=gZJog)
-
-    elif char == '+':
-      ui.keyPressMessage('+ - Jog (Z) down ({:} {:})'.format(gZJog, ps['units']['desc']), key, char)
-      mch.moveRelative(x=0,y=0,z=gZJog*-1)
-
-    elif char == '0':
-      ui.keyPressMessage('0 - Go home', key, char)
-
-      ui.logBlock(
-      '''
-      Available commands:
-
-      <numpad>0 - Safe machine home (Z0 + X0Y0)
-      mM        - Machine home (submenu)
-      wW        - WCO home (submenu)
-      ''')
-
-      ui.inputMsg('Select command...')
-      char = kb.getch()
-      key = kb.ch2key(char)
-
-      if char == '0':
-        ui.keyPressMessage('<numpad>0 - Safe machine home (Z0 + X0Y0)', key, char)
-        mch.goToMachineHome()
-
-
-      elif char in 'mM':
-        ui.keyPressMessage('m - Machine home', key, char)
-
-        ui.logBlock(
-        '''
-        Available commands:
-
-        xX        - x
-        yY        - y
-        zZ        - z
-        wW        - xy
-        aA        - xyz
-        ''')
-
-        ui.inputMsg('Select command...')
-        char = kb.getch()
-        key = kb.ch2key(char)
-
-        if char in 'xX':
-          ui.keyPressMessage('x - x', key, char)
-          mch.goToMachineHome_X()
-        elif char in 'yY':
-          ui.keyPressMessage('y - y', key, char)
-          mch.goToMachineHome_Y()
-        elif char in 'zZ':
-          ui.keyPressMessage('z - z', key, char)
-          mch.goToMachineHome_Z()
-        elif char in 'wW':
-          ui.keyPressMessage('w - xy', key, char)
-          mch.goToMachineHome_XY()
-        elif char in 'aA':
-          ui.keyPressMessage('a - xyz', key, char)
-          mch.goToMachineHome()
-        else:
-          ui.keyPressMessage('Unknown command', key, char)
-
-      elif char in 'wW':
-        ui.keyPressMessage('w - WCO home', key, char)
-
-        ui.logBlock(
-        '''
-        Available commands:
-
-        xX        - x
-        yY        - y
-        zZ        - z
-        wW        - xy
-        aA        - xyz
-        ''')
-
-        ui.inputMsg('Select command...')
-        char = kb.getch()
-        key = kb.ch2key(char)
-
-        if char in 'xX':
-          ui.keyPressMessage('x - x', key, char)
-          mch.sendWait('G0X0')
-        elif char in 'yY':
-          ui.keyPressMessage('y - y', key, char)
-          mch.sendWait('G0Y0')
-        elif char in 'zZ':
-          ui.keyPressMessage('z - z', key, char)
-          mch.sendWait('G0Z0')
-        elif char in 'wW':
-          ui.keyPressMessage('w - xy', key, char)
-          mch.sendWait('G0X0Y0')
-        elif char in 'aA':
-          ui.keyPressMessage('a - xyz', key, char)
-          mch.sendWait('G0X0Y0Z0')
-        else:
-          ui.keyPressMessage('Unknown command', key, char)
-
-      else:
-        ui.keyPressMessage('Unknown command', key, char)
-
-    elif char == '1':
-      ui.keyPressMessage('1 - Jog - [DL] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
-      mch.moveRelative(x=gXYJog*-1,y=gXYJog*-1)
-
-    elif char == '2':
-      ui.keyPressMessage('2 - Jog - [D] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
-      mch.moveRelative(y=gXYJog*-1)
-
-    elif char == '3':
-      ui.keyPressMessage('3 - Jog - [DR] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
-      mch.moveRelative(x=gXYJog,y=gXYJog*-1)
-
-    elif char == '4':
-      ui.keyPressMessage('4 - Jog - [L] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
-      mch.moveRelative(x=gXYJog*-1)
-
-    elif char == '6':
-      ui.keyPressMessage('6 - Jog - [R] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
-      mch.moveRelative(x=gXYJog)
-
-    elif char == '7':
-      ui.keyPressMessage('7 - Jog - [UL] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
-      mch.moveRelative(x=gXYJog*-1,y=gXYJog)
-
-    elif char == '8':
-      ui.keyPressMessage('8 - Jog - [U] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
-      mch.moveRelative(y=gXYJog)
-
-    elif char == '9':
-      ui.keyPressMessage('9 - Jog - [UR] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
-      mch.moveRelative(x=gXYJog,y=gXYJog)
-
-    elif char == '.':
-      ui.keyPressMessage('. - Absolute move to table position', key, char)
-
-      minX = mch.getMin('x')
-      minY = mch.getMin('y')
-      maxX = mch.getMax('x')
-      maxY = mch.getMax('y')
-      wX = abs(maxX-minX) if minX<0 else abs(minX-maxX)
-      wY = abs(maxY-minY) if minY<0 else abs(minY-maxY)
-      cX = minX-(wX/2) if minX>0 else minX+(wX/2)
-      cY = minY-(wY/2) if minX>0 else minY+(wY/2)
-
-      ui.logBlock(
-      '''
-      Available commands:
-
-      <numpad>  - Absolute table positions
-      .         - One axis only (submenu)
-      ''')
-
-      ui.inputMsg('Select command...')
-      char = kb.getch()
-      key = kb.ch2key(char)
-
-      if char == '.':
-        ui.keyPressMessage('. - ONE AXIS ONLY', key, char)
-
-        ui.logBlock(
-        '''
-        Available commands:
-
-        <numpad>46  - Absolute X axis limits
-        <numpad>28  - Absolute Y axis limits
-        ''')
-
-        ui.inputMsg('Select command...')
-        char = kb.getch()
-        key = kb.ch2key(char)
-
-        if char == '2':
-          ui.keyPressMessage('2 - ONE AXIS ONLY - Absolute move to axis limits - [B]', key, char)
-          mch.moveAbsolute(y=minY)
-        elif char == '4':
-          ui.keyPressMessage('4 - ONE AXIS ONLY - Absolute move to axis limits - [L]', key, char)
-          mch.moveAbsolute(x=minX)
-        elif char == '6':
-          ui.keyPressMessage('6 - ONE AXIS ONLY - Absolute move to axis limits - [R]', key, char)
-          mch.moveAbsolute(x=maxX)
-        elif char == '8':
-          ui.keyPressMessage('8 - ONE AXIS ONLY - Absolute move to axis limits - [U]', key, char)
-          mch.moveAbsolute(y=maxY)
-        else:
-          ui.keyPressMessage('Unknown command', key, char)
-
-      elif char == '1':
-        ui.keyPressMessage('1 - Absolute move to table position - [BL]', key, char)
-        mch.moveAbsolute(x=minX,y=minY)
-      elif char == '2':
-        ui.keyPressMessage('2 - Absolute move to table position - [BC]', key, char)
-        mch.moveAbsolute(x=cX,y=minY)
-      elif char == '3':
-        ui.keyPressMessage('3 - Absolute move to table position - [BR]', key, char)
-        mch.moveAbsolute(x=maxX,y=minY)
-      elif char == '4':
-        ui.keyPressMessage('4 - Absolute move to table position - [CL]', key, char)
-        mch.moveAbsolute(x=minX,y=cY)
-      elif char == '5':
-        ui.keyPressMessage('5 - Absolute move to table position - [CC]', key, char)
-        mch.moveAbsolute(x=cX,y=cY)
-      elif char == '6':
-        ui.keyPressMessage('6 - Absolute move to table position - [CR]', key, char)
-        mch.moveAbsolute(x=maxX,y=cY)
-      elif char == '7':
-        ui.keyPressMessage('7 - Absolute move to table position - [UL]', key, char)
-        mch.moveAbsolute(x=minX,y=maxY)
-      elif char == '8':
-        ui.keyPressMessage('8 - Absolute move to table position - [UC]', key, char)
-        mch.moveAbsolute(x=cX,y=maxY)
-      elif char == '9':
-        ui.keyPressMessage('9 - Absolute move to table position - [UR]', key, char)
-        mch.moveAbsolute(x=maxX,y=maxY)
-      else:
-        ui.keyPressMessage('Unknown command', key, char)
-
-    elif char == '/':
-      ui.keyPressMessage('/ - Set jog distance (XY)', key, char)
-      gXYJog = ui.getUserInput(
-        'Distance ({:})'.format(gXYJog),
-        float,
-        gXYJog)
-      showMachineStatus()
-
-    elif char == '*':
-      ui.keyPressMessage('* - Set jog distance (Z)', key, char)
-      gZJog = ui.getUserInput(
-        'Distance ({:})'.format(gZJog),
-        float,
-        gZJog)
-      showMachineStatus()
-
-    elif char == 'V':
-      ui.keyPressMessage('V - Set verbose level+', key, char)
-      tempVerboseLevel = ut.genericValueChanger(  ui.getVerboseLevel(), +1, ui.gMIN_VERBOSE_LEVEL, ui.gMAX_VERBOSE_LEVEL,
-                            loop=True, valueName='Verbose level',
-                            valueFormatter=lambda level : '{:d} {:s}'.format(level,ui.getVerboseLevelStr(level)) )
-      ui.setVerboseLevel(tempVerboseLevel)
-
-    elif char == 'v':
-      ui.keyPressMessage('v - Set verbose level-', key, char)
-      tempVerboseLevel = ut.genericValueChanger(  ui.getVerboseLevel(), -1, ui.gMIN_VERBOSE_LEVEL, ui.gMAX_VERBOSE_LEVEL,
-                          loop=True, valueName='Verbose level',
-                          valueFormatter=lambda level : '{:d} {:s}'.format(level,ui.getVerboseLevelStr(level)) )
-      ui.setVerboseLevel(tempVerboseLevel)
 
     else:  # Rest of keys
       processed = False
@@ -1021,6 +519,355 @@ def onParserStateChanged():
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def jogXY(d, tx=None):
+  ''' Machine relative jog XY.
+      - d : direction(string) 'UDLR'
+      - t : transform (lambda)
+  '''
+  d = d.upper()
+  x = 0
+  y = 0
+
+  if 'U' in d:  y = gXYJog
+  if 'D' in d:  y = gXYJog * -1
+  if 'L' in d:  x = gXYJog * -1
+  if 'R' in d:  x = gXYJog
+
+  if tx:
+    x = tx(x)
+    y = tx(y)
+
+  mch.moveRelative(x=x, y=y)
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def jogZ(d, tx=None):
+  ''' Machine relative jog XY.
+      - d : direction(string) 'UDLR'
+      - t : transform (lambda)
+  '''
+  d = d.upper()
+  z = 0
+
+  if 'U' in d:  z = gZJog
+  if 'D' in d:  z = gZJog * -1
+
+  if tx:
+    z = tx(z)
+
+  mch.moveRelative(z=z)
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def runMacro():
+  ui.inputMsg('Enter macro name...')
+  macroName=kb.input()
+  mcr.run(macroName)
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def showMacro():
+  ui.inputMsg('Enter macro name...')
+  macroName=kb.input()
+  mcr.show(macroName)
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def goToWCHOHome():
+  mch.sendWait('G0X0Y0')
+  mch.sendWait('G0Z0')
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def repeatLastGCodeCommand():
+  sendCommand(gLastGCodeCommand)
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def resetZToCurrProbeZ():
+  mch.resetWCOAxis('z', prb.axisPos('z'))
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def manualXYZReset():
+  ui.inputMsg('Enter GCode command...')
+  prefix = mch.getResetWCOStr()
+  userCommand = prefix + kb.input(prefix)
+  sendCommand(userCommand)
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def getWCOResetCommand():
+  cmd = mch.getResetWCOStr('wco','wco','wco')
+  ui.log(cmd, c='ui.msg')
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def sendRawGCodeCommand(char):
+  ui.inputMsg('Enter GCode command...')
+  if char == ' ':
+    char = ''
+  userCommand = char + kb.input(char)
+  sendCommand(userCommand)
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def sendRawGCodeCommandRELATIVE():
+  savedDistanceMode = mch.status['parserState']['distanceMode']['val']
+  ui.inputMsg('Enter GCode command...')
+  userCommand = kb.input()
+  if savedDistanceMode != 'G91':
+    userCommand = 'G91 ' + userCommand
+  sendCommand(userCommand)
+  if savedDistanceMode != 'G91':
+    sendCommand(savedDistanceMode)
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def toggleJoystickEnable():
+  joy.enabled = not joy.enabled
+
+  ui.log('Joystick [{:s}] [{:s}]\n'.format(
+    ui.color('CONNECTED', 'ui.successMsg') if joy.connected else ui.color('DISCONNECTED', 'ui.errorMsg'),
+    ui.color('ENABLED', 'ui.successMsg') if joy.enabled else ui.color('DISABLED', 'ui.errorMsg')
+  ))
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def restartJoystickConnection():
+  joy.restart()
+
+  ui.log()
+  ui.log('Joystick [{:s}] [{:s}]\n'.format(
+    ui.color('CONNECTED', 'ui.successMsg') if joy.connected else ui.color('DISCONNECTED', 'ui.errorMsg'),
+    ui.color('ENABLED', 'ui.successMsg') if joy.enabled else ui.color('DISABLED', 'ui.errorMsg')
+  ))
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def setXYJogDistance():
+  global gXYJog
+  gXYJog = ui.getUserInput(
+    'Distance ({:})'.format(gXYJog),
+    float,
+    gXYJog)
+  showMachineStatus()
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def setZJogDistance():
+  global gZJog
+  gZJog = ui.getUserInput(
+    'Distance ({:})'.format(gZJog),
+    float,
+    gZJog)
+  showMachineStatus()
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def changeVerboseLevel(inc):
+  tempVerboseLevel = ut.genericValueChanger(  ui.getVerboseLevel(), inc, ui.gMIN_VERBOSE_LEVEL, ui.gMAX_VERBOSE_LEVEL,
+                        loop=True, valueName='Verbose level',
+                        valueFormatter=lambda level : '{:d} {:s}'.format(level,ui.getVerboseLevelStr(level)) )
+  ui.setVerboseLevel(tempVerboseLevel)
+
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def absoluteXYAxisLimits(d):
+  minX = mch.getMin('x')
+  minY = mch.getMin('y')
+  maxX = mch.getMax('x')
+  maxY = mch.getMax('y')
+
+  d = d.upper()
+  x = None
+  y = None
+
+  if 'U' in d:  y = maxY
+  if 'D' in d:  y = minY
+  if 'L' in d:  x = minX
+  if 'R' in d:  x = maxX
+
+  mch.moveAbsolute(x=x, y=y)
+
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def absoluteTablePosition(p):
+  minX = mch.getMin('x')
+  minY = mch.getMin('y')
+  maxX = mch.getMax('x')
+  maxY = mch.getMax('y')
+  wX = abs(maxX-minX) if minX<0 else abs(minX-maxX)
+  wY = abs(maxY-minY) if minY<0 else abs(minY-maxY)
+  cX = minX-(wX/2) if minX>0 else minX+(wX/2)
+  cY = minY-(wY/2) if minX>0 else minY+(wY/2)
+
+  p = p.upper()
+  yPos = p[0]
+  xPos = p[1]
+
+  x = None
+  y = None
+
+  if yPos == 'U':   y = maxY
+  elif yPos == 'C': y = cY
+  elif yPos == 'D': y = minY
+
+  if xPos == 'L':   y = minX
+  elif xPos == 'C': y = cX
+  elif xPos == 'R': y = maxX
+
+  mch.moveAbsolute(x=x, y=y)
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def dummy():
+  pass
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def dummy():
+  pass
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def dummy():
+  pass
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def dummy():
+  pass
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def setupMenu():
+
+  absoluteXYAxisLimitsSubmenu = menu.Menu({
+    '2':   {'n':'ONE AXIS ONLY - Absolute move to axis limits - [D]',  'h':absoluteXYAxisLimits, 'ha':{'d':'D'}},
+    '8':   {'n':'ONE AXIS ONLY - Absolute move to axis limits - [U]',  'h':absoluteXYAxisLimits, 'ha':{'d':'U'}},
+    '4':   {'n':'ONE AXIS ONLY - Absolute move to axis limits - [L]',  'h':absoluteXYAxisLimits, 'ha':{'d':'L'}},
+    '6':   {'n':'ONE AXIS ONLY - Absolute move to axis limits - [R]',  'h':absoluteXYAxisLimits, 'ha':{'d':'R'}},
+  })
+
+  absoluteTablePositionSubmenu = menu.Menu({
+    '.':   {'n':'One axis only (submenu)',                 'h':absoluteXYAxisLimitsSubmenu},
+    '1':   {'n':'Absolute move to table position - [DL]',  'h':absoluteTablePosition, 'ha':{'p':'DL'}},
+    '2':   {'n':'Absolute move to table position - [DC]',  'h':absoluteTablePosition, 'ha':{'p':'DC'}},
+    '3':   {'n':'Absolute move to table position - [DR]',  'h':absoluteTablePosition, 'ha':{'p':'DR'}},
+    '4':   {'n':'Absolute move to table position - [CL]',  'h':absoluteTablePosition, 'ha':{'p':'CL'}},
+    '5':   {'n':'Absolute move to table position - [CC]',  'h':absoluteTablePosition, 'ha':{'p':'CC'}},
+    '6':   {'n':'Absolute move to table position - [CR]',  'h':absoluteTablePosition, 'ha':{'p':'CR'}},
+    '7':   {'n':'Absolute move to table position - [UL]',  'h':absoluteTablePosition, 'ha':{'p':'UL'}},
+    '8':   {'n':'Absolute move to table position - [UC]',  'h':absoluteTablePosition, 'ha':{'p':'UC'}},
+    '9':   {'n':'Absolute move to table position - [UR]',  'h':absoluteTablePosition, 'ha':{'p':'UR'}},
+  })
+
+  machineHomeSubmenu = menu.Menu({
+    'xX':  {'n':'x',        'h':mch.goToMachineHome_X},
+    'yY':  {'n':'y',        'h':mch.goToMachineHome_Y},
+    'zZ':  {'n':'z',        'h':mch.goToMachineHome_Z},
+    'wW':  {'n':'xy',       'h':mch.goToMachineHome_XY},
+    'aA':  {'n':'xyz',      'h':mch.goToMachineHome},
+  })
+
+  wcoHomeSubmenu = menu.Menu({
+    'xX':  {'n':'x',        'h':mch.sendWait, 'ha':{'command':'G0X0'}},
+    'yY':  {'n':'y',        'h':mch.sendWait, 'ha':{'command':'G0Y0'}},
+    'zZ':  {'n':'z',        'h':mch.sendWait, 'ha':{'command':'G0Z0'}},
+    'wW':  {'n':'xy',       'h':mch.sendWait, 'ha':{'command':'G0X0Y0'}},
+    'aA':  {'n':'xyz',      'h':goToWCHOHome},
+  })
+
+  goHomeSubmenu = menu.Menu({
+    '0':   {'n':'Safe machine home (Z0 + X0Y0)', 'h':mch.goToMachineHome},
+    'mM':  {'n':'Machine home (submenu)',        'h':machineHomeSubmenu},
+    'wW':  {'n':'WCO home (submenu)',            'h':wcoHomeSubmenu},
+  })
+
+  macroSubmenu = menu.Menu({
+    'lL':  {'n':'List macros',     'h':mcr.list},
+    'rR':  {'n':'Run macro',       'h':runMacro},
+    'sS':  {'n':'Show macro',      'h':showMacro},
+    'xX':  {'n':'Reload macros',   'h':mcr.load},
+  })
+
+  testsSubmenu = menu.Menu({
+    'sS':  {'n':'Table position scan',  'h':tst.tablePositionScan},
+    'lL':  {'n':'Base levelling holes', 'h':tst.baseLevelingHoles},
+    'zZ':  {'n':'Zig-zag pattern',      'h':tst.zigZagPattern},
+    '*':   {'n':'DUMMY Test',           'h':tst.dummy},
+  })
+
+  resetSubmenu = menu.Menu({
+    'xX':   {'n':'Reset X to current position',                'h':mch.resetWCOAxis,      'ha':{'axis':'x', 'val':'curr'}},
+    'yY':   {'n':'Reset Y to current position',                'h':mch.resetWCOAxis,      'ha':{'axis':'y', 'val':'curr'}},
+    'wW':   {'n':'Reset XY to current position',               'h':mch.resetWCO,          'ha':{'x':'curr', 'y':'curr'}},
+    'zZ':   {'n':'Reset Z to current position',                'h':mch.resetWCOAxis,      'ha':{'axis':'z', 'val':'curr'}},
+    'aA':   {'n':'Reset XYZ to current position',              'h':mch.resetWCO,          'ha':{'x':'curr', 'y':'curr', 'z':'curr'}},
+    'pP':   {'n':'Reset Z to current PRB:Z',                   'h':resetZToCurrProbeZ},
+    'mM':   {'n':'Manual [XYZ] reset',                         'h':manualXYZReset, 'ha':{}},
+    '-':    {'n':'Reset XY to machine home',                   'h':mch.resetWCO, 'ha':{'x':'home', 'y':'home'}},
+    '+':    {'n':'Reset XY to max machine travel',             'h':mch.resetWCO, 'ha':{'x':'away', 'y':'away'}},
+    '/':    {'n':'Reset XYZ to machine home',                  'h':mch.resetWCO, 'ha':{'x':'home', 'y':'home', 'z':'home'}},
+    '*':    {'n':'Reset XY to max machine travel, Z to home',  'h':mch.resetWCO, 'ha':{'x':'away', 'y':'away', 'z':'away'}},
+    'gG':   {'n':'Get GCode command for current WCO',          'h':getWCOResetCommand},
+  })
+
+  probeSubmenu = menu.Menu({
+    '1':   {'n':'Basic probe',       'h':prb.basic},
+    '2':   {'n':'Two stage probe',   'h':prb.twoStage},
+    '3':   {'n':'Three stage probe', 'h':prb.threeStage},
+  })
+
+  mnu.setOptions({
+    'qQ':  {'n':'Quit',                                       'h':mnu.quit},
+    'hH':  {'n':'Show help',                                  'h':mnu.showOptions},
+    's':   {'n':'Show current status (short)',                'h':showMachineStatus},
+    'S':   {'n':'Show current status (LONG)',                 'h':showMachineLongStatus},
+    '@':   {'n':'Show current status (FULL)',                 'h':showMachineFullStatus},
+    '=':   {'n':'Lock grblCommander',                         'h':lockGrblCommander},
+    'eE':  {'n':'Show grbl settings',                         'h':showGrblSettings},
+    'cC':  {'n':'Clear screen',                               'h':ui.clearScreen},
+    'tT':  {'n':'Tests (submenu)',                            'h':testsSubmenu},
+    'mM':  {'n':'Macro (submenu)',                            'h':macroSubmenu},
+    'rR':  {'n':'Reset work coordinate (submenu)',            'h':resetSubmenu},
+    'pP':  {'n':'Probe (submenu)',                            'h':probeSubmenu},
+
+    'gfxyzGFXYZ$ ':  {'n':'Send raw GCode command',           'h':sendRawGCodeCommand, 'ha':{'char':''}},
+    'lL':  {'n':'Send raw GCode command (FORCE RELATIVE)',    'h':sendRawGCodeCommandRELATIVE},
+
+    'º':   {'n':'Repeat last GCode command',                  'h':repeatLastGCodeCommand},
+    '0':   {'n':'Go home (submenu)',                          'h':goHomeSubmenu},
+    '.':   {'n':'Absolute move to table position (submenu)',  'h':absoluteTablePositionSubmenu},
+
+    'j':   {'n':'Enable/disable joystick',                    'h':toggleJoystickEnable},
+    'H':   {'n':'Restart joystick connection',                'h':restartJoystickConnection},
+
+    '1':   {'n':'Jog - [DL]',                                 'h':jogXY, 'ha':{'d':'DL'}},
+    '2':   {'n':'Jog - [D]',                                  'h':jogXY, 'ha':{'d':'D'}},
+    '3':   {'n':'Jog - [DR]',                                 'h':jogXY, 'ha':{'d':'DR'}},
+    '4':   {'n':'Jog - [L]',                                  'h':jogXY, 'ha':{'d':'L'}},
+    '6':   {'n':'Jog - [R]',                                  'h':jogXY, 'ha':{'d':'R'}},
+    '7':   {'n':'Jog - [UL]',                                 'h':jogXY, 'ha':{'d':'UL'}},
+    '8':   {'n':'Jog - [U]',                                  'h':jogXY, 'ha':{'d':'U'}},
+    '9':   {'n':'Jog - [UR]',                                 'h':jogXY, 'ha':{'d':'UR'}},
+    '-':   {'n':'Jog - (Z) [U]',                              'h':jogZ, 'ha':{'d':'U'}},
+    '+':   {'n':'Jog - (Z) [D]',                              'h':jogZ, 'ha':{'d':'D'}},
+
+    '/':   {'n':'Set XY jog distance',                        'h':setXYJogDistance},
+    '*':   {'n':'Set Z jog distance',                         'h':setZJogDistance},
+
+    'V':   {'n':'Set verbose level +',                        'h':changeVerboseLevel, 'ha':{'inc':+1}},
+    'v':   {'n':'Set verbose level -',                        'h':changeVerboseLevel, 'ha':{'inc':-1}},
+  })
+
+  #   ui.keyPressMessage('9 - Jog - [UR] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def main():
   ui.clearScreen()
 
@@ -1045,6 +892,8 @@ def main():
   ui.log()
 
   sendStartupMacro()
+
+  setupMenu()
 
   ui.log('System ready!', c='ui.successMsg')
 
