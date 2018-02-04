@@ -801,7 +801,7 @@ def setupMenu():
     {'k':'-',    'n':'Reset XY to machine home',                   'h':mch.resetWCO, 'ha':{'x':'home', 'y':'home'}},
     {'k':'+',    'n':'Reset XY to max machine travel',             'h':mch.resetWCO, 'ha':{'x':'away', 'y':'away'}},
     {'k':'/',    'n':'Reset XYZ to machine home',                  'h':mch.resetWCO, 'ha':{'x':'home', 'y':'home', 'z':'home'}},
-    {'k':'*',    'n':'Reset XY to max machine travel, Z to home',  'h':mch.resetWCO, 'ha':{'x':'away', 'y':'away', 'z':'away'}},
+    {'k':'*',    'n':'Reset XY to max machine travel, Z to home',  'h':mch.resetWCO, 'ha':{'x':'away', 'y':'away', 'z':'home'}},
     {'k':'gG',   'n':'Get GCode command for current WCO',          'h':getWCOResetCommand},
   ])
 
