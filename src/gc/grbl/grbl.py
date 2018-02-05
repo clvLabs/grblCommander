@@ -96,15 +96,13 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getConfig(self):
-    ''' Get working configuration
-    '''
+    ''' Get working configuration '''
     return self.cfg
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def start(self):
-    ''' Start connection with grblShield
-    '''
+    ''' Start connection with grblShield '''
     self.sp.open()
 
     if self.sp.isOpen():
@@ -126,30 +124,26 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def stop(self):
-    ''' Stop connection with grblShield
-    '''
+    ''' Stop connection with grblShield '''
     self.sp.close()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def resetConnection(self):
-    ''' Reset connection with grblShield
-    '''
+    ''' Reset connection with grblShield '''
     self.start()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def softReset(self):
-    ''' grblShield soft reset
-    '''
+    ''' grblShield soft reset '''
     self.sp.write(self.GRBL_SOFT_RESET)
     self.waitForStartup()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def sleep(self, seconds):
-    ''' grbl-aware sleep
-    '''
+    ''' grbl-aware sleep '''
     startTime = time.time()
 
     while (time.time() - startTime) < seconds:
@@ -161,8 +155,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def process(self):
-    ''' Call this method frequently to give Grbl some processing time
-    '''
+    ''' Call this method frequently to give Grbl some processing time '''
 
     # Read all available serial lines
     line = self.sp.readline()
@@ -212,8 +205,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def sendWait(self, command, responseTimeout=None, verbose='BASIC'):
-    ''' Send a command
-    '''
+    ''' Send a command and wait for machine to be idle '''
     if not command:
       return
 
@@ -223,9 +215,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def send(self, command, responseTimeout=None, verbose='BASIC'):
-    ''' Send a command
-    '''
-    command = command.rstrip().rstrip('\n').rstrip('\r')
+    ''' Send a command '''
     if not command:
       return
 
@@ -248,6 +238,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def isRunning(self):
+    ''' Check if the machine is running '''
     if 'machineState' not in self.status:
       return False
 
@@ -257,8 +248,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def readResponse(self,responseTimeout=None, verbose='BASIC'):
-    ''' Read a command's response
-    '''
+    ''' Read a command's response '''
     if responseTimeout is None:
       responseTimeout = self.spCfg['responseTimeout']
 
@@ -285,8 +275,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def waitForStartup(self):
-    ''' Wait for grblShield startup
-    '''
+    ''' Wait for grblShield startup '''
     ui.log('Waiting for startup message...')
     self.alarm = ''
     self.waitingStartup = True
@@ -306,8 +295,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def parse(self, line):
-    ''' Parse a text line
-    '''
+    ''' Parse a text line '''
     if line:
       if self.ignoreNextLine:
         self.ignoreNextLine = False
@@ -423,8 +411,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def parseParserState(self,state):
-    ''' TODO: Comment
-    '''
+    ''' Update self.status from parser state string '''
     # Split modal commands
     commands = state.split(' ')
 
@@ -452,8 +439,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def parseGCodeParam(self,parserParam):
-    ''' Parses a GCode param string and updates self.status
-    '''
+    ''' Parses a GCode param string and updates self.status '''
     # Separate ID and value
     parts = parserParam.split(':')
 
@@ -488,8 +474,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def parseInputPinState(self,pinState):
-    ''' Parses a pin state string and returns an object
-    '''
+    ''' Parses a pin state string and returns an object '''
     state = {}
 
     for item in dict.inputPinStates:
@@ -503,8 +488,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def parseMachineStatus(self,status):
-    ''' TODO: Comment
-    '''
+    ''' Parse machine status string and update self.status '''
     # Remove chevrons
     status = status[1:-1]
 
@@ -620,8 +604,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def parseSetting(self, settingStr):
-    ''' TODO: Comment
-    '''
+    ''' TODO: Comment '''
     components = settingStr.split('=')
     setting = int(components[0])
     value = components[1]
@@ -646,8 +629,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def queryMachineStatus(self):
-    ''' TODO: Comment
-    '''
+    ''' TODO: Comment '''
     ui.log('Querying machine status...', v='DEBUG')
     self.sp.write(self.GRBL_QUERY_MACHINE_STATUS)
     self.statusQuerySent = True
@@ -657,8 +639,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def viewMachineStatus(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     ui.logTitle('Requesting machine status')
     ui.log('Sending command [?]...', v='DETAIL')
     self.send(self.GRBL_QUERY_MACHINE_STATUS)
@@ -670,8 +651,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getMachineStatus(self):
-    ''' TODO: Comment
-    '''
+    ''' TODO: Comment '''
     self.queryMachineStatus()
     startTime = time.time()
 
@@ -690,8 +670,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getCompleteGrblSettings(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     result = []
 
     for key in sorted(self.status['settings']):
@@ -711,8 +690,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getCompleteParserState(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     result = []
 
     for modalGroupName in sorted(self.status['parserState']):
@@ -747,8 +725,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getSimpleParserState(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     settingsStr = ''
 
     # Configured
@@ -788,8 +765,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getSimpleMachineStatusStr(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     machineState = self.status['machineState']
     stateStr = self.getColoredMachineStateStr()
 
@@ -828,16 +804,14 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getColoredMachineStateStr(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     machineStateStr = self.status['machineState']
     return ui.color(machineStateStr, 'machineState.{:}'.format(machineStateStr))
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getWorkCoordinatesStr(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     wco = self.status['WCO'] if 'WCO' in self.status else None
     if not wco:
       return '<NONE>'
@@ -846,8 +820,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getMachinePosStr(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     mPos = self.status['MPos'] if 'MPos' in self.status else None
     if not mPos:
       return '<NONE>'
@@ -856,8 +829,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getWorkPosStr(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     wpos = self.status['WPos'] if 'WPos' in self.status else None
     if not wpos:
       return '<NONE>'
@@ -866,8 +838,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getProbePosStr(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     prb = self.status['GCodeParams']['PRB']
     coords = ui.xyzStr(prb['x'], prb['y'], prb['z'])
     lastRun = ui.color('SUCCESS','ui.successMsg') if prb['success'] else ui.color('FAIL','ui.errorMsg')
@@ -877,15 +848,13 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getLastMessage(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     return self.lastMessage
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getAlarmStr(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     if self.alarm:
       return self.dct.alarms[self.alarm]
     else:
@@ -894,22 +863,19 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getInputPinState(self):
-    ''' Helpers to get pin states
-    '''
+    ''' Helpers to get pin states '''
     return self.status['inputPinState']
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getInputPinStateStr(self):
-    ''' Helpers to get pin states
-    '''
+    ''' Helpers to get pin states '''
     return self.status['Pn']['val']
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getInputPinStateLongStr(self):
-    ''' Helpers to get pin states
-    '''
+    ''' Helpers to get pin states '''
     stateStr = ''
 
     pins = self.status['inputPinState']
@@ -922,50 +888,43 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getLimitSwitchState(self,axis):
-    ''' Helpers to get pin states
-    '''
+    ''' Helpers to get pin states '''
     return self.status['inputPinState'][axis]['val']
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getProbeState(self):
-    ''' Helpers to get pin states
-    '''
+    ''' Helpers to get pin states '''
     return self.status['inputPinState']['P']['val']
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getDoorState(self):
-    ''' Helpers to get pin states
-    '''
+    ''' Helpers to get pin states '''
     return self.status['inputPinState']['D']['val']
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getHoldState(self):
-    ''' Helpers to get pin states
-    '''
+    ''' Helpers to get pin states '''
     return self.status['inputPinState']['H']['val']
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getSoftResetState(self):
-    ''' Helpers to get pin states
-    '''
+    ''' Helpers to get pin states '''
     return self.status['inputPinState']['R']['val']
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getCycleStartState(self):
-    ''' Helpers to get pin states
-    '''
+    ''' Helpers to get pin states '''
     return self.status['inputPinState']['S']['val']
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def waitForMachineIdle(self,verbose='WARNING'):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     ui.log('Waiting for machine operation to finish...', v='SUPER')
     self.getMachineStatus()
 
@@ -979,8 +938,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def viewBuildInfo(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     ui.logTitle('Requesting build info')
     self.send(self.GRBL_QUERY_BUILD_INFO)
     ui.log()
@@ -988,8 +946,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def queryGCodeParserState(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     ui.log('Querying gcode parser state...', v='DEBUG')
     self.sp.write(self.GRBL_QUERY_GCODE_PARSER_STATE + '\n')
     self.lastParserStateQuery = time.time()
@@ -997,8 +954,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def viewGCodeParserState(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     ui.logTitle('Requesting GCode parser state')
     self.send(self.GRBL_QUERY_GCODE_PARSER_STATE)
     self.lastParserStateQuery = time.time()
@@ -1007,8 +963,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def viewGCodeParameters(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     ui.logTitle('Requesting GCode parameters')
     self.send(self.GRBL_QUERY_GCODE_PARAMETERS)
     ui.log()
@@ -1016,8 +971,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def viewGrblConfig(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     ui.logTitle('Requesting grbl config')
     self.send(self.GRBL_QUERY_GRBL_CONFIG)
     ui.log()
@@ -1025,8 +979,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def viewStartupBlocks(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     ui.logTitle('Requesting startup blocks')
     self.send(self.GRBL_QUERY_STARTUP_BLOCKS)
     ui.log()
@@ -1034,8 +987,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def enableSleepMode(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     ui.logTitle('Requesting sleep mode enable')
     self.send(self.GRBL_ENABLE_SLEEP_MODE)
     ui.log()
@@ -1096,8 +1048,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def mpos2wpos(self,axis,val):
-    ''' Translate a MPos coordinate into WPos
-    '''
+    ''' Translate a MPos coordinate into WPos '''
     if val is None:
       return None
 
@@ -1106,8 +1057,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def wpos2mpos(self,axis,val):
-    ''' Translate a WPos coordinate into MPos
-    '''
+    ''' Translate a WPos coordinate into MPos '''
     if val is None:
       return None
 
@@ -1116,8 +1066,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getHomingCorner(self, axis):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     # '27': 'Homing switch pull-off distance, millimeters'
     pos = float(self.status['settings'][27]['val'])
 
@@ -1132,8 +1081,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getAwayCorner(self, axis):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     pos = self.mchCfg['maxTravel'][axis] - self.mchCfg['softLimitsMargin']
 
     if self.status['settings'][23]['parsed'][axis]:
@@ -1144,8 +1092,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getMin(self, axis):
-    ''' calculate min axis(xyz) coord given current WCO
-    '''
+    ''' calculate min axis(xyz) coord given current WCO '''
     # '23': 'Homing direction invert, mask'
     if self.status['settings'][23]['parsed'][axis]:
       min = self.getHomingCorner(axis)
@@ -1157,8 +1104,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getMax(self, axis):
-    ''' calculate max axis(xyz) coord given current WCO
-    '''
+    ''' calculate max axis(xyz) coord given current WCO '''
     # '23': 'Homing direction invert, mask'
     if self.status['settings'][23]['parsed'][axis]:
       max = self.getAwayCorner(axis)
@@ -1170,8 +1116,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def goToMachineHome_X(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     # '27': 'Homing switch pull-off distance, millimeters'
     xPullOff = float(self.status['settings'][27]['val'])
 
@@ -1184,8 +1129,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def goToMachineHome_Y(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     # '27': 'Homing switch pull-off distance, millimeters'
     yPullOff = float(self.status['settings'][27]['val'])
 
@@ -1198,8 +1142,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def goToMachineHome_XY(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     # '27': 'Homing switch pull-off distance, millimeters'
     xPullOff = float(self.status['settings'][27]['val'])
     yPullOff = xPullOff
@@ -1216,8 +1159,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def goToMachineHome_Z(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     # '27': 'Homing switch pull-off distance, millimeters'
     pullOff = float(self.status['settings'][27]['val'])
 
@@ -1230,14 +1172,14 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def goToMachineHome(self):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     self.goToMachineHome_Z()
     self.goToMachineHome_XY()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def rapidRelative(self,x=None, y=None, z=None, verbose='WARNING'):
+    ''' TODO: comment '''
     cmd = self.getMoveRelativeStr(x=x,y=y,z=z,verbose=verbose)
     if cmd:
       cmd = 'G0 {:}'.format(cmd)
@@ -1247,6 +1189,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def feedRelative(self,x=None, y=None, z=None, speed=None, verbose='WARNING'):
+    ''' TODO: comment '''
     cmd = self.getMoveRelativeStr(x=x,y=y,z=z,speed=speed,verbose=verbose)
     if cmd:
       cmd = 'G1 {:}'.format(cmd)
@@ -1256,6 +1199,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def moveRelative(self,x=None, y=None, z=None, speed=None, verbose='WARNING'):
+    ''' TODO: comment '''
     cmd = self.getMoveRelativeStr(x=x,y=y,z=z,speed=speed,verbose=verbose)
     if cmd:
       ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
@@ -1264,8 +1208,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getMoveRelativeStr(self,x=None, y=None, z=None, speed=None, verbose='WARNING'):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     if x is None and y is None and z is None:
       ui.log('No parameters provided, doing nothing', v=verbose)
       return ''
@@ -1287,6 +1230,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def rapidAbsolute(self,x=None, y=None, z=None, machineCoords=False, verbose='WARNING'):
+    ''' TODO: comment '''
     cmd = self.getMoveAbsoluteStr(x=x,y=y,z=z,machineCoords=machineCoords,verbose=verbose)
     if cmd:
       cmd = 'G0 {:}'.format(cmd)
@@ -1296,6 +1240,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def feedAbsolute(self,x=None, y=None, z=None, machineCoords=False, speed=None, verbose='WARNING'):
+    ''' TODO: comment '''
     cmd = self.getMoveAbsoluteStr(x=x,y=y,z=z,machineCoords=machineCoords,speed=speed,verbose=verbose)
     if cmd:
       cmd = 'G1 {:}'.format(cmd)
@@ -1305,6 +1250,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def moveAbsolute(self,x=None, y=None, z=None, machineCoords=False, speed=None, verbose='WARNING'):
+    ''' TODO: comment '''
     cmd = self.getMoveAbsoluteStr(x=x,y=y,z=z,machineCoords=machineCoords,speed=speed,verbose=verbose)
     if cmd:
       ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
@@ -1313,8 +1259,7 @@ class Grbl:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getMoveAbsoluteStr(self,x=None, y=None, z=None, machineCoords=False, speed=None, verbose='WARNING'):
-    ''' TODO: comment
-    '''
+    ''' TODO: comment '''
     if x is None and y is None and z is None:
       ui.log('No parameters provided, doing nothing', v=verbose)
       return ''

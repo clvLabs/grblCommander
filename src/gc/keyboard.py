@@ -44,8 +44,7 @@ else:
 class Keyboard:
 
   def __init__(self):
-    ''' Construct a Keyboard object.
-    '''
+    ''' Construct a Keyboard object. '''
     self.initKeyValueConstants()
 
     if os.name == 'nt':
@@ -67,8 +66,7 @@ class Keyboard:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def keyPressed(self):
-    ''' Returns True if keyboard character was hit, False otherwise.
-    '''
+    ''' Returns True if keyboard character was hit, False otherwise. '''
     if os.name == 'nt':
       return msvcrt.kbhit()
 
@@ -84,8 +82,7 @@ class Keyboard:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getch(self, display=False):
-    ''' Returns a keyboard character after kbhit() has been called.
-    '''
+    ''' Returns a keyboard character. '''
     try:
       if os.name == 'nt':
         return msvcrt.getch().decode('utf-8')
@@ -103,12 +100,12 @@ class Keyboard:
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getKey(self):
     return self.ch2key(self.getch())
+    ''' Returns a Key object. '''
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def input(self, prompt=''):
-    ''' Substitution for python's input(), switching terminals
-    '''
+    ''' Substitution for python's input(), switching terminals '''
 
     sys.stdout.write(prompt)
 
@@ -143,8 +140,7 @@ class Keyboard:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def setOwnTerm(self):
-    ''' Activate own terminal.  On Windows this is a no-op.
-    '''
+    ''' Activate own terminal.  On Windows this is a no-op. '''
 
     if os.name == 'nt':
       pass
@@ -154,8 +150,7 @@ class Keyboard:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def resetTerm(self):
-    ''' Resets to normal terminal.  On Windows this is a no-op.
-    '''
+    ''' Resets to normal terminal.  On Windows this is a no-op. '''
 
     if os.name == 'nt':
       pass
@@ -165,8 +160,6 @@ class Keyboard:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def initKeyValueConstants(self):
-    ''' Shares a few common key codes
-    '''
     self.LF = 10
     self.CR  = 13
     self.ENTER = self.LF
@@ -226,3 +219,4 @@ class Keyboard:
     self.RIGHT = 77
     self.UP = 72
     self.DOWN = 80
+    ''' Shares a few common key codes '''

@@ -687,10 +687,8 @@ def main():
   ui.log()
 
   ui.logTitle('Grbl connection')
-  # Register parserStateChanged listener
-  mch.onParserStateChanged.append(onParserStateChanged)
-  # Start connection
-  mch.start()
+  mch.onParserStateChanged.append(onParserStateChanged)   # Register parserStateChanged listener
+  mch.start()     # Start connection
 
   ui.logTitle('Joystick connection')
   joy.start()
@@ -742,5 +740,5 @@ if __name__ == '__main__':
     main()
   finally:
     pass
-#    ui.log('Press any key to exit...')
-#    kb.getch()
+  #  ui.log('Press any key to exit...')
+  #  kb.getch()
