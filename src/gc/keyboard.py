@@ -27,6 +27,12 @@ import time
 import sys
 import os
 
+from . import ui as ui    # [DBG] !!!!!
+
+def DBG(msg):
+  ui.log('[DBG] {:}'.format(msg), c='red, yellow')
+
+
 # Windows
 if os.name == 'nt':
   import msvcrt
@@ -37,6 +43,40 @@ else:
   import termios
   import atexit
   from select import select
+
+# ------------------------------------------------------------------
+# Key class
+
+class Key:
+
+  def __init__(self, n=None, k=None, c=None, c0x=None, c224x=None):
+
+    # Make sure we have both key and char
+    assert k or c
+    if not k:      k = ord(c)
+    try:
+      if not c:      c = chr(k)
+    except ValueError:
+      c = '?'
+
+    self.n = n          # name
+    self.k = k          # key
+    self.c = c          # char
+    self.c0x = c0x      # combo 0X
+    self.c224x = c224x  # comgo 224x
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def _in(self, coll):
+    ''' Checks if key is the provided collection.
+        Collection can be:
+          - A string representing a list of chars => 'yYnN'
+    '''
+    if type(coll) is str:
+      return self.c in coll
+    else:
+      print('Unknown collection type')
+      assert False
 
 # ------------------------------------------------------------------
 # Keyboard class
@@ -76,12 +116,7 @@ class Keyboard:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def ch2key(self, ch):
-    return ord(ch)
-
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def getch(self, display=False):
+  def _getch(self, display=False):
     ''' Returns a keyboard character. '''
     try:
       if os.name == 'nt':
@@ -99,8 +134,56 @@ class Keyboard:
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getKey(self):
-    return self.ch2key(self.getch())
     ''' Returns a Key object. '''
+    char = self._getch()
+    charVal = ord(char)
+    DBG('k[{:}] c[{:}]'.format(charVal, char))
+
+    key = None
+    c0x = None
+    c224x = None
+
+    # 'COMBO_0X'
+    if charVal == 0:
+      DBG('c0x!')
+      c0x = 1
+      # Get next code
+      char = self._getch()
+      charVal = ord(char)
+
+      for name in self.k:
+        k = self.k[name]
+        if k.c0x and k.k == charVal:
+          key = k
+          break
+
+    # 'COMBO_224X'
+    elif charVal == 224:
+      DBG('c224x!')
+      c224x = 1
+
+      # Get next code
+      char = self._getch()
+      charVal = ord(char)
+
+      for name in self.k:
+        k = self.k[name]
+        if k.c224x and k.k == charVal:
+          key = k
+          break
+
+    # 'Normal' keys
+    else:
+      for name in self.k:
+        k = self.k[name]
+        if k.k == charVal:
+          key = k
+          break
+
+    if not key:
+      key = Key(n=char, k=charVal, c0x=c0x, c224x=c224x)
+
+    return key
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -115,7 +198,7 @@ class Keyboard:
     # Flush keyboard buffer into return value
     kbBuffer = ''
     enterBuffered = False
-    char = self.getch(True)
+    char = self._getch(True)
 
     while char:
       kbBuffer += char
@@ -123,7 +206,7 @@ class Keyboard:
       if ord(char) == 10:
         enterBuffered = True
 
-      char = self.getch(True)
+      char = self._getch(True)
 
     # Reet blocking flag for stdio
     os.set_blocking(self.fd, True)
@@ -146,6 +229,7 @@ class Keyboard:
       pass
     else:
       termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.new_term)
+      DBG('SetOwnTerm! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -156,67 +240,67 @@ class Keyboard:
       pass
     else:
       termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.old_term)
+      DBG('RESETTerm! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def initKeyValueConstants(self):
-    self.LF = 10
-    self.CR  = 13
-    self.ENTER = self.LF
-    self.CTRL_R = 18
-    self.CTRL_X = 24
-    self.CTRL_Y = 25
-    self.CTRL_Z = 26
-    self.ESC = 27
-
-    self.COMBO_0X = 0
-
-    self.F1 = 59
-    self.F2 = 60
-    self.F3 = 61
-    self.F4 = 62
-    self.F5 = 63
-    self.F6 = 64
-    self.F7 = 65
-    self.F8 = 66
-    self.F9 = 67
-    self.F10 = 68
-
-    self.KP_INS = 82
-    self.KP_DEL = 83
-    self.KP_HOME = 71
-    self.KP_END = 79
-    self.KP_PGUP = 73
-    self.KP_PGDN = 81
-    self.KP_LEFT = 75
-    self.KP_RIGHT = 77
-    self.KP_UP = 72
-    self.KP_DOWN = 80
-
-    self.CTRL_KP_INS = 146
-    self.CTRL_KP_DEL = 147
-    self.CTRL_KP_HOME = 119
-    self.CTRL_KP_END = 117
-    self.CTRL_KP_PGUP = 132
-    self.CTRL_KP_PGDN = 118
-    self.CTRL_KP_LEFT = 115
-    self.CTRL_KP_RIGHT = 116
-    self.CTRL_KP_UP = 141
-    self.CTRL_KP_DOWN = 145
-
-    self.COMBO_224X = 224
-
-    self.F11 = 133
-    self.F12 = 134
-
-    self.INS = 82
-    self.DEL = 83
-    self.HOME = 71
-    self.END = 79
-    self.PGUP = 73
-    self.PGDN = 81
-    self.LEFT = 75
-    self.RIGHT = 77
-    self.UP = 72
-    self.DOWN = 80
     ''' Shares a few common key codes '''
+    self.noKey = Key(n='NONE', k=-1)
+
+    self.k = {
+      'LF': Key(n='ENTER', k=10),
+      'CR': Key(n='ENTER', k=13),
+      'ESC': Key(n='ESC', k=27),
+
+      'CTRL_R': Key(n='CTRL_R', k=18),
+      'CTRL_X': Key(n='CTRL_X', k=24),
+      'CTRL_Y': Key(n='CTRL_Y', k=25),
+      'CTRL_Z': Key(n='CTRL_Z', k=26),
+
+      'F1': Key(n='F1', k=59, c0x=1),
+      'F2': Key(n='F2', k=60, c0x=1),
+      'F3': Key(n='F3', k=61, c0x=1),
+      'F4': Key(n='F4', k=62, c0x=1),
+      'F5': Key(n='F5', k=63, c0x=1),
+      'F6': Key(n='F6', k=64, c0x=1),
+      'F7': Key(n='F7', k=65, c0x=1),
+      'F8': Key(n='F8', k=66, c0x=1),
+      'F9': Key(n='F9', k=67, c0x=1),
+      'F10': Key(n='F10', k=68, c0x=1),
+      'F11': Key(n='F11', k=133, c224x=1),
+      'F12': Key(n='F12', k=134, c224x=1),
+
+      'INS': Key(n='INS', k=82, c224x=1),
+      'DEL': Key(n='DEL', k=83, c224x=1),
+      'HOME': Key(n='HOME', k=71, c224x=1),
+      'END': Key(n='END', k=79, c224x=1),
+      'PGUP': Key(n='PGUP', k=73, c224x=1),
+      'PGDN': Key(n='PGDN', k=81, c224x=1),
+      'LEFT': Key(n='LEFT', k=75, c224x=1),
+      'RIGHT': Key(n='RIGHT', k=77, c224x=1),
+      'UP': Key(n='UP', k=72, c224x=1),
+      'DOWN': Key(n='DOWN', k=80, c224x=1),
+
+      'KP_INS': Key(n='KP_INS', k=82, c0x=1),
+      'KP_DEL': Key(n='KP_DEL', k=83, c0x=1),
+      'KP_HOME': Key(n='KP_HOME', k=71, c0x=1),
+      'KP_END': Key(n='KP_END', k=79, c0x=1),
+      'KP_PGUP': Key(n='KP_PGUP', k=73, c0x=1),
+      'KP_PGDN': Key(n='KP_PGDN', k=81, c0x=1),
+      'KP_LEFT': Key(n='KP_LEFT', k=75, c0x=1),
+      'KP_RIGHT': Key(n='KP_RIGHT', k=77, c0x=1),
+      'KP_UP': Key(n='KP_UP', k=72, c0x=1),
+      'KP_DOWN': Key(n='KP_DOWN', k=80, c0x=1),
+
+      'CTRL_KP_INS': Key(n='CTRL_KP_INS', k=146, c0x=1),
+      'CTRL_KP_DEL': Key(n='CTRL_KP_DEL', k=147, c0x=1),
+      'CTRL_KP_HOME': Key(n='CTRL_KP_HOME', k=119, c0x=1),
+      'CTRL_KP_END': Key(n='CTRL_KP_END', k=117, c0x=1),
+      'CTRL_KP_PGUP': Key(n='CTRL_KP_PGUP', k=132, c0x=1),
+      'CTRL_KP_PGDN': Key(n='CTRL_KP_PGDN', k=118, c0x=1),
+      'CTRL_KP_LEFT': Key(n='CTRL_KP_LEFT', k=115, c0x=1),
+      'CTRL_KP_RIGHT': Key(n='CTRL_KP_RIGHT', k=116, c0x=1),
+      'CTRL_KP_UP': Key(n='CTRL_KP_UP', k=141, c0x=1),
+      'CTRL_KP_DOWN': Key(n='CTRL_KP_DOWN', k=145, c0x=1),
+    }
