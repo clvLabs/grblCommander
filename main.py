@@ -71,13 +71,11 @@ def sendCommand(command):
   gLastGCodeCommand = command
 
   # Special case for homing ($H)
-  responseTimeout = None
   homing = False
-  if command.rstrip(' ').upper() == '$H':
+  if mch.stripCommand(command) == mch.GRBL_HOMING_CYCLE:
     homing = True
-    responseTimeout = float(mchCfg['homingTimeout'])
 
-  mch.sendWait(command, responseTimeout=responseTimeout)
+  mch.sendWait(command)
 
   if homing:
     sendStartupMacro()

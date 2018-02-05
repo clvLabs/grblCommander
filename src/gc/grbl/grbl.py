@@ -15,33 +15,15 @@ from .. import ui as ui
 from . import serialport
 from . import dict
 
-
-# ------------------------------------------------------------------
-# Constants
-GRBL_SOFT_RESET = '%c' % 24
-GRBL_QUERY_MACHINE_STATUS = '?'
-GRBL_QUERY_GCODE_PARSER_STATE = '$G'
-GRBL_QUERY_BUILD_INFO = '$I'
-GRBL_QUERY_GCODE_PARAMETERS = '$#'
-GRBL_QUERY_GRBL_CONFIG = '$$'
-GRBL_QUERY_STARTUP_BLOCKS = '$N'
-GRBL_ENABLE_SLEEP_MODE = '$SLP'
-GCODE_RESET_WCO_PREFIX = 'G10L2P0'
-
-PERIODIC_QUERY_INTERVAL = 0.5
-PROCESS_SLEEP = 0.05
-WAITIDLE_SLEEP = 0.15
-WAITSTARTUP_TIME = 2
-
-
 # ------------------------------------------------------------------
 # Grbl class
 
 class Grbl:
 
   def __init__(self, cfg):
-    ''' Construct a Grbl object.
-    '''
+    ''' Construct a Grbl object. '''
+    self.initConstants()
+
     self.cfg = cfg
     self.spCfg = cfg['serial']
     self.mchCfg = cfg['machine']
@@ -93,6 +75,26 @@ class Grbl:
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def initConstants(self):
+    ''' Provide constants '''
+    self.GRBL_SOFT_RESET = '%c' % 24
+    self.GRBL_QUERY_MACHINE_STATUS = '?'
+    self.GRBL_QUERY_GCODE_PARSER_STATE = '$G'
+    self.GRBL_HOMING_CYCLE = '$H'
+    self.GRBL_QUERY_BUILD_INFO = '$I'
+    self.GRBL_QUERY_GCODE_PARAMETERS = '$#'
+    self.GRBL_QUERY_GRBL_CONFIG = '$$'
+    self.GRBL_QUERY_STARTUP_BLOCKS = '$N'
+    self.GRBL_ENABLE_SLEEP_MODE = '$SLP'
+    self.GCODE_RESET_WCO_PREFIX = 'G10L2P0'
+
+    self.PERIODIC_QUERY_INTERVAL = 0.5
+    self.PROCESS_SLEEP = 0.05
+    self.WAITIDLE_SLEEP = 0.15
+    self.WAITSTARTUP_TIME = 2
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getConfig(self):
     ''' Get working configuration
     '''
@@ -140,7 +142,7 @@ class Grbl:
   def softReset(self):
     ''' grblShield soft reset
     '''
-    self.sp.write(GRBL_SOFT_RESET)
+    self.sp.write(self.GRBL_SOFT_RESET)
     self.waitForStartup()
 
 
@@ -154,7 +156,7 @@ class Grbl:
       self.process()
 
       # Give some time for the processor to do other stuff
-      time.sleep(PROCESS_SLEEP)
+      time.sleep(self.PROCESS_SLEEP)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -180,7 +182,7 @@ class Grbl:
     if self.waitingMachineStatus and not self.statusQuerySent:
       sendStatusQuery = True
 
-    if (time.time() - self.lastMachineStatusQuery) > PERIODIC_QUERY_INTERVAL:
+    if (time.time() - self.lastMachineStatusQuery) > self.PERIODIC_QUERY_INTERVAL:
       sendStatusQuery = True
 
     if sendStatusQuery:
@@ -190,7 +192,7 @@ class Grbl:
     # Automatic periodic parser status queries
     sendParserStateQuery = False
 
-    if (time.time() - self.lastParserStateQuery) > PERIODIC_QUERY_INTERVAL:
+    if (time.time() - self.lastParserStateQuery) > self.PERIODIC_QUERY_INTERVAL:
       sendParserStateQuery = True
 
     if sendParserStateQuery:
@@ -202,6 +204,11 @@ class Grbl:
       ui.clearLine()
       ui.log('\r{:}'.format(self.getSimpleMachineStatusStr()), end='')
 
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def stripCommand(self, command):
+    ''' Return a stripped version of the command string '''
+    return command.rstrip().rstrip('\n').rstrip('\r')
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def sendWait(self, command, responseTimeout=None, verbose='BASIC'):
@@ -216,12 +223,17 @@ class Grbl:
     ''' Send a command
     '''
     command = command.rstrip().rstrip('\n').rstrip('\r')
+
+    command = self.stripCommand(command)
     upperCommand = command.upper()
 
-    if upperCommand == GRBL_QUERY_GCODE_PARSER_STATE:
+    if upperCommand == self.GRBL_QUERY_GCODE_PARSER_STATE:
       self.showNextParserState = True
-    elif upperCommand == GRBL_QUERY_MACHINE_STATUS:
+    elif upperCommand == self.GRBL_QUERY_MACHINE_STATUS:
       self.showNextMachineStatus = True
+    elif upperCommand == self.GRBL_HOMING_CYCLE:
+      if not responseTimeout:
+        responseTimeout = float(self.mchCfg['homingTimeout'])
 
     ui.log('>>>>> {:}'.format(command), c='comms.send' ,v=verbose)
     self.sp.write(command+'\n')
@@ -275,7 +287,7 @@ class Grbl:
     self.waitingStartup = True
     startTime = time.time()
 
-    while self.waitingStartup and (time.time() - startTime) < WAITSTARTUP_TIME:
+    while self.waitingStartup and (time.time() - startTime) < self.WAITSTARTUP_TIME:
       self.process()
 
     if not self.waitingStartup:
@@ -632,7 +644,7 @@ class Grbl:
     ''' TODO: Comment
     '''
     ui.log('Querying machine status...', v='DEBUG')
-    self.sp.write(GRBL_QUERY_MACHINE_STATUS)
+    self.sp.write(self.GRBL_QUERY_MACHINE_STATUS)
     self.statusQuerySent = True
     self.waitingMachineStatus = True
     self.lastMachineStatusQuery = time.time()
@@ -644,7 +656,7 @@ class Grbl:
     '''
     ui.logTitle('Requesting machine status')
     ui.log('Sending command [?]...', v='DETAIL')
-    self.send(GRBL_QUERY_MACHINE_STATUS)
+    self.send(self.GRBL_QUERY_MACHINE_STATUS)
     self.statusQuerySent = True
     self.waitingMachineStatus = True
     self.lastMachineStatusQuery = time.time()
@@ -965,7 +977,7 @@ class Grbl:
     ''' TODO: comment
     '''
     ui.logTitle('Requesting build info')
-    self.send(GRBL_QUERY_BUILD_INFO)
+    self.send(self.GRBL_QUERY_BUILD_INFO)
     ui.log()
 
 
@@ -974,7 +986,7 @@ class Grbl:
     ''' TODO: comment
     '''
     ui.log('Querying gcode parser state...', v='DEBUG')
-    self.sp.write(GRBL_QUERY_GCODE_PARSER_STATE + '\n')
+    self.sp.write(self.GRBL_QUERY_GCODE_PARSER_STATE + '\n')
     self.lastParserStateQuery = time.time()
 
 
@@ -983,7 +995,7 @@ class Grbl:
     ''' TODO: comment
     '''
     ui.logTitle('Requesting GCode parser state')
-    self.send(GRBL_QUERY_GCODE_PARSER_STATE)
+    self.send(self.GRBL_QUERY_GCODE_PARSER_STATE)
     self.lastParserStateQuery = time.time()
     ui.log()
 
@@ -993,7 +1005,7 @@ class Grbl:
     ''' TODO: comment
     '''
     ui.logTitle('Requesting GCode parameters')
-    self.send(GRBL_QUERY_GCODE_PARAMETERS)
+    self.send(self.GRBL_QUERY_GCODE_PARAMETERS)
     ui.log()
 
 
@@ -1002,7 +1014,7 @@ class Grbl:
     ''' TODO: comment
     '''
     ui.logTitle('Requesting grbl config')
-    self.send(GRBL_QUERY_GRBL_CONFIG)
+    self.send(self.GRBL_QUERY_GRBL_CONFIG)
     ui.log()
 
 
@@ -1011,7 +1023,7 @@ class Grbl:
     ''' TODO: comment
     '''
     ui.logTitle('Requesting startup blocks')
-    self.send(GRBL_QUERY_STARTUP_BLOCKS)
+    self.send(self.GRBL_QUERY_STARTUP_BLOCKS)
     ui.log()
 
 
@@ -1020,7 +1032,7 @@ class Grbl:
     ''' TODO: comment
     '''
     ui.logTitle('Requesting sleep mode enable')
-    self.send(GRBL_ENABLE_SLEEP_MODE)
+    self.send(self.GRBL_ENABLE_SLEEP_MODE)
     ui.log()
 
 
@@ -1033,7 +1045,7 @@ class Grbl:
         - 'away' : Opposite point from machine home
         - 'wco'  : Current WCO x/y/z
     '''
-    cmd = GCODE_RESET_WCO_PREFIX
+    cmd = self.GCODE_RESET_WCO_PREFIX
 
     for (val, axis) in [(x,'x'),(y,'y'),(z,'z')]:
       if val == 'curr':
@@ -1074,7 +1086,7 @@ class Grbl:
     elif val == 'home':
       val = self.getHomingCorner(axis)
 
-    self.send('{:}{:}{:}'.format(GCODE_RESET_WCO_PREFIX,axis,val))
+    self.send('{:}{:}{:}'.format(self.GCODE_RESET_WCO_PREFIX,axis,val))
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
