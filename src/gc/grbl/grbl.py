@@ -214,6 +214,9 @@ class Grbl:
   def sendWait(self, command, responseTimeout=None, verbose='BASIC'):
     ''' Send a command
     '''
+    if not command:
+      return
+
     self.send(command=command, responseTimeout=responseTimeout, verbose=verbose)
     self.waitForMachineIdle(verbose=verbose)
 
@@ -223,6 +226,8 @@ class Grbl:
     ''' Send a command
     '''
     command = command.rstrip().rstrip('\n').rstrip('\r')
+    if not command:
+      return
 
     command = self.stripCommand(command)
     upperCommand = command.upper()
