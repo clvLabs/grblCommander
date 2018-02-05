@@ -73,7 +73,7 @@ class Menu(object):
     if not self.kb.keyPressed():
       return True
 
-    return self.parseChar(self.kb.getch())
+    return self.parseKey(self.kb.getKey())
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -94,15 +94,14 @@ class Menu(object):
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def parseChar(self, char):
-    ''' Parse a character and run the corresponding handler '''
+  def parseKey(self, key):
+    ''' Parse a key and run the corresponding handler '''
     processed = False
-    key = self.kb.ch2key(char)
     for opt in self.options:
       if self.isNormal(opt) or self.isHidden(opt):
         if 'k' in opt:
-          if char in opt['k']:
-            ui.keyPressMessage('{:} - {:}'.format(opt['k'], opt['n']), key, char)
+          if key._in(opt['k']):
+            ui.keyPressMessage('{:} - {:}'.format(opt['k'], opt['n']), key.k, key.c)
 
             if type(opt['h']) is Menu:
               opt['h'].submenu()        # Run handler as submenu
@@ -114,7 +113,7 @@ class Menu(object):
                 for k in opt['xha']:
                   v = opt['xha'][k]
                   if k == 'inChar':
-                    opt['ha'][v] = char
+                    opt['ha'][v] = key.c
 
               # Regular handler arguments
               if 'ha' in opt:
@@ -126,7 +125,7 @@ class Menu(object):
             break
 
     if not processed:
-      ui.keyPressMessage('Unknown command {:s} ({:d})'.format(char, key), key, char)
+      ui.keyPressMessage('Unknown command {:s} ({:d})'.format(key.c, key.k), key.k, key.c)
     else:
       if self.settings['readyMsg']:
         self.settings['readyMsg']()
@@ -167,4 +166,4 @@ class Menu(object):
     ''' Run self as a submenu '''
     self.showOptions()
     ui.inputMsg('Select command...')
-    return self.parseChar(self.kb.getch())
+    return self.parseKey(self.kb.getKey())

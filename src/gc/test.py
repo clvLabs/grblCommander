@@ -97,7 +97,7 @@ class Test:
     ''' TODO: comment
     '''
     if self.kb.keyPressed():
-      if self.kb.getKey() == self.kb.ESC:
+      if self.kb.getKey().n == 'ESC':
         self.testCancelled = True
         self.logTestCancelled()
     return self.testCancelled
@@ -115,9 +115,9 @@ class Test:
     while True:
       while not self.kb.keyPressed():
         key = self.kb.getKey()
-        if key == self.kb.ENTER:
+        if key.n == 'ENTER':
           return True
-        elif key == self.kb.ESC:
+        elif key.n == 'ESC':
           self.testCancelled = True
           self.logTestCancelled()
           return False
