@@ -865,7 +865,17 @@ def setupMenu():
     {'SECTION':1, 'n':'Joystick'},
     {'k':'j',   'n':'Enable/disable joystick',     'h':toggleJoystickEnable},
     {'k':'J',   'n':'Restart joystick connection', 'h':restartJoystickConnection},
-    {'k':'',    'n':'***JOYSTICK KEYS',            'h':NOT_IMPLEMENTED},
+
+    {'INFO':1, 'k':'<xy>',             'n':'XY jog (including diagonals)'},
+    {'INFO':1, 'k':'<z>-/+',           'n':'Z jog (up/down)'},
+    {'INFO':1, 'k':'<extraU><z+>',     'n':'Go to machine home Z'},
+    {'INFO':1, 'k':'<extraD><z+>',     'n':'Go to machine home'},
+    {'INFO':1, 'k':'<extraU><x>',      'n':'Change jog distance (XY) (+-1)'},
+    {'INFO':1, 'k':'<extraU><y>',      'n':'Change jog distance (XY) (+-10)'},
+    {'INFO':1, 'k':'<extraD><x>',      'n':'Change jog distance (Z) (+-1)'},
+    {'INFO':1, 'k':'<extraD><y>',      'n':'Change jog distance (Z) (+-10)'},
+
+
   ])
 
   #   ui.keyPressMessage('9 - Jog - [UR] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
