@@ -87,7 +87,11 @@ class Menu(object):
     return 'HIDDEN' in opt
 
   def isNormal(self, opt):
-    return not self.isSection(opt) and not self.isInfo(opt) and not self.isHidden(opt)
+    return True \
+      and not self.isSection(opt) \
+      and not self.isInfo(opt) \
+      and not self.isHidden(opt) \
+
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def parseChar(self, char):
@@ -143,7 +147,7 @@ class Menu(object):
       elif self.isInfo(opt):
         keyName = '{:}'.format(opt['k'])
         optName = '{:20s} {:}'.format(keyName, opt['n'])
-        txt += optName + '\n'
+        txt += ui.color(optName, 'ui.menuItem') + '\n'
       elif self.isHidden(opt):
         pass
       else:
@@ -151,11 +155,9 @@ class Menu(object):
         optName = '{:20s} {:}'.format(keyName, opt['n'])
 
         if type(opt['h']) is Menu:
-          optName = ui.color(optName, 'ui.menuSubmenu')
+          txt += ui.color(optName, 'ui.menuSubmenu') + '\n'
         else:
-          optName = ui.color(optName, 'ui.menuItem')
-
-        txt += optName + '\n'
+          txt += ui.color(optName, 'ui.menuItem') + '\n'
 
     ui.logBlock(txt)
 
