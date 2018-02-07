@@ -45,6 +45,12 @@ else:
   from select import select
 
 # ------------------------------------------------------------------
+# Key list (defined here, redeclared & filled below)
+
+KEY_LIST = {}
+
+
+# ------------------------------------------------------------------
 # Key class
 
 class Key:
@@ -70,13 +76,21 @@ class Key:
   def _in(self, coll):
     ''' Checks if key is the provided collection.
         Collection can be:
+          - A string representing a key name => 'CTRL_X'
           - A string representing a list of chars => 'yYnN'
     '''
     if type(coll) is str:
-      return self.c in coll
+      if coll in KEY_LIST:
+        return coll == self.n
+
+      if self.c in coll:
+        return True
+
     else:
       print('Unknown collection type')
       assert False
+
+    return False
 
 # ------------------------------------------------------------------
 # Keyboard class
@@ -248,59 +262,65 @@ class Keyboard:
     ''' Shares a few common key codes '''
     self.noKey = Key(n='NONE', k=-1)
 
-    self.k = {
-      'LF': Key(n='ENTER', k=10),
-      'CR': Key(n='ENTER', k=13),
-      'ESC': Key(n='ESC', k=27),
+    self.k = KEY_LIST
 
-      'CTRL_R': Key(n='CTRL_R', k=18),
-      'CTRL_X': Key(n='CTRL_X', k=24),
-      'CTRL_Y': Key(n='CTRL_Y', k=25),
-      'CTRL_Z': Key(n='CTRL_Z', k=26),
 
-      'F1': Key(n='F1', k=59, c0x=1),
-      'F2': Key(n='F2', k=60, c0x=1),
-      'F3': Key(n='F3', k=61, c0x=1),
-      'F4': Key(n='F4', k=62, c0x=1),
-      'F5': Key(n='F5', k=63, c0x=1),
-      'F6': Key(n='F6', k=64, c0x=1),
-      'F7': Key(n='F7', k=65, c0x=1),
-      'F8': Key(n='F8', k=66, c0x=1),
-      'F9': Key(n='F9', k=67, c0x=1),
-      'F10': Key(n='F10', k=68, c0x=1),
-      'F11': Key(n='F11', k=133, c224x=1),
-      'F12': Key(n='F12', k=134, c224x=1),
+# ------------------------------------------------------------------
+# Key list
 
-      'INS': Key(n='INS', k=82, c224x=1),
-      'DEL': Key(n='DEL', k=83, c224x=1),
-      'HOME': Key(n='HOME', k=71, c224x=1),
-      'END': Key(n='END', k=79, c224x=1),
-      'PGUP': Key(n='PGUP', k=73, c224x=1),
-      'PGDN': Key(n='PGDN', k=81, c224x=1),
-      'LEFT': Key(n='LEFT', k=75, c224x=1),
-      'RIGHT': Key(n='RIGHT', k=77, c224x=1),
-      'UP': Key(n='UP', k=72, c224x=1),
-      'DOWN': Key(n='DOWN', k=80, c224x=1),
+KEY_LIST = {
+  'ENTER': Key(n='ENTER', k=10),
+  'CR': Key(n='CR', k=13),
+  'ESC': Key(n='ESC', k=27),
 
-      'KP_INS': Key(n='KP_INS', k=82, c0x=1),
-      'KP_DEL': Key(n='KP_DEL', k=83, c0x=1),
-      'KP_HOME': Key(n='KP_HOME', k=71, c0x=1),
-      'KP_END': Key(n='KP_END', k=79, c0x=1),
-      'KP_PGUP': Key(n='KP_PGUP', k=73, c0x=1),
-      'KP_PGDN': Key(n='KP_PGDN', k=81, c0x=1),
-      'KP_LEFT': Key(n='KP_LEFT', k=75, c0x=1),
-      'KP_RIGHT': Key(n='KP_RIGHT', k=77, c0x=1),
-      'KP_UP': Key(n='KP_UP', k=72, c0x=1),
-      'KP_DOWN': Key(n='KP_DOWN', k=80, c0x=1),
+  'CTRL_R': Key(n='CTRL_R', k=18),
+  'CTRL_X': Key(n='CTRL_X', k=24),
+  'CTRL_Y': Key(n='CTRL_Y', k=25),
+  'CTRL_Z': Key(n='CTRL_Z', k=26),
 
-      'CTRL_KP_INS': Key(n='CTRL_KP_INS', k=146, c0x=1),
-      'CTRL_KP_DEL': Key(n='CTRL_KP_DEL', k=147, c0x=1),
-      'CTRL_KP_HOME': Key(n='CTRL_KP_HOME', k=119, c0x=1),
-      'CTRL_KP_END': Key(n='CTRL_KP_END', k=117, c0x=1),
-      'CTRL_KP_PGUP': Key(n='CTRL_KP_PGUP', k=132, c0x=1),
-      'CTRL_KP_PGDN': Key(n='CTRL_KP_PGDN', k=118, c0x=1),
-      'CTRL_KP_LEFT': Key(n='CTRL_KP_LEFT', k=115, c0x=1),
-      'CTRL_KP_RIGHT': Key(n='CTRL_KP_RIGHT', k=116, c0x=1),
-      'CTRL_KP_UP': Key(n='CTRL_KP_UP', k=141, c0x=1),
-      'CTRL_KP_DOWN': Key(n='CTRL_KP_DOWN', k=145, c0x=1),
-    }
+  'F1': Key(n='F1', k=59, c0x=1),
+  'F2': Key(n='F2', k=60, c0x=1),
+  'F3': Key(n='F3', k=61, c0x=1),
+  'F4': Key(n='F4', k=62, c0x=1),
+  'F5': Key(n='F5', k=63, c0x=1),
+  'F6': Key(n='F6', k=64, c0x=1),
+  'F7': Key(n='F7', k=65, c0x=1),
+  'F8': Key(n='F8', k=66, c0x=1),
+  'F9': Key(n='F9', k=67, c0x=1),
+  'F10': Key(n='F10', k=68, c0x=1),
+  'F11': Key(n='F11', k=133, c224x=1),
+  'F12': Key(n='F12', k=134, c224x=1),
+
+  'INS': Key(n='INS', k=82, c224x=1),
+  'DEL': Key(n='DEL', k=83, c224x=1),
+  'HOME': Key(n='HOME', k=71, c224x=1),
+  'END': Key(n='END', k=79, c224x=1),
+  'PGUP': Key(n='PGUP', k=73, c224x=1),
+  'PGDN': Key(n='PGDN', k=81, c224x=1),
+  'LEFT': Key(n='LEFT', k=75, c224x=1),
+  'RIGHT': Key(n='RIGHT', k=77, c224x=1),
+  'UP': Key(n='UP', k=72, c224x=1),
+  'DOWN': Key(n='DOWN', k=80, c224x=1),
+
+  'KP_INS': Key(n='KP_INS', k=82, c0x=1),
+  'KP_DEL': Key(n='KP_DEL', k=83, c0x=1),
+  'KP_HOME': Key(n='KP_HOME', k=71, c0x=1),
+  'KP_END': Key(n='KP_END', k=79, c0x=1),
+  'KP_PGUP': Key(n='KP_PGUP', k=73, c0x=1),
+  'KP_PGDN': Key(n='KP_PGDN', k=81, c0x=1),
+  'KP_LEFT': Key(n='KP_LEFT', k=75, c0x=1),
+  'KP_RIGHT': Key(n='KP_RIGHT', k=77, c0x=1),
+  'KP_UP': Key(n='KP_UP', k=72, c0x=1),
+  'KP_DOWN': Key(n='KP_DOWN', k=80, c0x=1),
+
+  'CTRL_KP_INS': Key(n='CTRL_KP_INS', k=146, c0x=1),
+  'CTRL_KP_DEL': Key(n='CTRL_KP_DEL', k=147, c0x=1),
+  'CTRL_KP_HOME': Key(n='CTRL_KP_HOME', k=119, c0x=1),
+  'CTRL_KP_END': Key(n='CTRL_KP_END', k=117, c0x=1),
+  'CTRL_KP_PGUP': Key(n='CTRL_KP_PGUP', k=132, c0x=1),
+  'CTRL_KP_PGDN': Key(n='CTRL_KP_PGDN', k=118, c0x=1),
+  'CTRL_KP_LEFT': Key(n='CTRL_KP_LEFT', k=115, c0x=1),
+  'CTRL_KP_RIGHT': Key(n='CTRL_KP_RIGHT', k=116, c0x=1),
+  'CTRL_KP_UP': Key(n='CTRL_KP_UP', k=141, c0x=1),
+  'CTRL_KP_DOWN': Key(n='CTRL_KP_DOWN', k=145, c0x=1),
+}

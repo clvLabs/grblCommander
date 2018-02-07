@@ -498,8 +498,9 @@ def absoluteTablePosition(p):
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def dummy():
-  pass
+def resetSerialConnection():
+  mch.resetConnection()
+  mch.queryMachineStatus()
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -605,14 +606,15 @@ def setupMenu():
   mnu.setOptions([
     {'SECTION':1, 'n':'General commands'},
     {'k':'qQ',           'n':'Quit',                         'h':mnu.quit},
-    {'k':'',             'n':'***Reset serial connection',   'h':NOT_IMPLEMENTED},
-    {'k':'',             'n':'***grbl soft reset',           'h':NOT_IMPLEMENTED},
+    {'k':'CTRL_R',       'n':'Reset serial connection',      'h':resetSerialConnection},
+    {'k':'CTRL_X',       'n':'grbl soft reset',              'h':mch.softReset},
     {'k':'=',            'n':'Lock grblCommander',           'h':lockGrblCommander},
     {'k':'cC',           'n':'Clear screen',                 'h':ui.clearScreen},
 
     {'SECTION':1, 'n':'Info'},
     {'k':'hH',           'n':'Show help',                    'h':mnu.showOptions},
-    {'k':'',             'n':'***Force status re-query',     'h':NOT_IMPLEMENTED},
+    {'k':'ENTER',        'n':'Force status re-query',        'h':mch.viewMachineStatus},
+    {'k':'?',            'n':'Force status re-query',        'h':mch.viewMachineStatus},
     {'k':'s',            'n':'Show current status (short)',  'h':showMachineStatus},
     {'k':'S',            'n':'Show current status (LONG)',   'h':showMachineLongStatus},
     {'k':'@',            'n':'Show current status (FULL)',   'h':showMachineFullStatus},
