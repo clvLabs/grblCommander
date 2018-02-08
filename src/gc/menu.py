@@ -15,13 +15,34 @@ from . import ui as ui
 
 class Option:
 
-  def __init__(self, n=None, k=None, c=None, h=None, ha=None):
+  def __init__(self, n=None, k=None, c=None, h=None, ha=None, xha=None, \
+              SECTION=None, INFO=None, HIDDEN=None):
     self.n = n        # name
     self.k = k        # key
     self.c = c        # char
     self.h = h        # handler (function)
     self.ha = ha      # handler args (**kwargs)
+    self.xha = xha    # EXTRA handler args (**kwargs)
 
+    # Special keywords
+    self.SECTION = SECTION
+    self.INFO = INFO
+    self.HIDDEN = HIDDEN
+
+    self.kd = self.keyDisplay(k)   # key (display version)
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def keyDisplay(self, k):
+    ''' Format a key name/combination for display '''
+    if type(k) is str:
+      r = k
+    elif type(k) is list:
+      r = ' / '.join(k)
+    else:
+      r = k
+
+    return '{:}'.format(r)
 
 # ------------------------------------------------------------------
 # Menu class
@@ -31,7 +52,10 @@ class Menu(object):
   def __init__(self, kb, options=None, settings=None):
     ''' Construct a Menu object '''
     self.kb = kb
-    self.options = options
+    self.options = []
+
+    if options:
+      self.setOptions(options)
 
     if settings:
       self.settings = settings
@@ -46,7 +70,8 @@ class Menu(object):
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def setOptions(self, options):
     ''' Set options after construction '''
-    self.options = options
+    for opt in options:
+      self.options.append(Option(**opt))
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -78,13 +103,13 @@ class Menu(object):
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def isSection(self, opt):
-    return 'SECTION' in opt
+    return opt.SECTION
 
   def isInfo(self, opt):
-    return 'INFO' in opt
+    return opt.INFO
 
   def isHidden(self, opt):
-    return 'HIDDEN' in opt
+    return opt.HIDDEN
 
   def isNormal(self, opt):
     return True \
@@ -99,27 +124,27 @@ class Menu(object):
     processed = False
     for opt in self.options:
       if self.isNormal(opt) or self.isHidden(opt):
-        if 'k' in opt:
-          if key._in(opt['k']):
-            ui.keyPressMessage('{:} - {:}'.format(opt['k'], opt['n']), key.k, key.c)
+        if opt.k:
+          if key._in(opt.k):
+            ui.keyPressMessage('{:} - {:}'.format(opt.kd, opt.n), key.k, key.c)
 
-            if type(opt['h']) is Menu:
-              opt['h'].submenu()        # Run handler as submenu
+            if type(opt.h) is Menu:
+              opt.h.submenu()        # Run handler as submenu
             else:
               # EXTRA handler arguments
-              if 'xha' in opt:
-                if not 'ha' in opt:
-                  opt['ha'] = {}
-                for k in opt['xha']:
-                  v = opt['xha'][k]
+              if opt.xha:
+                if not opt.ha:
+                  opt.ha = {}
+                for k in opt.xha:
+                  v = opt.xha[k]
                   if k == 'inChar':
-                    opt['ha'][v] = key.c
+                    opt.ha[v] = key.c
 
               # Regular handler arguments
-              if 'ha' in opt:
-                opt['h'](**opt['ha'])   # Run handler with arguments
+              if opt.ha:
+                opt.h(**opt.ha)   # Run handler with arguments
               else:
-                opt['h']()              # Run handler without arguments
+                opt.h()              # Run handler without arguments
 
             processed = True
             break
@@ -140,20 +165,18 @@ class Menu(object):
     for opt in self.options:
       if self.isSection(opt):
         txt += '\n{:}\n{:}\n'.format(
-          ui.color(opt['n'], 'ui.menuSection'),
+          ui.color(opt.n, 'ui.menuSection'),
           ui.color(ui.gMSG_SEPARATOR, 'ui.menuSection'),
         )
       elif self.isInfo(opt):
-        keyName = '{:}'.format(opt['k'])
-        optName = '{:20s} {:}'.format(keyName, opt['n'])
+        optName = '{:20s} {:}'.format(opt.kd, opt.n)
         txt += ui.color(optName, 'ui.menuItem') + '\n'
       elif self.isHidden(opt):
         pass
       else:
-        keyName = '{:}'.format(opt['k'])
-        optName = '{:20s} {:}'.format(keyName, opt['n'])
+        optName = '{:20s} {:}'.format(opt.kd, opt.n)
 
-        if type(opt['h']) is Menu:
+        if type(opt.h) is Menu:
           txt += ui.color(optName, 'ui.menuSubmenu') + '\n'
         else:
           txt += ui.color(optName, 'ui.menuItem') + '\n'

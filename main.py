@@ -613,8 +613,7 @@ def setupMenu():
 
     {'SECTION':1, 'n':'Info'},
     {'k':'hH',           'n':'Show help',                    'h':mnu.showOptions},
-    {'k':'ENTER',        'n':'Force status re-query',        'h':mch.viewMachineStatus},
-    {'k':'?',            'n':'Force status re-query',        'h':mch.viewMachineStatus},
+    {'k':['ENTER', '?'], 'n':'Force status re-query',        'h':mch.viewMachineStatus},
     {'k':'s',            'n':'Show current status (short)',  'h':showMachineStatus},
     {'k':'S',            'n':'Show current status (LONG)',   'h':showMachineLongStatus},
     {'k':'@',            'n':'Show current status (FULL)',   'h':showMachineFullStatus},

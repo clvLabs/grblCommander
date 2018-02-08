@@ -78,6 +78,7 @@ class Key:
         Collection can be:
           - A string representing a key name => 'CTRL_X'
           - A string representing a list of chars => 'yYnN'
+          - A list of strings in any of the above formats
     '''
     if type(coll) is str:
       if coll in KEY_LIST:
@@ -85,6 +86,12 @@ class Key:
 
       if self.c in coll:
         return True
+
+    elif type(coll) is list:
+
+      for c in coll:
+        if self._in(c):
+          return True
 
     else:
       print('Unknown collection type')
