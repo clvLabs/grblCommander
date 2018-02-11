@@ -55,7 +55,7 @@ KEY_LIST = {}
 
 class Key:
 
-  def __init__(self, n=None, k=None, c=None, c0x=None, c224x=None):
+  def __init__(self, n=None, k=None, c=None):
 
     # Make sure we have both key and char
     assert k or c
@@ -68,8 +68,6 @@ class Key:
     self.n = n          # name
     self.k = k          # key
     self.c = c          # char
-    self.c0x = c0x      # combo 0X
-    self.c224x = c224x  # comgo 224x
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -161,48 +159,15 @@ class Keyboard:
     DBG('k[{:}] c[{:}]'.format(charVal, char))
 
     key = None
-    c0x = None
-    c224x = None
 
-    # 'COMBO_0X'
-    if charVal == 0:
-      DBG('c0x!')
-      c0x = 1
-      # Get next code
-      char = self._getch()
-      charVal = ord(char)
-
-      for name in self.k:
-        k = self.k[name]
-        if k.c0x and k.k == charVal:
-          key = k
-          break
-
-    # 'COMBO_224X'
-    elif charVal == 224:
-      DBG('c224x!')
-      c224x = 1
-
-      # Get next code
-      char = self._getch()
-      charVal = ord(char)
-
-      for name in self.k:
-        k = self.k[name]
-        if k.c224x and k.k == charVal:
-          key = k
-          break
-
-    # 'Normal' keys
-    else:
-      for name in self.k:
-        k = self.k[name]
-        if k.k == charVal:
-          key = k
-          break
+    for name in self.k:
+      k = self.k[name]
+      if k.k == charVal:
+        key = k
+        break
 
     if not key:
-      key = Key(n=char, k=charVal, c0x=c0x, c224x=c224x)
+      key = Key(n=char, k=charVal)
 
     return key
 
@@ -285,49 +250,49 @@ KEY_LIST = {
   'CTRL_Y': Key(n='CTRL_Y', k=25),
   'CTRL_Z': Key(n='CTRL_Z', k=26),
 
-  'F1': Key(n='F1', k=59, c0x=1),
-  'F2': Key(n='F2', k=60, c0x=1),
-  'F3': Key(n='F3', k=61, c0x=1),
-  'F4': Key(n='F4', k=62, c0x=1),
-  'F5': Key(n='F5', k=63, c0x=1),
-  'F6': Key(n='F6', k=64, c0x=1),
-  'F7': Key(n='F7', k=65, c0x=1),
-  'F8': Key(n='F8', k=66, c0x=1),
-  'F9': Key(n='F9', k=67, c0x=1),
-  'F10': Key(n='F10', k=68, c0x=1),
-  'F11': Key(n='F11', k=133, c224x=1),
-  'F12': Key(n='F12', k=134, c224x=1),
+  # 'F1': Key(n='F1', k=59),
+  # 'F2': Key(n='F2', k=60),
+  # 'F3': Key(n='F3', k=61),
+  # 'F4': Key(n='F4', k=62),
+  # 'F5': Key(n='F5', k=63),
+  # 'F6': Key(n='F6', k=64),
+  # 'F7': Key(n='F7', k=65),
+  # 'F8': Key(n='F8', k=66),
+  # 'F9': Key(n='F9', k=67),
+  # 'F10': Key(n='F10', k=68),
+  # 'F11': Key(n='F11', k=133),
+  # 'F12': Key(n='F12', k=134),
 
-  'INS': Key(n='INS', k=82, c224x=1),
-  'DEL': Key(n='DEL', k=83, c224x=1),
-  'HOME': Key(n='HOME', k=71, c224x=1),
-  'END': Key(n='END', k=79, c224x=1),
-  'PGUP': Key(n='PGUP', k=73, c224x=1),
-  'PGDN': Key(n='PGDN', k=81, c224x=1),
-  'LEFT': Key(n='LEFT', k=75, c224x=1),
-  'RIGHT': Key(n='RIGHT', k=77, c224x=1),
-  'UP': Key(n='UP', k=72, c224x=1),
-  'DOWN': Key(n='DOWN', k=80, c224x=1),
+  # 'INS': Key(n='INS', k=82),
+  # 'DEL': Key(n='DEL', k=83),
+  # 'HOME': Key(n='HOME', k=71),
+  # 'END': Key(n='END', k=79),
+  # 'PGUP': Key(n='PGUP', k=73),
+  # 'PGDN': Key(n='PGDN', k=81),
+  # 'LEFT': Key(n='LEFT', k=75),
+  # 'RIGHT': Key(n='RIGHT', k=77),
+  # 'UP': Key(n='UP', k=72),
+  # 'DOWN': Key(n='DOWN', k=80),
 
-  'KP_INS': Key(n='KP_INS', k=82, c0x=1),
-  'KP_DEL': Key(n='KP_DEL', k=83, c0x=1),
-  'KP_HOME': Key(n='KP_HOME', k=71, c0x=1),
-  'KP_END': Key(n='KP_END', k=79, c0x=1),
-  'KP_PGUP': Key(n='KP_PGUP', k=73, c0x=1),
-  'KP_PGDN': Key(n='KP_PGDN', k=81, c0x=1),
-  'KP_LEFT': Key(n='KP_LEFT', k=75, c0x=1),
-  'KP_RIGHT': Key(n='KP_RIGHT', k=77, c0x=1),
-  'KP_UP': Key(n='KP_UP', k=72, c0x=1),
-  'KP_DOWN': Key(n='KP_DOWN', k=80, c0x=1),
+  # 'KP_INS': Key(n='KP_INS', k=82),
+  # 'KP_DEL': Key(n='KP_DEL', k=83),
+  # 'KP_HOME': Key(n='KP_HOME', k=71),
+  # 'KP_END': Key(n='KP_END', k=79),
+  # 'KP_PGUP': Key(n='KP_PGUP', k=73),
+  # 'KP_PGDN': Key(n='KP_PGDN', k=81),
+  # 'KP_LEFT': Key(n='KP_LEFT', k=75),
+  # 'KP_RIGHT': Key(n='KP_RIGHT', k=77),
+  # 'KP_UP': Key(n='KP_UP', k=72),
+  # 'KP_DOWN': Key(n='KP_DOWN', k=80),
 
-  'CTRL_KP_INS': Key(n='CTRL_KP_INS', k=146, c0x=1),
-  'CTRL_KP_DEL': Key(n='CTRL_KP_DEL', k=147, c0x=1),
-  'CTRL_KP_HOME': Key(n='CTRL_KP_HOME', k=119, c0x=1),
-  'CTRL_KP_END': Key(n='CTRL_KP_END', k=117, c0x=1),
-  'CTRL_KP_PGUP': Key(n='CTRL_KP_PGUP', k=132, c0x=1),
-  'CTRL_KP_PGDN': Key(n='CTRL_KP_PGDN', k=118, c0x=1),
-  'CTRL_KP_LEFT': Key(n='CTRL_KP_LEFT', k=115, c0x=1),
-  'CTRL_KP_RIGHT': Key(n='CTRL_KP_RIGHT', k=116, c0x=1),
-  'CTRL_KP_UP': Key(n='CTRL_KP_UP', k=141, c0x=1),
-  'CTRL_KP_DOWN': Key(n='CTRL_KP_DOWN', k=145, c0x=1),
+  # 'CTRL_KP_INS': Key(n='CTRL_KP_INS', k=146),
+  # 'CTRL_KP_DEL': Key(n='CTRL_KP_DEL', k=147),
+  # 'CTRL_KP_HOME': Key(n='CTRL_KP_HOME', k=119),
+  # 'CTRL_KP_END': Key(n='CTRL_KP_END', k=117),
+  # 'CTRL_KP_PGUP': Key(n='CTRL_KP_PGUP', k=132),
+  # 'CTRL_KP_PGDN': Key(n='CTRL_KP_PGDN', k=118),
+  # 'CTRL_KP_LEFT': Key(n='CTRL_KP_LEFT', k=115),
+  # 'CTRL_KP_RIGHT': Key(n='CTRL_KP_RIGHT', k=116),
+  # 'CTRL_KP_UP': Key(n='CTRL_KP_UP', k=141),
+  # 'CTRL_KP_DOWN': Key(n='CTRL_KP_DOWN', k=145),
 }
