@@ -212,7 +212,7 @@ class Macro:
         self.show(name, avoidReload=True)
 
         ui.inputMsg('Press y/Y to execute, any other key to cancel...')
-        key = self.kb.getkey()
+        key = self.kb.getKey()
 
         if not key._in('yY'):
           ui.logBlock('MACRO [{:}] CANCELLED'.format(name), c='ui.cancelMsg')
