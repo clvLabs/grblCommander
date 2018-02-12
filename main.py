@@ -26,7 +26,7 @@ mchCfg = cfg['machine']
 mcrCfg = cfg['macro']
 
 # Current version
-gVERSION = '0.11.0'
+gVERSION = '0.12.0'
 
 # keyboard manager
 kb = keyboard.Keyboard()
