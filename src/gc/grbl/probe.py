@@ -10,24 +10,18 @@ if __name__ == '__main__':
 
 import time
 
-from .. import ui as ui
-from . import grbl
-
-# ------------------------------------------------------------------
-# Constants
-
-
 # ------------------------------------------------------------------
 # Probe class
 
 class Probe:
 
-  def __init__(self, mch):
-    ''' Construct a Grbl object.
+  def __init__(self, cfg, ui, mch):
+    ''' Construct a Probe object.
     '''
+    self.cfg = cfg
+    self.ui = ui
     self.mch = mch
 
-    self.cfg = mch.cfg
     self.mchCfg = self.cfg['machine']
     self.uiCfg = self.cfg['ui']
     self.prbCfg = self.mchCfg['probing']
@@ -176,24 +170,24 @@ class Probe:
     result = {}
 
     if direction not in ['down', 'up']:
-      ui.log('ERROR: probe.probe() : invalid direction [{:}]'.format(direction), c='ui.errorMsg')
+      self.ui.log('ERROR: probe.probe() : invalid direction [{:}]'.format(direction), c='ui.errorMsg')
       result['success'] = False
       return result
 
     down = True if direction == 'down' else False
 
-    ui.logTitle('{:}: Probing {:} (feed {:})'.format(
+    self.ui.logTitle('{:}: Probing {:} (feed {:})'.format(
       comment,
       direction,
       feed))
 
     probeContacting = self.mch.getProbeState()
     if (down and probeContacting):
-      ui.log('The probe is contacting the plate before probing down. CANCELLING', c='ui.errorMsg')
+      self.ui.log('The probe is contacting the plate before probing down. CANCELLING', c='ui.errorMsg')
       result['success'] = False
       return result
     elif (not down and not probeContacting):
-      ui.log('The probe is NOT contacting the plate before probing up. CANCELLING', c='ui.errorMsg')
+      self.ui.log('The probe is NOT contacting the plate before probing up. CANCELLING', c='ui.errorMsg')
       result['success'] = False
       return result
 
@@ -223,20 +217,20 @@ class Probe:
   def showLogTitle(self):
     ''' TODO: comment
     '''
-    ui.log('Name     Dir  Feed   ProbeZ   StopZ  Overshoot', c='ui.successMsg')
-    ui.log('-------- ---- ----   ------   ------ ----------', c='ui.successMsg')
+    self.ui.log('Name     Dir  Feed   ProbeZ   StopZ  Overshoot', c='ui.successMsg')
+    self.ui.log('-------- ---- ----   ------   ------ ----------', c='ui.successMsg')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def showLogItem(self, item):
     ''' TODO: comment
     '''
-    ui.log('{:8s} {:4s} {:4d} {:} {:} {:7.3f} {:}'.format(
+    self.ui.log('{:8s} {:4s} {:4d} {:} {:} {:7.3f} {:}'.format(
       item['comment'],
       item['direction'],
       item['feed'],
-      ui.coordStr(item['probeZ']),
-      ui.coordStr(item['currZ']),
+      self.ui.coordStr(item['probeZ']),
+      self.ui.coordStr(item['currZ']),
       item['overshoot'],
       self.mch.status['parserState']['units']['desc']
       ), c='ui.successMsg')
@@ -247,7 +241,7 @@ class Probe:
     ''' Pulls Z off by the specified distance
     '''
     if distance:
-      ui.logTitle('Pulling off ({:} {:})'.format(distance, self.mch.status['parserState']['units']['desc']))
+      self.ui.logTitle('Pulling off ({:} {:})'.format(distance, self.mch.status['parserState']['units']['desc']))
       self.mch.rapidRelative(z=distance)
 
 
@@ -255,13 +249,13 @@ class Probe:
   def resetWCOZ(self):
     ''' Resets current WCO's Z to PRB:Z - <touchPlateHeight>
     '''
-    ui.logTitle('Resetting WCO Z')
+    self.ui.logTitle('Resetting WCO Z')
     touchPlateHeight = self.prbCfg['touchPlateHeight']
     probeZ = self.axisPos('z')
     newWCOZ = self.axisPos('z') - touchPlateHeight
-    ui.log('Probe Z: {:}'.format(probeZ), c='ui.successMsg')
-    ui.log('Touch plate height: {:}'.format(touchPlateHeight), c='ui.successMsg')
-    ui.log('New Z0: {:}'.format(newWCOZ), c='ui.finishedMsg')
+    self.ui.log('Probe Z: {:}'.format(probeZ), c='ui.successMsg')
+    self.ui.log('Touch plate height: {:}'.format(touchPlateHeight), c='ui.successMsg')
+    self.ui.log('New Z0: {:}'.format(newWCOZ), c='ui.finishedMsg')
     self.mch.resetWCOAxis('z', newWCOZ)
 
 
@@ -269,7 +263,7 @@ class Probe:
   def saveCurrentState(self):
     ''' Gets a few parameters to be restored after probing
     '''
-    ui.logTitle('Saving current parser state')
+    self.ui.logTitle('Saving current parser state')
     savedParserMotion = self.parserSt['motion']['val']
     savedFeed = self.parserSt['feed']['val']
 
@@ -283,6 +277,6 @@ class Probe:
   def restoreState(self, state):
     ''' Restores a few parameters after probing
     '''
-    ui.logTitle('Restoring previous parser state')
+    self.ui.logTitle('Restoring previous parser state')
     self.mch.sendWait(state['savedParserMotion'])
     self.mch.sendWait('F{:}'.format(state['savedFeed']))

@@ -13,17 +13,16 @@ from os import environ
 from pygame.locals import QUIT, JOYBUTTONUP, JOYBUTTONDOWN, \
     JOYAXISMOTION, JOYHATMOTION
 
-from . import ui as ui
-
 # ------------------------------------------------------------------
 # Joystick class
 
 class Joystick:
 
-  def __init__(self, cfg):
+  def __init__(self, cfg, ui):
     ''' Construct a Joystick object
     '''
     self.cfg = cfg
+    self.ui = ui
     self.joyCfg = cfg['joystick']
     self._joystick = None
     self.connected = False
@@ -53,7 +52,7 @@ class Joystick:
     ''' Start joystick connection
     '''
 
-    ui.log('Starting pygame...')
+    self.ui.log('Starting pygame...')
     # Don't use drivers we don't need
     environ['SDL_VIDEODRIVER'] = 'dummy'
     environ['SDL_AUDIODRIVER'] = 'dummy'
@@ -77,20 +76,20 @@ class Joystick:
     self._joystick = None
     self.resetStatus()
 
-    ui.log('Restarting joystick driver...')
+    self.ui.log('Restarting joystick driver...')
     if pygame.joystick.get_init():
       pygame.joystick.quit()
 
     pygame.joystick.init()
 
-    ui.log('Searching for joystick [{:s}]...'.format(self.joyCfg['name']))
+    self.ui.log('Searching for joystick [{:s}]...'.format(self.joyCfg['name']))
     try:
       for i in range(0, pygame.joystick.get_count()):
           foundJoy = pygame.joystick.Joystick(i)
           # print('Detected joystick '%s'' % foundJoy.get_name())
 
           if foundJoy.get_name() == self.joyCfg['name']:
-            ui.log('Joystick found!!.', c='ui.successMsg')
+            self.ui.log('Joystick found!!.', c='ui.successMsg')
             self._joystick = foundJoy
             self._joystick.init()
     except:
@@ -102,7 +101,7 @@ class Joystick:
       self.flushQueue()
     else:
       self.connected = False
-      ui.log('Joystick not found', c='ui.errorMsg', v='ERROR')
+      self.ui.log('Joystick not found', c='ui.errorMsg', v='ERROR')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

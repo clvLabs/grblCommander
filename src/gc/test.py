@@ -12,23 +12,22 @@ import sys
 import time
 import math
 
-from . import ui as ui
-
 # ------------------------------------------------------------------
 # Test class
 
 class Test:
 
-  def __init__(self, grbl, kb):
+  def __init__(self, cfg, kb, ui, mch):
     ''' Construct a Test object.
     '''
-    self.grbl = grbl
+    self.cfg = cfg
     self.kb = kb
-    self.cfg = self.grbl.getConfig()
+    self.ui = ui
+    self.mch = mch
     self.mchCfg = self.cfg['machine']
     self.tstCfg = self.cfg['test']
-    self.mpos = self.grbl.status['MPos']
-    self.wpos = self.grbl.status['WPos']
+    self.mpos = self.mch.status['MPos']
+    self.wpos = self.mch.status['WPos']
 
     self.testCancelled = False
 
@@ -44,7 +43,7 @@ class Test:
   def sendCommand(self,cmd):
     ''' Send a move command to the grblShield (wait for machine idle)
     '''
-    self.grbl.sendWait(cmd)
+    self.mch.sendWait(cmd)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -52,7 +51,7 @@ class Test:
     ''' TODO: comment
     '''
     if not self.testCancelled:
-      self.grbl.feedAbsolute(x=x, y=y, z=z, speed=speed)
+      self.mch.feedAbsolute(x=x, y=y, z=z, speed=speed)
       self.checkTestCancelled()
 
 
@@ -61,7 +60,7 @@ class Test:
     ''' TODO: comment
     '''
     if not self.testCancelled:
-      self.grbl.rapidAbsolute(x=x, y=y, z=z)
+      self.mch.rapidAbsolute(x=x, y=y, z=z)
       self.checkTestCancelled()
 
 
@@ -69,7 +68,7 @@ class Test:
   def logTestHeader(self,text):
     ''' TODO: comment
     '''
-    ui.log('''
+    self.ui.log('''
     WARNING !!!!!
     =============
     \n{:}
@@ -82,14 +81,14 @@ class Test:
   def logTestCancelled(self):
     ''' TODO: comment
     '''
-    ui.logBlock('TEST CANCELLED', c='ui.cancelMsg')
+    self.ui.logBlock('TEST CANCELLED', c='ui.cancelMsg')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def logTestFinished(self):
     ''' TODO: comment
     '''
-    ui.logBlock('TEST FINISHED', c='ui.finishedMsg')
+    self.ui.logBlock('TEST FINISHED', c='ui.finishedMsg')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -107,10 +106,10 @@ class Test:
   def waitForSpindleStart(self):
     ''' TODO: comment
     '''
-    ui.logTitle('Spindle start')
+    self.ui.logTitle('Spindle start')
 
-    ui.log()
-    ui.inputMsg('''Please start spindle...
+    self.ui.log()
+    self.ui.inputMsg('''Please start spindle...
     (press <ENTER> or <ESC>)''')
     while True:
       while not self.kb.keyPressed():
@@ -130,7 +129,7 @@ class Test:
     if password is None:
       password = self.tstCfg['password']
 
-    if ui.userConfirm('Are you sure you want to start?', password):
+    if self.ui.userConfirm('Are you sure you want to start?', password):
       return True
     else:
       self.testCancelled = True
@@ -162,11 +161,11 @@ class Test:
       if self.testCancelled:
         return
 
-      ui.logTitle('Going to [{:}]'.format(stepName))
+      self.ui.logTitle('Going to [{:}]'.format(stepName))
       self.mchRapid(x=x,y=y)
 
-    maxX = self.grbl.getMax('x')
-    maxY = self.grbl.getMax('y')
+    maxX = self.mch.getMax('x')
+    maxY = self.mch.getMax('y')
     savedX = self.wpos['x']
     savedY = self.wpos['y']
 
@@ -185,7 +184,7 @@ class Test:
     else:
       self.logTestFinished()
 
-    ui.logTitle('Back home')
+    self.ui.logTitle('Back home')
     self.mchRapid(x=0, y=0)
     tpsSingleStep('Return', x=savedX,y=savedY)
 
@@ -228,14 +227,14 @@ class Test:
       goToSafeZ()
 
     # - [Main process]- - - - - - - - - - - - - - - - - -
-    ui.logTitle('Safe initial position')
+    self.ui.logTitle('Safe initial position')
     goToSafeZ()
-    ui.log()
+    self.ui.log()
 
     if not self.waitForSpindleStart():
       return
 
-    ui.logTitle('Starting drill pattern')
+    self.ui.logTitle('Starting drill pattern')
     totalDrills = len(YSteps) * len(XSteps)
 
     for yIndex, y in enumerate(YSteps):
@@ -243,9 +242,9 @@ class Test:
       for xIndex, x in enumerate(xRange):
         if not self.testCancelled:
           currDrill = (yIndex * len(YSteps)) + (xIndex+1)
-          ui.logTitle('Rapid to next drill')
+          self.ui.logTitle('Rapid to next drill')
           goTo(x, y)
-          ui.logTitle('Drilling @ X{:} Y{:} ({:}/{:})'.format(
+          self.ui.logTitle('Drilling @ X{:} Y{:} ({:}/{:})'.format(
             x, y,
             currDrill, totalDrills)
           )
@@ -256,7 +255,7 @@ class Test:
     else:
       self.logTestFinished()
 
-    ui.logTitle('Back home')
+    self.ui.logTitle('Back home')
     self.mchRapid(z=1.5)
     self.mchRapid(x=0, y=0)
 
@@ -277,7 +276,7 @@ class Test:
     ''')
 
     def showZZParameters(title):
-      ui.log('''
+      self.ui.log('''
       {:s}:
         startRow              {:d}
         startCol              {:d}
@@ -382,30 +381,30 @@ class Test:
 
     showZZParameters('Calculated parameters')
 
-    startRow = ui.getUserInput('startRow (BASE 1!!!) ({:d})'.format(startRow), int, startRow)
-    startCol = ui.getUserInput('startCol (BASE 1!!!) ({:d})'.format(startCol), int, startCol)
-    # startY = ui.getUserInput('StartY ({:f})'.format(startY), float, startY)
-    # startX = ui.getUserInput('StartX ({:f})'.format(startX), float, startX)
+    startRow = self.ui.getUserInput('startRow (BASE 1!!!) ({:d})'.format(startRow), int, startRow)
+    startCol = self.ui.getUserInput('startCol (BASE 1!!!) ({:d})'.format(startCol), int, startCol)
+    # startY = self.ui.getUserInput('StartY ({:f})'.format(startY), float, startY)
+    # startX = self.ui.getUserInput('StartX ({:f})'.format(startX), float, startX)
     startY = rows[startRow-1]
     startX = cols[startCol-1]
 
-    materialTop = ui.getUserInput('MaterialTop ({:f})'.format(materialTop), float, materialTop)
-    # bitDiameter = ui.getUserInput('Bit diameter (mm) ({:})'.format(bitDiameter), float, bitDiameter)
-    # bitFlutes = ui.getUserInput('Number of flutes ({:})'.format(bitFlutes), int, bitFlutes)
-    # bitRPM = ui.getUserInput('Spindle RPM ({:})'.format(bitRPM), int, bitRPM)
+    materialTop = self.ui.getUserInput('MaterialTop ({:f})'.format(materialTop), float, materialTop)
+    # bitDiameter = self.ui.getUserInput('Bit diameter (mm) ({:})'.format(bitDiameter), float, bitDiameter)
+    # bitFlutes = self.ui.getUserInput('Number of flutes ({:})'.format(bitFlutes), int, bitFlutes)
+    # bitRPM = self.ui.getUserInput('Spindle RPM ({:})'.format(bitRPM), int, bitRPM)
 
     safeWorkZ = materialTop + 3
-    # safeTravelZ = ui.getUserInput('Z safe TRAVEL height (mm) ({:})'.format(safeTravelZ), float, safeTravelZ)
-    # safeWorkZ = ui.getUserInput('Z safe WORK height (mm) ({:})'.format(safeWorkZ), float, safeWorkZ)
-    # zzRun = ui.getUserInput('Run ({:f}) (0 for straight line)'.format(zzRun), float, zzRun)
-    # zzRise = ui.getUserInput('Rise ({:f})'.format(zzRise), float, zzRise)
-    zzPlunge = ui.getUserInput('Plunge ({:f})'.format(zzPlunge), float, zzPlunge)
-    # zzPlungeSpeed = ui.getUserInput('PlungeSpeed ({:f})'.format(zzPlungeSpeed), float, zzPlungeSpeed)
-    zzInitialFeed = ui.getUserInput('InitialFeed ({:f})'.format(zzInitialFeed), float, zzInitialFeed)
-    zzDeltaFeed = ui.getUserInput('DeltaFeed ({:d})'.format(zzDeltaFeed), int, zzDeltaFeed)
-    # zzZigZagPerIteration = ui.getUserInput('ZigZagPerIteration ({:d})'.format(zzZigZagPerIteration), int, zzZigZagPerIteration)
-    zzIterations = ui.getUserInput('Iterations ({:d})'.format(zzIterations), int, zzIterations)
-    # zzSpacing = ui.getUserInput('Spacing ({:f})'.format(zzSpacing), float, zzSpacing)
+    # safeTravelZ = self.ui.getUserInput('Z safe TRAVEL height (mm) ({:})'.format(safeTravelZ), float, safeTravelZ)
+    # safeWorkZ = self.ui.getUserInput('Z safe WORK height (mm) ({:})'.format(safeWorkZ), float, safeWorkZ)
+    # zzRun = self.ui.getUserInput('Run ({:f}) (0 for straight line)'.format(zzRun), float, zzRun)
+    # zzRise = self.ui.getUserInput('Rise ({:f})'.format(zzRise), float, zzRise)
+    zzPlunge = self.ui.getUserInput('Plunge ({:f})'.format(zzPlunge), float, zzPlunge)
+    # zzPlungeSpeed = self.ui.getUserInput('PlungeSpeed ({:f})'.format(zzPlungeSpeed), float, zzPlungeSpeed)
+    zzInitialFeed = self.ui.getUserInput('InitialFeed ({:f})'.format(zzInitialFeed), float, zzInitialFeed)
+    zzDeltaFeed = self.ui.getUserInput('DeltaFeed ({:d})'.format(zzDeltaFeed), int, zzDeltaFeed)
+    # zzZigZagPerIteration = self.ui.getUserInput('ZigZagPerIteration ({:d})'.format(zzZigZagPerIteration), int, zzZigZagPerIteration)
+    zzIterations = self.ui.getUserInput('Iterations ({:d})'.format(zzIterations), int, zzIterations)
+    # zzSpacing = self.ui.getUserInput('Spacing ({:f})'.format(zzSpacing), float, zzSpacing)
 
     zzTotalWidth = ((zzRun + zzSpacing) * zzIterations) - zzSpacing + bitDiameter
     zzTotalHeight = (zzRise * zzZigZagPerIteration * 2) + bitDiameter
@@ -417,15 +416,15 @@ class Test:
     if not self.confirmStart():
       return
 
-    ui.logTitle('Safe initial position')
+    self.ui.logTitle('Safe initial position')
     self.mchRapid(z=safeTravelZ)
     self.mchRapid(x=0, y=0)
-    ui.log()
+    self.ui.log()
 
     if not self.waitForSpindleStart():
       return
 
-    ui.logTitle('Rapid to initial position')
+    self.ui.logTitle('Rapid to initial position')
     self.mchRapid(x=startX, y=startY)
 
     currX = startX
@@ -434,7 +433,7 @@ class Test:
 
     for currIteration in range(zzIterations):
       if not self.testCancelled:
-        ui.logTitle('Iteration {:}/{:} feed: {:}'.format(
+        self.ui.logTitle('Iteration {:}/{:} feed: {:}'.format(
           currIteration+1,
           zzIterations,
           currFeed)
@@ -444,16 +443,16 @@ class Test:
         currIterY = currY
 
         # Plunge
-        ui.logTitle('Rapid Z approach to material top')
+        self.ui.logTitle('Rapid Z approach to material top')
         self.mchRapid(z=materialTop)
 
-        ui.logTitle('Iteration {:}/{:} Plunge'.format(currIteration+1,zzIterations))
+        self.ui.logTitle('Iteration {:}/{:} Plunge'.format(currIteration+1,zzIterations))
         self.mchFeed(z=(materialTop-zzPlunge), speed=zzPlungeSpeed)
 
         # 'Draw' the zig-zag patterns
         for zigZag in range(zzZigZagPerIteration):
           if not self.testCancelled:
-            ui.logTitle('Iteration {:}/{:} ZigZag {:}/{:}'.format(
+            self.ui.logTitle('Iteration {:}/{:} ZigZag {:}/{:}'.format(
               currIteration+1,
               zzIterations,
               zigZag+1,
@@ -477,7 +476,7 @@ class Test:
         # Move to the next start point (if there's a next one)
         if currIteration+1 < zzIterations:
           if not self.testCancelled:
-            ui.logTitle('Rapid to iteration {:}/{:}'.format(currIteration+2,zzIterations))
+            self.ui.logTitle('Rapid to iteration {:}/{:}'.format(currIteration+2,zzIterations))
             self.mchRapid(z=safeWorkZ)
 
           if not self.testCancelled:
@@ -495,7 +494,7 @@ class Test:
     else:
       self.logTestFinished()
 
-    ui.logTitle('Back home')
+    self.ui.logTitle('Back home')
     self.mchRapid(z=safeTravelZ)
     self.mchRapid(x=0, y=0)
 
@@ -517,7 +516,7 @@ class Test:
     ''')
 
     def showParams(title):
-      ui.log('''
+      self.ui.log('''
       {:s}:
         StartX                {:f}
         StartY                {:f}
@@ -572,20 +571,20 @@ class Test:
 
     showParams('Default parameters')
 
-    startX = ui.getUserInput('StartX ({:f})'.format(startX), float, startX)
-    startY = ui.getUserInput('StartY ({:f})'.format(startY), float, startY)
-    materialTop = ui.getUserInput('MaterialTop ({:f})'.format(materialTop), float, materialTop)
-    targetZ = ui.getUserInput('TargetZ ({:f})'.format(targetZ), float, targetZ)
+    startX = self.ui.getUserInput('StartX ({:f})'.format(startX), float, startX)
+    startY = self.ui.getUserInput('StartY ({:f})'.format(startY), float, startY)
+    materialTop = self.ui.getUserInput('MaterialTop ({:f})'.format(materialTop), float, materialTop)
+    targetZ = self.ui.getUserInput('TargetZ ({:f})'.format(targetZ), float, targetZ)
 
     safeHeight = materialTop + 5
-    safeHeight = ui.getUserInput('SafeHeight ({:f})'.format(safeHeight), float, safeHeight)
-    pocketWidth = ui.getUserInput('PocketWidth ({:f})'.format(pocketWidth), float, pocketWidth)
-    pocketHeight = ui.getUserInput('PocketHeight ({:f})'.format(pocketHeight), float, pocketHeight)
-    tabWidth = ui.getUserInput('TabWidth ({:f})'.format(tabWidth), float, tabWidth)
-    tabHeight = ui.getUserInput('TabHeight ({:f})'.format(tabHeight), float, tabHeight)
-    plunge = ui.getUserInput('Plunge ({:f})'.format(plunge), float, plunge)
-    plungeSpeed = ui.getUserInput('PlungeSpeed ({:d})'.format(plungeSpeed), int, plungeSpeed)
-    feed = ui.getUserInput('Feed ({:d})'.format(feed), int, feed)
+    safeHeight = self.ui.getUserInput('SafeHeight ({:f})'.format(safeHeight), float, safeHeight)
+    pocketWidth = self.ui.getUserInput('PocketWidth ({:f})'.format(pocketWidth), float, pocketWidth)
+    pocketHeight = self.ui.getUserInput('PocketHeight ({:f})'.format(pocketHeight), float, pocketHeight)
+    tabWidth = self.ui.getUserInput('TabWidth ({:f})'.format(tabWidth), float, tabWidth)
+    tabHeight = self.ui.getUserInput('TabHeight ({:f})'.format(tabHeight), float, tabHeight)
+    plunge = self.ui.getUserInput('Plunge ({:f})'.format(plunge), float, plunge)
+    plungeSpeed = self.ui.getUserInput('PlungeSpeed ({:d})'.format(plungeSpeed), int, plungeSpeed)
+    feed = self.ui.getUserInput('Feed ({:d})'.format(feed), int, feed)
 
     if not tabWidth or not tabHeight:
       tabWidth = tabHeight = 0
@@ -597,18 +596,18 @@ class Test:
     if not self.confirmStart():
       return
 
-    ui.logTitle('Safe initial position')
+    self.ui.logTitle('Safe initial position')
     self.mchRapid(z=safeHeight)
     self.mchRapid(x=0, y=0)
-    ui.log()
+    self.ui.log()
 
     if not self.waitForSpindleStart():
       return
 
-    ui.logTitle('Rapid to initial position')
+    self.ui.logTitle('Rapid to initial position')
     self.mchRapid(x=startX, y=startY)
 
-    ui.logTitle('Rapid Z approach to material top')
+    self.ui.logTitle('Rapid Z approach to material top')
     self.mchRapid(z=materialTop)
 
     currZ = materialTop - plunge
@@ -632,45 +631,45 @@ class Test:
 
       # Plunge
       if not self.testCancelled:
-        ui.logTitle('Plunge Z{:} ({:}/{:})'.format(ui.coordStr(currZ), currZPass, zPasses))
+        self.ui.logTitle('Plunge Z{:} ({:}/{:})'.format(self.ui.coordStr(currZ), currZPass, zPasses))
         self.mchFeed(z=currZ, speed=plungeSpeed)
 
       # Horizontal line DL-DR
       if not self.testCancelled:
-        ui.logTitle('Horizontal line DL-DR Z{:} ({:}/{:})'.format(ui.coordStr(currZ), currZPass, zPasses))
+        self.ui.logTitle('Horizontal line DL-DR Z{:} ({:}/{:})'.format(self.ui.coordStr(currZ), currZPass, zPasses))
         if currZ < tabZ:
           self.mchFeed(x=tabStartX, speed=feed)
-          ui.logTitle('tab:start')
+          self.ui.logTitle('tab:start')
           self.mchFeed(z=tabZ, speed=plungeSpeed)
           self.mchFeed(x=tabEndX, speed=feed)
           self.mchFeed(z=currZ, speed=plungeSpeed)
-          ui.logTitle('tab:end')
+          self.ui.logTitle('tab:end')
           self.mchFeed(x=holeEndX, speed=feed)
         else:
           self.mchFeed(x=holeEndX, speed=feed)
 
       # Vertical line DR-UR
       if not self.testCancelled:
-        ui.logTitle('Vertical line DR-UR Z{:} ({:}/{:})'.format(ui.coordStr(currZ), currZPass, zPasses))
+        self.ui.logTitle('Vertical line DR-UR Z{:} ({:}/{:})'.format(self.ui.coordStr(currZ), currZPass, zPasses))
         self.mchFeed(y=holeEndY, speed=feed)
 
       # Horizontal line UR-UL
       if not self.testCancelled:
-        ui.logTitle('Horizontal line UR-UL Z{:} ({:}/{:})'.format(ui.coordStr(currZ), currZPass, zPasses))
+        self.ui.logTitle('Horizontal line UR-UL Z{:} ({:}/{:})'.format(self.ui.coordStr(currZ), currZPass, zPasses))
         if currZ < tabZ:
           self.mchFeed(x=tabEndX, speed=feed)
-          ui.logTitle('tab:start')
+          self.ui.logTitle('tab:start')
           self.mchFeed(z=tabZ, speed=plungeSpeed)
           self.mchFeed(x=tabStartX, speed=feed)
           self.mchFeed(z=currZ, speed=plungeSpeed)
-          ui.logTitle('tab:end')
+          self.ui.logTitle('tab:end')
           self.mchFeed(x=holeStartX, speed=feed)
         else:
           self.mchFeed(x=holeStartX, speed=feed)
 
       # Vertical line UL-DL
       if not self.testCancelled:
-        ui.logTitle('Vertical line UL-DL Z{:} ({:}/{:})'.format(ui.coordStr(currZ), currZPass, zPasses))
+        self.ui.logTitle('Vertical line UL-DL Z{:} ({:}/{:})'.format(self.ui.coordStr(currZ), currZPass, zPasses))
         self.mchFeed(y=holeStartY, speed=feed)
 
       # Next plunge calculation/check
@@ -688,7 +687,7 @@ class Test:
     else:
       self.logTestFinished()
 
-    ui.logTitle('Back home')
+    self.ui.logTitle('Back home')
     self.mchRapid(z=safeHeight)
     self.mchRapid(x=0, y=0)
 

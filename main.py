@@ -9,7 +9,6 @@ import sys
 import time
 import pprint
 
-import src.gc.utils as ut
 import src.gc.ui as ui
 import src.gc.menu as menu
 import src.gc.keyboard as keyboard
@@ -32,20 +31,23 @@ gVERSION = '0.11.0'
 # keyboard manager
 kb = keyboard.Keyboard()
 
+# UI manager
+ui = ui.UI(cfg, kb)
+
 # menu manager
-mnu = menu.Menu(kb)
+mnu = menu.Menu(kb, ui)
 
 # grbl machine manager
-mch = grbl.Grbl(cfg)
+mch = grbl.Grbl(cfg, ui)
 
 # grbl probe manager
-prb = probe.Probe(mch)
+prb = probe.Probe(cfg, ui, mch)
 
 # joystick manager
-joy = joystick.Joystick(cfg)
+joy = joystick.Joystick(cfg, ui)
 
-mcr = macro.Macro(mch, kb)
-tst = test.Test(mch, kb)
+mcr = macro.Macro(cfg, kb, ui, mch)
+tst = test.Test(cfg, kb, ui, mch)
 
 # Jog distance
 gXYJog = mchCfg['xyJogMm']
@@ -125,7 +127,7 @@ def showMachineStatus():
   statusStr += 'Software config:\n'
   statusStr += 'Jog distance (XY) = {:}\n'.format(ui.coordStr(gXYJog))
   statusStr += 'Jog distance (Z)  = {:}\n'.format(ui.coordStr(gZJog))
-  statusStr += 'VerboseLevel      = {:d}/{:d} ({:s})\n'.format(ui.getVerboseLevel(), ui.gMAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
+  statusStr += 'VerboseLevel      = {:d}/{:d} ({:s})\n'.format(ui.getVerboseLevel(), ui.MAX_VERBOSE_LEVEL, ui.getVerboseLevelStr())
   # statusStr += '\n'.format()
 
   ui.logBlock(statusStr)
@@ -195,19 +197,19 @@ def processJoystickInput():
   # Special actions with 'extraU' pushed
   if joy.status['extraU']:
     if joy.status['x+']:
-      gXYJog = ut.genericValueChanger(gXYJog, +1, 1, 100, loop=True, valueName='xyJog')
+      gXYJog = genericValueChanger(gXYJog, +1, 1, 100, loop=True, valueName='xyJog')
       ui.keyPressMessage('Change jog distance (XY) (+1) ({:})'.format(gXYJog))
 
     elif joy.status['x-']:
-      gXYJog = ut.genericValueChanger(gXYJog, -1, 1, 100, loop=True, valueName='xyJog')
+      gXYJog = genericValueChanger(gXYJog, -1, 1, 100, loop=True, valueName='xyJog')
       ui.keyPressMessage('Change jog distance (XY) (-1) ({:})'.format(gXYJog))
 
     elif joy.status['y+']:
-      gXYJog = ut.genericValueChanger(gXYJog, +10, 1, 100, loop=True, valueName='xyJog')
+      gXYJog = genericValueChanger(gXYJog, +10, 1, 100, loop=True, valueName='xyJog')
       ui.keyPressMessage('Change jog distance (XY) (+10) ({:})'.format(gXYJog))
 
     elif joy.status['y-']:
-      gXYJog = ut.genericValueChanger(gXYJog, -10, 1, 100, loop=True, valueName='xyJog')
+      gXYJog = genericValueChanger(gXYJog, -10, 1, 100, loop=True, valueName='xyJog')
       ui.keyPressMessage('Change jog distance (XY) (-10) ({:})'.format(gXYJog))
 
     elif joy.status['z+']:
@@ -220,19 +222,19 @@ def processJoystickInput():
   # Special actions with 'extraD' pushed
   elif joy.status['extraD']:
     if joy.status['x+']:
-      gZJog = ut.genericValueChanger(gZJog, +1, 1, 20, loop=True, valueName='zJog')
+      gZJog = genericValueChanger(gZJog, +1, 1, 20, loop=True, valueName='zJog')
       ui.keyPressMessage('Change jog distance (Z) (+1) ({:})'.format(gZJog))
 
     elif joy.status['x-']:
-      gZJog = ut.genericValueChanger(gZJog, -1, 1, 20, loop=True, valueName='zJog')
+      gZJog = genericValueChanger(gZJog, -1, 1, 20, loop=True, valueName='zJog')
       ui.keyPressMessage('Change jog distance (Z) (-1) ({:})'.format(gZJog))
 
     elif joy.status['y+']:
-      gZJog = ut.genericValueChanger(gZJog, +10, 1, 20, loop=True, valueName='zJog')
+      gZJog = genericValueChanger(gZJog, +10, 1, 20, loop=True, valueName='zJog')
       ui.keyPressMessage('Change jog distance (Z) (+10)] ({:})'.format(gZJog))
 
     elif joy.status['y-']:
-      gZJog = ut.genericValueChanger(gZJog, -10, 1, 20, loop=True, valueName='zJog')
+      gZJog = genericValueChanger(gZJog, -10, 1, 20, loop=True, valueName='zJog')
       ui.keyPressMessage('Change jog distance (Z) (-10)] ({:})'.format(gZJog))
 
     elif joy.status['z+']:
@@ -428,7 +430,6 @@ def setXYJogDistance():
     'Distance ({:})'.format(gXYJog),
     float,
     gXYJog)
-  showMachineStatus()
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -438,12 +439,51 @@ def setZJogDistance():
     'Distance ({:})'.format(gZJog),
     float,
     gZJog)
-  showMachineStatus()
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def genericValueChanger(value, direction, min, max, loop=False, valueName='', valueFormatter=None):
+  newValue = 0
+  increment = 0
+
+  increment = direction
+
+  if( direction > 0 ):  # Up
+    if(  ( value < max )
+    and  ( value + increment > max ) ):
+      increment = max - value
+
+  else:          # Down
+    if(  ( value > min )
+    and  ( value + increment  < min ) ):
+      increment = min - value
+
+  newValue = value + increment
+
+  if(loop):
+    if( newValue < min ):  newValue = max
+    if( newValue > max ):  newValue = min
+  else:
+    if( newValue < min ):
+      ui.log('ERROR: {:s} below {:d} not allowed!'.format(valueName, min), c='ui.errorMsg', v='ERROR')
+      return value
+
+    if( newValue > max ):
+      ui.log('ERROR: {:s} over {:d} not allowed!'.format(valueName, max), c='ui.errorMsg', v='ERROR')
+      return value
+
+  if( valueFormatter != None ):
+    formattedValue = valueFormatter( newValue )
+  else:
+    formattedValue = newValue
+
+  ui.log('New {:s}: {:}'.format(valueName, formattedValue))
+  return newValue
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def changeVerboseLevel(inc):
-  tempVerboseLevel = ut.genericValueChanger(  ui.getVerboseLevel(), inc, ui.gMIN_VERBOSE_LEVEL, ui.gMAX_VERBOSE_LEVEL,
+  tempVerboseLevel = genericValueChanger(  ui.getVerboseLevel(), inc, ui.MIN_VERBOSE_LEVEL, ui.MAX_VERBOSE_LEVEL,
                         loop=True, valueName='Verbose level',
                         valueFormatter=lambda level : '{:d} {:s}'.format(level,ui.getVerboseLevelStr(level)) )
   ui.setVerboseLevel(tempVerboseLevel)
@@ -521,14 +561,14 @@ def NOT_IMPLEMENTED():
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def setupMenu():
 
-  absoluteXYAxisLimitsSubmenu = menu.Menu(kb, [
+  absoluteXYAxisLimitsSubmenu = mnu.subMenu([
     {'k':'2',   'n':'ONE AXIS ONLY - Absolute move to axis limits - [D]',  'h':absoluteXYAxisLimits, 'ha':{'d':'D'}},
     {'k':'8',   'n':'ONE AXIS ONLY - Absolute move to axis limits - [U]',  'h':absoluteXYAxisLimits, 'ha':{'d':'U'}},
     {'k':'4',   'n':'ONE AXIS ONLY - Absolute move to axis limits - [L]',  'h':absoluteXYAxisLimits, 'ha':{'d':'L'}},
     {'k':'6',   'n':'ONE AXIS ONLY - Absolute move to axis limits - [R]',  'h':absoluteXYAxisLimits, 'ha':{'d':'R'}},
   ])
 
-  absoluteTablePositionSubmenu = menu.Menu(kb, [
+  absoluteTablePositionSubmenu = mnu.subMenu([
     {'k':'.',   'n':'One axis only (*)',                       'h':absoluteXYAxisLimitsSubmenu},
     {'k':'1',   'n':'Absolute move to table position - [DL]',  'h':absoluteTablePosition, 'ha':{'p':'DL'}},
     {'k':'2',   'n':'Absolute move to table position - [DC]',  'h':absoluteTablePosition, 'ha':{'p':'DC'}},
@@ -541,7 +581,7 @@ def setupMenu():
     {'k':'9',   'n':'Absolute move to table position - [UR]',  'h':absoluteTablePosition, 'ha':{'p':'UR'}},
   ])
 
-  machineHomeSubmenu = menu.Menu(kb, [
+  machineHomeSubmenu = mnu.subMenu([
     {'k':'xX',  'n':'x',   'h':mch.goToMachineHome_X},
     {'k':'yY',  'n':'y',   'h':mch.goToMachineHome_Y},
     {'k':'zZ',  'n':'z',   'h':mch.goToMachineHome_Z},
@@ -549,7 +589,7 @@ def setupMenu():
     {'k':'aA',  'n':'xyz', 'h':mch.goToMachineHome},
   ])
 
-  wcoHomeSubmenu = menu.Menu(kb, [
+  wcoHomeSubmenu = mnu.subMenu([
     {'k':'xX',  'n':'x',   'h':mch.sendWait, 'ha':{'command':'G0X0'}},
     {'k':'yY',  'n':'y',   'h':mch.sendWait, 'ha':{'command':'G0Y0'}},
     {'k':'zZ',  'n':'z',   'h':mch.sendWait, 'ha':{'command':'G0Z0'}},
@@ -557,27 +597,27 @@ def setupMenu():
     {'k':'aA',  'n':'xyz', 'h':goToWCHOHome},
   ])
 
-  goHomeSubmenu = menu.Menu(kb, [
+  goHomeSubmenu = mnu.subMenu([
     {'k':'0',   'n':'Safe machine home (Z0 + X0Y0)', 'h':mch.goToMachineHome},
     {'k':'mM',  'n':'Machine home (*)',              'h':machineHomeSubmenu},
     {'k':'wW',  'n':'WCO home (*)',                  'h':wcoHomeSubmenu},
   ])
 
-  macroSubmenu = menu.Menu(kb, [
+  macroSubmenu = mnu.subMenu([
     {'k':'lL',  'n':'List macros',   'h':mcr.list},
     {'k':'rR',  'n':'Run macro',     'h':runMacro},
     {'k':'sS',  'n':'Show macro',    'h':showMacro},
     {'k':'xX',  'n':'Reload macros', 'h':mcr.load},
   ])
 
-  testsSubmenu = menu.Menu(kb, [
+  testsSubmenu = mnu.subMenu([
     {'k':'sS',  'n':'Table position scan',  'h':tst.tablePositionScan},
     {'k':'lL',  'n':'Base levelling holes', 'h':tst.baseLevelingHoles},
     {'k':'zZ',  'n':'Zig-zag pattern',      'h':tst.zigZagPattern},
     {'k':'*',   'n':'DUMMY Test',           'h':tst.dummy},
   ])
 
-  resetSubmenu = menu.Menu(kb, [
+  resetSubmenu = mnu.subMenu([
     {'SECTION':1, 'n':'Reset to current position'},
     {'k':'xX',   'n':'X',    'h':mch.resetWCO,      'ha':{'x':'curr'}},
     {'k':'yY',   'n':'Y',    'h':mch.resetWCO,      'ha':{'y':'curr'}},
@@ -597,7 +637,7 @@ def setupMenu():
     {'k':'gG',   'n':'Get GCode command for current WCO', 'h':getWCOResetCommand},
   ])
 
-  probeSubmenu = menu.Menu(kb, [
+  probeSubmenu = mnu.subMenu([
     {'k':'1',   'n':'Basic probe',       'h':prb.basic},
     {'k':'2',   'n':'Two stage probe',   'h':prb.twoStage},
     {'k':'3',   'n':'Three stage probe', 'h':prb.threeStage},

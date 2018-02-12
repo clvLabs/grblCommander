@@ -10,8 +10,6 @@ if __name__ == '__main__':
 
 import time
 
-from .. import ui as ui
-
 from . import serialport
 from . import dict
 
@@ -20,11 +18,12 @@ from . import dict
 
 class Grbl:
 
-  def __init__(self, cfg):
+  def __init__(self, cfg, ui):
     ''' Construct a Grbl object. '''
     self.initConstants()
 
     self.cfg = cfg
+    self.ui = ui
     self.spCfg = cfg['serial']
     self.mchCfg = cfg['machine']
     self.mcrCfg = cfg['macro']
@@ -71,7 +70,7 @@ class Grbl:
       'inputPinState': self.parseInputPinState('')
     }
 
-    self.sp = serialport.SerialPort(cfg)
+    self.sp = serialport.SerialPort(self.cfg, self.ui)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -106,8 +105,8 @@ class Grbl:
     self.sp.open()
 
     if self.sp.isOpen():
-      ui.log('Serial port open.', c='ui.successMsg')
-      ui.log()
+      self.ui.log('Serial port open.', c='ui.successMsg')
+      self.ui.log()
 
       self.waitForStartup()
 
@@ -118,7 +117,7 @@ class Grbl:
       self.viewGCodeParameters()
 
     else:
-      ui.log('ERROR opening serial port, exiting program', c='ui.errorMsg', v='ERROR')
+      self.ui.log('ERROR opening serial port, exiting program', c='ui.errorMsg', v='ERROR')
       quit()
 
 
@@ -165,7 +164,7 @@ class Grbl:
 
     # Manage alarm state
     if self.alarm and (self.waitingResponse or self.waitingMachineStatus):
-      ui.log('Alarm detected, resetting wait flags', c='ui.msg', v='DETAIL')
+      self.ui.log('Alarm detected, resetting wait flags', c='ui.msg', v='DETAIL')
       self.waitingResponse = False
       self.waitingMachineStatus = False
 
@@ -194,8 +193,8 @@ class Grbl:
 
     # Show 'live' machine status if running
     if self.isRunning():
-      ui.clearLine()
-      ui.log('\r{:}'.format(self.getSimpleMachineStatusStr()), end='')
+      self.ui.clearLine()
+      self.ui.log('\r{:}'.format(self.getSimpleMachineStatusStr()), end='')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -230,7 +229,7 @@ class Grbl:
       if not responseTimeout:
         responseTimeout = float(self.mchCfg['homingTimeout'])
 
-    ui.log('>>>>> {:}'.format(command), c='comms.send' ,v=verbose)
+    self.ui.log('>>>>> {:}'.format(command), c='comms.send' ,v=verbose)
     self.sp.write(command+'\n')
 
     return self.readResponse(responseTimeout=responseTimeout,verbose=verbose)
@@ -252,10 +251,9 @@ class Grbl:
     if responseTimeout is None:
       responseTimeout = self.spCfg['responseTimeout']
 
-    ui.log('readResponse() - Waiting for response from serial...', v='SUPER')
+    self.ui.log('readResponse() - Waiting for response from serial...', v='SUPER')
 
     startTime = time.time()
-    receivedLines = 0
     self.response = []
     self.waitingResponse = True
 
@@ -263,10 +261,10 @@ class Grbl:
       self.process()
 
     if not self.waitingResponse:
-      ui.log(  'readResponse() - Successfully received {:d} data lines from serial'.format(
+      self.ui.log(  'readResponse() - Successfully received {:d} data lines from serial'.format(
         len(self.response)), v='SUPER')
     else:
-      ui.log('readResponse() - TIMEOUT Waiting for response from serial', c='ui.errorMsg', v='ERROR')
+      self.ui.log('readResponse() - TIMEOUT Waiting for response from serial', c='ui.errorMsg', v='ERROR')
       self.response = []
       self.waitingResponse = False
 
@@ -276,7 +274,7 @@ class Grbl:
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def waitForStartup(self):
     ''' Wait for grblShield startup '''
-    ui.log('Waiting for startup message...')
+    self.ui.log('Waiting for startup message...')
     self.alarm = ''
     self.waitingStartup = True
     startTime = time.time()
@@ -285,12 +283,12 @@ class Grbl:
       self.process()
 
     if not self.waitingStartup:
-      ui.log('Startup message received, machine ready', c='ui.successMsg')
-      ui.log()
+      self.ui.log('Startup message received, machine ready', c='ui.successMsg')
+      self.ui.log()
     else:
       self.status['str'] = ''
-      ui.log('TIMEOUT Waiting for startup', v='WARNING')
-      ui.log()
+      self.ui.log('TIMEOUT Waiting for startup', v='WARNING')
+      self.ui.log()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -344,7 +342,7 @@ class Grbl:
           self.waitingMachineStatus = False
           self.statusQuerySent = False
         except:
-          ui.log('UNKNOWN machine data [{:}]'.format(line), c='ui.errorMsg', v='ERROR')
+          self.ui.log('UNKNOWN machine data [{:}]'.format(line), c='ui.errorMsg', v='ERROR')
 
       # Messages
       elif line[:5] == '[MSG:':
@@ -393,18 +391,18 @@ class Grbl:
         if self.waitingResponse:
           self.waitingResponse = False
         else:
-          ui.log('[WARNING] Unexpected machine response',c='ui.msg',v='DETAIL')
+          self.ui.log('[WARNING] Unexpected machine response',c='ui.msg',v='DETAIL')
 
       if showLine:
         if self.isRunning():
-          ui.log()
-        ui.log('<<<<< {:}'.format(originalLine), c='comms.recv')
+          self.ui.log()
+        self.ui.log('<<<<< {:}'.format(originalLine), c='comms.recv')
 
       if errorCode:
-        ui.log('ERROR [{:}]: {:}'.format(errorCode, self.dct.errors[errorCode]), c='ui.errorMsg')
+        self.ui.log('ERROR [{:}]: {:}'.format(errorCode, self.dct.errors[errorCode]), c='ui.errorMsg')
 
       if isAlarm:
-        ui.log('ALARM [{:}]: {:}'.format(self.alarm, self.getAlarmStr()), c='ui.errorMsg')
+        self.ui.log('ALARM [{:}]: {:}'.format(self.alarm, self.getAlarmStr()), c='ui.errorMsg')
         if self.waitingResponse:
           self.waitingResponse = False
 
@@ -613,7 +611,7 @@ class Grbl:
       'val': value,
     }
 
-    ui.log('<<<<< {:} ({:})'.format(settingStr, self.dct.settings[setting]), c='comms.recv')
+    self.ui.log('<<<<< {:} ({:})'.format(settingStr, self.dct.settings[setting]), c='comms.recv')
 
     # $2 - Step port invert, mask
     # $3 -  Direction port invert, mask
@@ -630,7 +628,7 @@ class Grbl:
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def queryMachineStatus(self):
     ''' TODO: Comment '''
-    ui.log('Querying machine status...', v='DEBUG')
+    self.ui.log('Querying machine status...', v='DEBUG')
     self.sp.write(self.GRBL_QUERY_MACHINE_STATUS)
     self.statusQuerySent = True
     self.waitingMachineStatus = True
@@ -640,13 +638,13 @@ class Grbl:
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def viewMachineStatus(self):
     ''' TODO: comment '''
-    ui.logTitle('Requesting machine status')
-    ui.log('Sending command [?]...', v='DETAIL')
+    self.ui.logTitle('Requesting machine status')
+    self.ui.log('Sending command [?]...', v='DETAIL')
     self.send(self.GRBL_QUERY_MACHINE_STATUS)
     self.statusQuerySent = True
     self.waitingMachineStatus = True
     self.lastMachineStatusQuery = time.time()
-    ui.log()
+    self.ui.log()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -659,9 +657,9 @@ class Grbl:
       self.process()
 
     if not self.waitingMachineStatus:
-      ui.log('Successfully received machine status', v='DEBUG')
+      self.ui.log('Successfully received machine status', v='DEBUG')
     else:
-      ui.log('TIMEOUT Waiting for machine status', v='WARNING')
+      self.ui.log('TIMEOUT Waiting for machine status', v='WARNING')
       self.waitingMachineStatus = False
       self.statusQuerySent = False
 
@@ -681,7 +679,7 @@ class Grbl:
       color = 'ui.successMsg'
 
       line = '{:6s} {:10s} {:s}'.format(id, val, desc)
-      line = ui.color(line, color)
+      line = self.ui.color(line, color)
 
       result.append(line)
 
@@ -713,10 +711,10 @@ class Grbl:
       line = line.rstrip()
       if val != original:
         line += ': {:}'.format(val)
-      line = ui.color(line, color)
+      line = self.ui.color(line, color)
 
       if val != preferred:
-        line += ui.color(' ({:})'.format(preferred), 'ui.successMsg')
+        line += self.ui.color(' ({:})'.format(preferred), 'ui.successMsg')
 
       result.append(line)
 
@@ -745,7 +743,7 @@ class Grbl:
         color = 'ui.errorMsg'
         display = '{:}({:})'.format(val, desc)
 
-      settingsStr += '{:} '.format(ui.color(display, color))
+      settingsStr += '{:} '.format(self.ui.color(display, color))
 
     # The rest if != preferred
     for modalGroupName in self.mchCfg['preferredParserState']:
@@ -758,7 +756,7 @@ class Grbl:
         if val != preferred:
           color = 'ui.errorMsg'
           display = '{:}({:})'.format(original, desc)
-          settingsStr += '{:} '.format(ui.color(display, color))
+          settingsStr += '{:} '.format(self.ui.color(display, color))
 
     return settingsStr.rstrip()
 
@@ -786,11 +784,11 @@ class Grbl:
         self.getMachinePosStr(),
         self.status['F']['val']
         )
-      content = ui.color(content, 'ui.onlineMachinePos')
+      content = self.ui.color(content, 'ui.onlineMachinePos')
 
     # Suffix
     if self.getInputPinStateStr():
-      suffix = '[{:}]'.format(ui.color(self.getInputPinStateStr(), 'machineState.Alarm'))
+      suffix = '[{:}]'.format(self.ui.color(self.getInputPinStateStr(), 'machineState.Alarm'))
 
     # Build string
     string = prefix
@@ -806,7 +804,7 @@ class Grbl:
   def getColoredMachineStateStr(self):
     ''' TODO: comment '''
     machineStateStr = self.status['machineState']
-    return ui.color(machineStateStr, 'machineState.{:}'.format(machineStateStr))
+    return self.ui.color(machineStateStr, 'machineState.{:}'.format(machineStateStr))
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -815,7 +813,7 @@ class Grbl:
     wco = self.status['WCO'] if 'WCO' in self.status else None
     if not wco:
       return '<NONE>'
-    return ui.xyzStr(wco['x'],wco['y'],wco['z'])
+    return self.ui.xyzStr(wco['x'],wco['y'],wco['z'])
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -824,7 +822,7 @@ class Grbl:
     mPos = self.status['MPos'] if 'MPos' in self.status else None
     if not mPos:
       return '<NONE>'
-    return ui.xyzStr(mPos['x'],mPos['y'],mPos['z'])
+    return self.ui.xyzStr(mPos['x'],mPos['y'],mPos['z'])
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -833,15 +831,15 @@ class Grbl:
     wpos = self.status['WPos'] if 'WPos' in self.status else None
     if not wpos:
       return '<NONE>'
-    return ui.xyzStr(wpos['x'], wpos['y'], wpos['z'])
+    return self.ui.xyzStr(wpos['x'], wpos['y'], wpos['z'])
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getProbePosStr(self):
     ''' TODO: comment '''
     prb = self.status['GCodeParams']['PRB']
-    coords = ui.xyzStr(prb['x'], prb['y'], prb['z'])
-    lastRun = ui.color('SUCCESS','ui.successMsg') if prb['success'] else ui.color('FAIL','ui.errorMsg')
+    coords = self.ui.xyzStr(prb['x'], prb['y'], prb['z'])
+    lastRun = self.ui.color('SUCCESS','ui.successMsg') if prb['success'] else self.ui.color('FAIL','ui.errorMsg')
 
     return '[{:}] ({:})'.format(coords, lastRun)
 
@@ -881,7 +879,7 @@ class Grbl:
     pins = self.status['inputPinState']
     for pin in pins:
       if pins[pin]['val']:
-        stateStr += '[{:} ({:})] '.format(ui.color(pin, 'machineState.Alarm'),pins[pin]['desc'])
+        stateStr += '[{:} ({:})] '.format(self.ui.color(pin, 'machineState.Alarm'),pins[pin]['desc'])
 
     return stateStr.rstrip()
 
@@ -925,29 +923,29 @@ class Grbl:
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def waitForMachineIdle(self,verbose='WARNING'):
     ''' TODO: comment '''
-    ui.log('Waiting for machine operation to finish...', v='SUPER')
+    self.ui.log('Waiting for machine operation to finish...', v='SUPER')
     self.getMachineStatus()
 
     while self.isRunning():
       self.process()
       self.getMachineStatus()
 
-    ui.log('Machine operation finished', v='SUPER')
-    ui.log()
+    self.ui.log('Machine operation finished', v='SUPER')
+    self.ui.log()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def viewBuildInfo(self):
     ''' TODO: comment '''
-    ui.logTitle('Requesting build info')
+    self.ui.logTitle('Requesting build info')
     self.send(self.GRBL_QUERY_BUILD_INFO)
-    ui.log()
+    self.ui.log()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def queryGCodeParserState(self):
     ''' TODO: comment '''
-    ui.log('Querying gcode parser state...', v='DEBUG')
+    self.ui.log('Querying gcode parser state...', v='DEBUG')
     self.sp.write(self.GRBL_QUERY_GCODE_PARSER_STATE + '\n')
     self.lastParserStateQuery = time.time()
 
@@ -955,42 +953,42 @@ class Grbl:
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def viewGCodeParserState(self):
     ''' TODO: comment '''
-    ui.logTitle('Requesting GCode parser state')
+    self.ui.logTitle('Requesting GCode parser state')
     self.send(self.GRBL_QUERY_GCODE_PARSER_STATE)
     self.lastParserStateQuery = time.time()
-    ui.log()
+    self.ui.log()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def viewGCodeParameters(self):
     ''' TODO: comment '''
-    ui.logTitle('Requesting GCode parameters')
+    self.ui.logTitle('Requesting GCode parameters')
     self.send(self.GRBL_QUERY_GCODE_PARAMETERS)
-    ui.log()
+    self.ui.log()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def viewGrblConfig(self):
     ''' TODO: comment '''
-    ui.logTitle('Requesting grbl config')
+    self.ui.logTitle('Requesting grbl config')
     self.send(self.GRBL_QUERY_GRBL_CONFIG)
-    ui.log()
+    self.ui.log()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def viewStartupBlocks(self):
     ''' TODO: comment '''
-    ui.logTitle('Requesting startup blocks')
+    self.ui.logTitle('Requesting startup blocks')
     self.send(self.GRBL_QUERY_STARTUP_BLOCKS)
-    ui.log()
+    self.ui.log()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def enableSleepMode(self):
     ''' TODO: comment '''
-    ui.logTitle('Requesting sleep mode enable')
+    self.ui.logTitle('Requesting sleep mode enable')
     self.send(self.GRBL_ENABLE_SLEEP_MODE)
-    ui.log()
+    self.ui.log()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1183,7 +1181,7 @@ class Grbl:
     cmd = self.getMoveRelativeStr(x=x,y=y,z=z,verbose=verbose)
     if cmd:
       cmd = 'G0 {:}'.format(cmd)
-      ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
+      self.ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
       self.sendWait(cmd, verbose=verbose)
 
 
@@ -1193,7 +1191,7 @@ class Grbl:
     cmd = self.getMoveRelativeStr(x=x,y=y,z=z,speed=speed,verbose=verbose)
     if cmd:
       cmd = 'G1 {:}'.format(cmd)
-      ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
+      self.ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
       self.sendWait(cmd, verbose=verbose)
 
 
@@ -1202,7 +1200,7 @@ class Grbl:
     ''' TODO: comment '''
     cmd = self.getMoveRelativeStr(x=x,y=y,z=z,speed=speed,verbose=verbose)
     if cmd:
-      ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
+      self.ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
       self.sendWait(cmd, verbose=verbose)
 
 
@@ -1210,7 +1208,7 @@ class Grbl:
   def getMoveRelativeStr(self,x=None, y=None, z=None, speed=None, verbose='WARNING'):
     ''' TODO: comment '''
     if x is None and y is None and z is None:
-      ui.log('No parameters provided, doing nothing', v=verbose)
+      self.ui.log('No parameters provided, doing nothing', v=verbose)
       return ''
 
     axes = ['x','y','z']
@@ -1234,7 +1232,7 @@ class Grbl:
     cmd = self.getMoveAbsoluteStr(x=x,y=y,z=z,machineCoords=machineCoords,verbose=verbose)
     if cmd:
       cmd = 'G0 {:}'.format(cmd)
-      ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
+      self.ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
       self.sendWait(cmd, verbose=verbose)
 
 
@@ -1244,7 +1242,7 @@ class Grbl:
     cmd = self.getMoveAbsoluteStr(x=x,y=y,z=z,machineCoords=machineCoords,speed=speed,verbose=verbose)
     if cmd:
       cmd = 'G1 {:}'.format(cmd)
-      ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
+      self.ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
       self.sendWait(cmd, verbose=verbose)
 
 
@@ -1253,7 +1251,7 @@ class Grbl:
     ''' TODO: comment '''
     cmd = self.getMoveAbsoluteStr(x=x,y=y,z=z,machineCoords=machineCoords,speed=speed,verbose=verbose)
     if cmd:
-      ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
+      self.ui.log('Sending command [{:s}]...'.format(repr(cmd)), v='DETAIL')
       self.sendWait(cmd, verbose=verbose)
 
 
@@ -1261,7 +1259,7 @@ class Grbl:
   def getMoveAbsoluteStr(self,x=None, y=None, z=None, machineCoords=False, speed=None, verbose='WARNING'):
     ''' TODO: comment '''
     if x is None and y is None and z is None:
-      ui.log('No parameters provided, doing nothing', v=verbose)
+      self.ui.log('No parameters provided, doing nothing', v=verbose)
       return ''
 
     cmd = ''
@@ -1290,10 +1288,10 @@ class Grbl:
       for axis in axes:
         if target[axis] != None:
           if target[axis] < min[axis]:
-            ui.log('Adjusting target {:}({:}) to min({:})'.format(axis.upper(), target[axis], min[axis]), v='DETAIL')
+            self.ui.log('Adjusting target {:}({:}) to min({:})'.format(axis.upper(), target[axis], min[axis]), v='DETAIL')
             target[axis] = min[axis]
           elif target[axis] > max[axis]:
-            ui.log('Adjusting target {:}({:}) to max({:})'.format(axis.upper(), target[axis], max[axis]), v='DETAIL')
+            self.ui.log('Adjusting target {:}({:}) to max({:})'.format(axis.upper(), target[axis], max[axis]), v='DETAIL')
             target[axis] = max[axis]
 
           if target[axis] == wpos[axis]:
@@ -1304,10 +1302,10 @@ class Grbl:
       for axis in axes:
         if target[axis] != None:
           if target[axis] < min[axis]:
-            ui.log('Adjusting target {:}({:}) to min({:})'.format(axis.upper(), target[axis] - wpos[axis], min[axis] - wpos[axis]), v='DETAIL')
+            self.ui.log('Adjusting target {:}({:}) to min({:})'.format(axis.upper(), target[axis] - wpos[axis], min[axis] - wpos[axis]), v='DETAIL')
             target[axis] = min[axis] - wpos[axis]
           elif target[axis] > max[axis]:
-            ui.log('Adjusting target {:}({:}) to max({:})'.format(axis.upper(), target[axis] - wpos[axis], max[axis] - wpos[axis]), v='DETAIL')
+            self.ui.log('Adjusting target {:}({:}) to max({:})'.format(axis.upper(), target[axis] - wpos[axis], max[axis] - wpos[axis]), v='DETAIL')
             target[axis] = max[axis] - wpos[axis]
           else:
             target[axis] -= wpos[axis]
@@ -1318,7 +1316,7 @@ class Grbl:
     # ---[ Generate gcode ]-----------------------------------------
     for axis in axes:
       if target[axis] != None and target[axis] != wpos[axis]:
-        cmd += '{:}{:} '.format(axis.upper(), ui.coordStr(target[axis]).strip())
+        cmd += '{:}{:} '.format(axis.upper(), self.ui.coordStr(target[axis]).strip())
 
     cmd = cmd.rstrip()
 

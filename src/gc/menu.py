@@ -8,8 +8,6 @@ grblCommander menu manager
 if __name__ == '__main__':
   print('This file is a module, it should not be executed directly')
 
-from . import ui as ui
-
 # ------------------------------------------------------------------
 # Menu Option class
 
@@ -49,9 +47,10 @@ class Option:
 
 class Menu(object):
 
-  def __init__(self, kb, options=None, settings=None):
+  def __init__(self, kb, ui, options=None, settings=None):
     ''' Construct a Menu object '''
     self.kb = kb
+    self.ui = ui
     self.options = []
 
     if options:
@@ -65,6 +64,12 @@ class Menu(object):
       }
 
     self._quit = False
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def subMenu(self, options):
+    ''' Create a submenu '''
+    return Menu(self.kb, self.ui, options)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -126,7 +131,7 @@ class Menu(object):
       if self.isNormal(opt) or self.isHidden(opt):
         if opt.k:
           if key._in(opt.k):
-            ui.keyPressMessage('{:} - {:}'.format(opt.kd, opt.n))
+            self.ui.keyPressMessage('{:} - {:}'.format(opt.kd, opt.n))
 
             if type(opt.h) is Menu:
               opt.h.submenu()        # Run handler as submenu
@@ -152,7 +157,7 @@ class Menu(object):
             break
 
     if not processed:
-      ui.keyPressMessage('Unknown command {:s}'.format(key.n))
+      self.ui.keyPressMessage('Unknown command {:s}'.format(key.n))
     else:
       if self.settings['readyMsg']:
         self.settings['readyMsg']()
@@ -167,28 +172,28 @@ class Menu(object):
     for opt in self.options:
       if self.isSection(opt):
         txt += '\n{:}\n{:}\n'.format(
-          ui.color(opt.n, 'ui.menuSection'),
-          ui.color(ui.gMSG_SEPARATOR, 'ui.menuSection'),
+          self.ui.color(opt.n, 'ui.menuSection'),
+          self.ui.color(self.ui.MSG_SEPARATOR, 'ui.menuSection'),
         )
       elif self.isInfo(opt):
         optName = '{:20s} {:}'.format(opt.kd, opt.n)
-        txt += ui.color(optName, 'ui.menuItem') + '\n'
+        txt += self.ui.color(optName, 'ui.menuItem') + '\n'
       elif self.isHidden(opt):
         pass
       else:
         optName = '{:20s} {:}'.format(opt.kd, opt.n)
 
         if type(opt.h) is Menu:
-          txt += ui.color(optName, 'ui.menuSubmenu') + '\n'
+          txt += self.ui.color(optName, 'ui.menuSubmenu') + '\n'
         else:
-          txt += ui.color(optName, 'ui.menuItem') + '\n'
+          txt += self.ui.color(optName, 'ui.menuItem') + '\n'
 
-    ui.logBlock(txt)
+    self.ui.logBlock(txt)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def submenu(self):
     ''' Run self as a submenu '''
     self.showOptions()
-    ui.inputMsg('Select command...')
+    self.ui.inputMsg('Select command...')
     return self.parseKey(self.kb.getKey())

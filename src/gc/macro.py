@@ -12,20 +12,18 @@ import importlib
 import time
 from pathlib import Path, PurePath
 
-from . import ui as ui
-
-
 # ------------------------------------------------------------------
 # Macro class
 
 class Macro:
 
-  def __init__(self, grbl, kb):
+  def __init__(self, cfg, kb, ui, mch):
     ''' Construct a Macro object.
     '''
-    self.grbl = grbl
+    self.mch = mch
     self.kb = kb
-    self.cfg = grbl.getConfig()
+    self.ui = ui
+    self.cfg = cfg
     self.mcrCfg = self.cfg['macro']
 
     self.macros = {}
@@ -56,7 +54,7 @@ class Macro:
     self.loadFolder('src/macros', silent=silent)
 
     if not silent:
-      ui.log()
+      self.ui.log()
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -103,13 +101,13 @@ class Macro:
           if 'title' in tmpMacro and 'commands' in tmpMacro:
             self.macros[macroShortName] = tmpMacro
             if not silent:
-              ui.log('[{:}]'.format(macroShortName), end=' ')
+              self.ui.log('[{:}]'.format(macroShortName), end=' ')
           else:
             if not silent:
-              ui.log('[{:}]'.format(macroShortName), c='ui.errorMsg', end=' ')
+              self.ui.log('[{:}]'.format(macroShortName), c='ui.errorMsg', end=' ')
         except:
           if not silent:
-            ui.log('[{:}]'.format(macroShortName), c='ui.errorMsg', end=' ')
+            self.ui.log('[{:}]'.format(macroShortName), c='ui.errorMsg', end=' ')
 
     for item in Path(folder).glob('*'):
       if item.is_dir():
@@ -148,7 +146,7 @@ class Macro:
         title
         )
 
-    ui.logBlock(block)
+    self.ui.logBlock(block)
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -158,7 +156,7 @@ class Macro:
     success = self._run(name, silent=silent)
 
     if not success:
-      ui.logTitle('Restoring machine settings after macro cancel')
+      self.ui.logTitle('Restoring machine settings after macro cancel')
       self._run(self.mcrCfg['startup'], silent=True)
 
     return success
@@ -199,7 +197,7 @@ class Macro:
 
     macro = self.getMacro(name)
     if not macro:
-      ui.log('ERROR: Macro [{:}] does not exist, please check config file.'.format(name),
+      self.ui.log('ERROR: Macro [{:}] does not exist, please check config file.'.format(name),
         color = 'ui.errorMsg')
       return False
 
@@ -207,15 +205,15 @@ class Macro:
 
     if not silent:
       if isSubCall:
-        ui.logTitle('Macro [{:}] subcall START'.format(name), c='macro.subCallStart')
+        self.ui.logTitle('Macro [{:}] subcall START'.format(name), c='macro.subCallStart')
       else:
         self.show(name, avoidReload=True)
 
-        ui.inputMsg('Press y/Y to execute, any other key to cancel...')
+        self.ui.inputMsg('Press y/Y to execute, any other key to cancel...')
         key = self.kb.getKey()
 
         if not key._in('yY'):
-          ui.logBlock('MACRO [{:}] CANCELLED'.format(name), c='ui.cancelMsg')
+          self.ui.logBlock('MACRO [{:}] CANCELLED'.format(name), c='ui.cancelMsg')
           return False
 
     for command in commands:
@@ -231,20 +229,20 @@ class Macro:
         if isMacroCall:
           color = 'macro.macroCall'
 
-        ui.logTitle(cmdComment, c=color)
+        self.ui.logTitle(cmdComment, c=color)
 
       if cmdName:
         if isReservedName:
-          ui.logTitle(cmdName, c='macro.reservedName')
+          self.ui.logTitle(cmdName, c='macro.reservedName')
 
           if cmdName.lower() == 'pause':
-            ui.inputMsg('Paused, press <ENTER> to continue / <ESC> to exit ...')
+            self.ui.inputMsg('Paused, press <ENTER> to continue / <ESC> to exit ...')
             key = self.kb.noKey
             while key.n not in ['CR', 'LF', 'ESC']:
               key = self.kb.getKey()
 
             if key.n == 'ESC':
-              ui.logBlock('MACRO [{:}] CANCELLED'.format(name), c='ui.cancelMsg')
+              self.ui.logBlock('MACRO [{:}] CANCELLED'.format(name), c='ui.cancelMsg')
               return False
             else:
               continue
@@ -259,26 +257,26 @@ class Macro:
 
         if isMacroCall:
           if not self._run(cmdName, silent=silent, isSubCall=True):
-            ui.logBlock('MACRO [{:}] CANCELLED'.format(name), c='ui.cancelMsg')
+            self.ui.logBlock('MACRO [{:}] CANCELLED'.format(name), c='ui.cancelMsg')
             return False
         else:
-          self.grbl.send(cmdName)
+          self.mch.send(cmdName)
           if not silent:
-            self.grbl.waitForMachineIdle()
+            self.mch.waitForMachineIdle()
 
       if self.kb.keyPressed():
         if self.kb.getKey().n == 'ESC':
-          ui.logBlock('MACRO [{:}] CANCELLED'.format(name), c='ui.cancelMsg')
+          self.ui.logBlock('MACRO [{:}] CANCELLED'.format(name), c='ui.cancelMsg')
           return False
 
     if not silent:
       if isSubCall:
-        ui.logTitle('Macro [{:}] subCall END'.format(name), c='macro.subCallEnd')
+        self.ui.logTitle('Macro [{:}] subCall END'.format(name), c='macro.subCallEnd')
       else:
-        ui.logBlock('MACRO [{:}] FINISHED'.format(name), c='ui.finishedMsg')
+        self.ui.logBlock('MACRO [{:}] FINISHED'.format(name), c='ui.finishedMsg')
 
     if not isSubCall:
-      ui.log()
+      self.ui.log()
 
     return True
 
@@ -292,7 +290,7 @@ class Macro:
 
     macro = self.getMacro(name)
     if not macro:
-      ui.log('ERROR: Macro [{:}] does not exist, check config file.'.format(name),
+      self.ui.log('ERROR: Macro [{:}] does not exist, check config file.'.format(name),
         c='ui.errorMsg')
       return
 
@@ -300,12 +298,12 @@ class Macro:
 
     commands = macro['commands']
 
-    block = ui.color('Macro [{:}] - {:} ({:} lines)\n\n'.format(
+    block = self.ui.color('Macro [{:}] - {:} ({:} lines)\n\n'.format(
       name, title, len(commands)), 'ui.title')
 
     if 'description' in macro:
       description = macro['description'].rstrip(' ').strip('\r\n')
-      block += ui.color(description, 'ui.msg') + '\n\n'
+      block += self.ui.color(description, 'ui.msg') + '\n\n'
 
     maxCommandLen = 0
     for command in commands:
@@ -327,7 +325,7 @@ class Macro:
         commentColor = 'macro.headerComment'
 
       block += '{:}   {:}\n'.format(
-        ui.color(cmdName.ljust(maxCommandLen), cmdColor),
-        ui.color(cmdComment, commentColor) )
+        self.ui.color(cmdName.ljust(maxCommandLen), cmdColor),
+        self.ui.color(cmdComment, commentColor) )
 
-    ui.logBlock(block)
+    self.ui.logBlock(block)

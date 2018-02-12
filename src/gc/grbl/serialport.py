@@ -12,17 +12,16 @@ import os
 import time
 import serial
 
-from .. import ui as ui
-
 # ------------------------------------------------------------------
 # SerialPort class
 
 class SerialPort:
 
-  def __init__(self, cfg):
+  def __init__(self, cfg, ui):
     ''' Construct a SerialPort object.
     '''
     self.cfg = cfg
+    self.ui = ui
     self.spCfg = cfg['serial']
 
     self.serial = serial.Serial()
@@ -44,7 +43,7 @@ class SerialPort:
   def close(self):
     ''' Close the serial port
     '''
-    ui.log('Closing serial port {:s}...'.format(self.portName))
+    self.ui.log('Closing serial port {:s}...'.format(self.portName))
     return self.serial.close()
 
 
@@ -62,7 +61,7 @@ class SerialPort:
     if self.serial.isOpen():
       self.close()
 
-    ui.log('Opening serial port {:s}...'.format(self.portName))
+    self.ui.log('Opening serial port {:s}...'.format(self.portName))
 
     try:
       self.serial.open()
@@ -80,7 +79,7 @@ class SerialPort:
       line = line.decode('utf-8')
       line = line.strip('\r\n')
 
-      ui.log('Read line: [{:}]'.format(line), v='DEBUG')
+      self.ui.log('Read line: [{:}]'.format(line), v='DEBUG')
 
     return line
 
