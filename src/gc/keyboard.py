@@ -231,8 +231,12 @@ class Keyboard:
     return not self.charQueue.empty()
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def getKey(self):
+  def getKey(self, wait=True):
     ''' Returns a Key object. '''
+
+    if not wait:
+      if not self.keyPressed() and not self.nextChar:
+        return None
 
     # Wait for a key !!!!
     while not self.keyPressed() and not self.nextChar:
@@ -299,23 +303,18 @@ class Keyboard:
     kbBuffer = ''
     enterBuffered = False
 
-    if False:   # TODO: Fix (not working)
+    key = self.getKey(wait=False)
 
-      # Set non-blocking flag for stdio
-      os.set_blocking(self.fd, False)
+    while key and key.c:
+      kbBuffer += key.c
 
-      key = self.getKey()
+      if key.k == 10:
+        enterBuffered = True
 
-      while key.c:
-        kbBuffer += key.c
+      key = self.getKey(wait=False)
 
-        if key.k == 10:
-          enterBuffered = True
-
-        key = self.getKey()
-
-      # Reet blocking flag for stdio
-      os.set_blocking(self.fd, True)
+    if kbBuffer:
+      sys.stdout.write(kbBuffer)
 
     if enterBuffered:
       retVal = kbBuffer
