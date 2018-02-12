@@ -6,6 +6,8 @@ A handy tool for playing around with your grbl-controlled CNC.
 
 Currently compatible with [grbl](https://github.com/gnea/grbl) v1.1
 
+[![asciicast](https://asciinema.org/a/XYrcAkFcMJ1Gab837Y9shqNvX.png)](https://asciinema.org/a/XYrcAkFcMJ1Gab837Y9shqNvX)
+
 Allows:
 
 * Manually moving X/Y/Z axis at configurable steps
