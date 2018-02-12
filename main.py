@@ -649,11 +649,14 @@ def setupMenu():
     {'HIDDEN':1, 'k':'F12', 'n':'Preconfigured macro', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
 
     {'SECTION':1, 'n':'Jog'},
-    {'INFO':1, 'k':'<numpad>',         'n':'XY jog (including diagonals)'},
-    {'INFO':1, 'k':'<SHIFT>+<numpad>', 'n':'XY jog (double distance)'},
-    {'INFO':1, 'k':'<CTRL><numpad>',   'n':'XY jog (half distance)'},
-    {'k':'/',   'n':'Set XY jog distance', 'h':setXYJogDistance},
-    {'k':'*',   'n':'Set Z jog distance',  'h':setZJogDistance},
+    {'INFO':1, 'k':'<numpad>',             'n':'XY jog (including diagonals)'},
+    {'INFO':1, 'k':'<cursor>',             'n':'XY jog'},
+    {'INFO':1, 'k':'<SHIFT>+<cursor>',     'n':'XY jog (double distance)'},
+    {'INFO':1, 'k':'<CTRL><cursor>',       'n':'XY jog (half distance)'},
+    {'k':'-',  'n':'z jog [U]',            'h':jogZ,  'ha':{'d':'U'}},
+    {'k':'+',  'n':'z jog [D]',            'h':jogZ,  'ha':{'d':'D'}},
+    {'k':'/',  'n':'Set XY jog distance',  'h':setXYJogDistance},
+    {'k':'*',  'n':'Set Z jog distance',   'h':setZJogDistance},
 
     {'HIDDEN':1, 'k':'1',   'n':'Jog - [DL]',          'h':jogXY, 'ha':{'d':'DL'}},
     {'HIDDEN':1, 'k':'2',   'n':'Jog - [D]',           'h':jogXY, 'ha':{'d':'D'}},
@@ -663,8 +666,21 @@ def setupMenu():
     {'HIDDEN':1, 'k':'7',   'n':'Jog - [UL]',          'h':jogXY, 'ha':{'d':'UL'}},
     {'HIDDEN':1, 'k':'8',   'n':'Jog - [U]',           'h':jogXY, 'ha':{'d':'U'}},
     {'HIDDEN':1, 'k':'9',   'n':'Jog - [UR]',          'h':jogXY, 'ha':{'d':'UR'}},
-    {'HIDDEN':1, 'k':'-',   'n':'Jog - (Z) [U]',       'h':jogZ,  'ha':{'d':'U'}},
-    {'HIDDEN':1, 'k':'+',   'n':'Jog - (Z) [D]',       'h':jogZ,  'ha':{'d':'D'}},
+
+    {'HIDDEN':1, 'k':'CUR_U',   'n':'Jog - [U]',       'h':jogXY, 'ha':{'d':'U'}},
+    {'HIDDEN':1, 'k':'CUR_D',   'n':'Jog - [D]',       'h':jogXY, 'ha':{'d':'D'}},
+    {'HIDDEN':1, 'k':'CUR_L',   'n':'Jog - [L]',       'h':jogXY, 'ha':{'d':'L'}},
+    {'HIDDEN':1, 'k':'CUR_R',   'n':'Jog - [R]',       'h':jogXY, 'ha':{'d':'R'}},
+
+    {'HIDDEN':1, 'k':'SHIFT_CUR_U',   'n':'Jog - [U]*2', 'h':jogXY, 'ha':{'d':'U', 'tx': lambda x: x*2 }},
+    {'HIDDEN':1, 'k':'SHIFT_CUR_D',   'n':'Jog - [D]*2', 'h':jogXY, 'ha':{'d':'D', 'tx': lambda x: x*2 }},
+    {'HIDDEN':1, 'k':'SHIFT_CUR_L',   'n':'Jog - [L]*2', 'h':jogXY, 'ha':{'d':'L', 'tx': lambda x: x*2 }},
+    {'HIDDEN':1, 'k':'SHIFT_CUR_R',   'n':'Jog - [R]*2', 'h':jogXY, 'ha':{'d':'R', 'tx': lambda x: x*2 }},
+
+    {'HIDDEN':1, 'k':'CTRL_CUR_U',   'n':'Jog - [U]/2',  'h':jogXY, 'ha':{'d':'U', 'tx': lambda x: x/2 }},
+    {'HIDDEN':1, 'k':'CTRL_CUR_D',   'n':'Jog - [D]/2',  'h':jogXY, 'ha':{'d':'D', 'tx': lambda x: x/2 }},
+    {'HIDDEN':1, 'k':'CTRL_CUR_L',   'n':'Jog - [L]/2',  'h':jogXY, 'ha':{'d':'L', 'tx': lambda x: x/2 }},
+    {'HIDDEN':1, 'k':'CTRL_CUR_R',   'n':'Jog - [R]/2',  'h':jogXY, 'ha':{'d':'R', 'tx': lambda x: x/2 }},
 
     {'SECTION':1, 'n':'Joystick'},
     {'k':'j',   'n':'Enable/disable joystick',     'h':toggleJoystickEnable},
