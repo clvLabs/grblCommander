@@ -26,12 +26,8 @@ if __name__ == '__main__':
 import time
 import sys
 import os
-
-from . import ui as ui    # [DBG] !!!!!
-
-def DBG(msg):
-  ui.log('[DBG] {:}'.format(msg), c='red, yellow')
-
+import threading
+import queue
 
 # Windows
 if os.name == 'nt':
@@ -39,7 +35,6 @@ if os.name == 'nt':
 
 # Posix (Linux, OS X)
 else:
-  import sys
   import termios
   import atexit
   from select import select
@@ -57,29 +52,37 @@ class Key:
 
   def __init__(self, n=None, k=None, c=None):
 
-    # Make sure we have both key and char
-    assert k or c
-    if not k:      k = ord(c)
+    if not k:
+      k = ord(c)
+
     try:
-      if not c:      c = chr(k)
+      if not c:
+        if type(k) is int:
+          c = chr(k)
+        else:
+          c= '<?>'
     except ValueError:
-      c = '?'
+      c = '<?>'
 
-    self.n = n          # name
-    self.k = k          # key
-    self.c = c          # char
+    if not n:
+      n = '{:} (key {:})'.format(c, k)
 
+    self.n = n      # name
+    self.k = k      # key
+    self.c = c      # char
+
+    self.keyList = KEY_LIST
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def _in(self, coll):
     ''' Checks if key is the provided collection.
-        Collection can be:
-          - A string representing a key name => 'CTRL_X'
-          - A string representing a list of chars => 'yYnN'
-          - A list of strings in any of the above formats
+      Collection can be:
+        - A string representing a key name => 'CTRL_X'
+        - A string representing a list of chars => 'yYnN'
+        - A list of strings in any of the above formats
     '''
     if type(coll) is str:
-      if coll in KEY_LIST:
+      if coll in self.keyList:
         return coll == self.n
 
       if self.c in coll:
@@ -97,15 +100,105 @@ class Key:
 
     return False
 
+
+# ------------------------------------------------------------------
+# KBThread class
+
+class KBThread(threading.Thread):
+  ''' Keyboard watcher thread '''
+
+  SLEEP_TIME = 0.0005
+  outQueue = None    # Queue for char output
+  lastTime = 0
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def __init__(self, fd, outQueue):
+    super().__init__()
+    self.fd = fd
+    self.outQueue = outQueue
+    self._stopEvent = threading.Event()
+    self._runningEvent = threading.Event()
+    self.resume()
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def stop(self):
+      self._stopEvent.set()
+      self.resume()
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def stopped(self):
+      return self._stopEvent.is_set()
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def pause(self):
+      self._runningEvent.clear()
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def resume(self):
+      self._runningEvent.set()
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def paused(self):
+      return not self._runningEvent.is_set()
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def run(self):
+    while True:
+
+      c = None
+      while not c:
+        self._runningEvent.wait()
+        if self.stopped():
+          return
+        c = self._getch()
+        if not c:
+          time.sleep(self.SLEEP_TIME)
+
+      curTime = time.time()
+      elapsed = curTime - self.lastTime
+      self.lastTime = curTime
+
+      self.outQueue.put((c, elapsed,))
+
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def _getch(self):
+    ''' Returns a keyboard character. '''
+    try:
+      if os.name == 'nt':
+        return msvcrt.getch().decode('utf-8')
+
+      else:
+        os.set_blocking(self.fd, False)
+        char = sys.stdin.read(1)
+        os.set_blocking(self.fd, True)
+        return char
+
+    except Exception as e:
+      print(
+        'keyboard.py: EXCEPTION reading keyboard: {:}'.format(str(e)))
+      return '\0'
+
+
 # ------------------------------------------------------------------
 # Keyboard class
 
 class Keyboard:
 
+  MBTIME = 0.001 # MultiByte threshold time
+  nextChar = None
+
   def __init__(self):
     ''' Construct a Keyboard object. '''
     self.initKeyValueConstants()
 
+    # Setup keyboard
     if os.name == 'nt':
       pass
     else:
@@ -115,87 +208,114 @@ class Keyboard:
 
       # New terminal setting unbuffered
       self.new_term = termios.tcgetattr(self.fd)
-      self.new_term[3] = (self.new_term[3] & ~termios.ICANON & ~termios.ECHO)
+      self.new_term[3] = (self.new_term[3] & ~
+                termios.ICANON & ~termios.ECHO)
 
       self.setOwnTerm()
 
       # Support normal-terminal reset at exit
       atexit.register(self.resetTerm)
 
+    # Setup listener thread
+    self.charQueue = queue.Queue()
+    self.listener = KBThread(self.fd, self.charQueue)
+    self.listener.start()
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def stop(self):
+    self.listener.stop()
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def keyPressed(self):
     ''' Returns True if keyboard character was hit, False otherwise. '''
-    if os.name == 'nt':
-      return msvcrt.kbhit()
-
-    else:
-      dr,dw,de = select([sys.stdin], [], [], 0)
-      return dr != []
-
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def _getch(self, display=False):
-    ''' Returns a keyboard character. '''
-    try:
-      if os.name == 'nt':
-        return msvcrt.getch().decode('utf-8')
-
-      else:
-        char = sys.stdin.read(1)
-        if display:
-          sys.stdout.write(char)
-        return char
-
-    except Exception as e:
-      print('keyboard.py: EXCEPTION reading keyboard: {:}'.format(str(e)))
-      return 0
+    return not self.charQueue.empty()
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def getKey(self):
     ''' Returns a Key object. '''
-    char = self._getch()
+
+    # Wait for a key !!!!
+    while not self.keyPressed() and not self.nextChar:
+      pass
+
+    if self.nextChar:
+      char, elapsed = self.nextChar, 0
+      self.nextChar = None
+    else:
+      char, elapsed = self.charQueue.get_nowait()
+
     charVal = ord(char)
-    DBG('k[{:}] c[{:}]'.format(charVal, char))
+
+    cmd = ''
+
+    if charVal == 27:
+      time.sleep(self.MBTIME)
+      if self.keyPressed():
+        cmd += char
+        cmdLen = self.charQueue.qsize()
+        for i in range(cmdLen):
+          char, elapsed = self.charQueue.get_nowait()
+          if elapsed < self.MBTIME:
+            cmd += char
+          else:
+            self.nextChar = char
+            break
+
+    if cmd == '':
+      cmd = None
 
     key = None
 
-    for name in self.k:
-      k = self.k[name]
-      if k.k == charVal:
-        key = k
-        break
+    for name in self.keyList:
+      k = self.keyList[name]
+
+      if not cmd and type(k.k) is int:
+        if k.k == charVal:
+          key = k
+          break
+      elif type(k.k) is str:
+        if k.k == cmd:
+          key = k
+          break
+      else:
+        pass
 
     if not key:
-      key = Key(n=char, k=charVal)
+      if cmd:
+        key = Key(n='UNKNOWN: <ESC>[{:}]'.format(cmd[1:]), k=cmd)
+      else:
+        key = Key(c=char, k=charVal)
 
     return key
-
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def input(self, prompt=''):
     ''' Substitution for python's input(), switching terminals '''
 
+    self.listener.pause()
     sys.stdout.write(prompt)
-
-    # Set non-blocking flag for stdio
-    os.set_blocking(self.fd, False)
 
     # Flush keyboard buffer into return value
     kbBuffer = ''
     enterBuffered = False
-    char = self._getch(True)
 
-    while char:
-      kbBuffer += char
+    if False:   # TODO: Fix (not working)
 
-      if ord(char) == 10:
-        enterBuffered = True
+      # Set non-blocking flag for stdio
+      os.set_blocking(self.fd, False)
 
-      char = self._getch(True)
+      key = self.getKey()
 
-    # Reet blocking flag for stdio
-    os.set_blocking(self.fd, True)
+      while key.c:
+        kbBuffer += key.c
+
+        if key.k == 10:
+          enterBuffered = True
+
+        key = self.getKey()
+
+      # Reet blocking flag for stdio
+      os.set_blocking(self.fd, True)
 
     if enterBuffered:
       retVal = kbBuffer
@@ -204,8 +324,9 @@ class Keyboard:
       retVal = kbBuffer + input()
       self.setOwnTerm()
 
-    return retVal
+    self.listener.resume()
 
+    return retVal
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def setOwnTerm(self):
@@ -215,8 +336,6 @@ class Keyboard:
       pass
     else:
       termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.new_term)
-      DBG('SetOwnTerm! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
-
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def resetTerm(self):
@@ -226,73 +345,143 @@ class Keyboard:
       pass
     else:
       termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.old_term)
-      DBG('RESETTerm! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
-
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def initKeyValueConstants(self):
     ''' Shares a few common key codes '''
     self.noKey = Key(n='NONE', k=-1)
 
-    self.k = KEY_LIST
+    self.keyList = {}
+
+    for k in KEY_LIST:
+      self.keyList[k] = Key(n=k, **KEY_LIST[k])
 
 
 # ------------------------------------------------------------------
 # Key list
 
 KEY_LIST = {
-  'ENTER': Key(n='ENTER', k=10),
-  'CR': Key(n='CR', k=13),
-  'ESC': Key(n='ESC', k=27),
+  'ENTER': {'k': 10},
+  'CR': {'k': 13},
+  'ESC': {'k': 27},
 
-  'CTRL_R': Key(n='CTRL_R', k=18),
-  'CTRL_X': Key(n='CTRL_X', k=24),
-  'CTRL_Y': Key(n='CTRL_Y', k=25),
-  'CTRL_Z': Key(n='CTRL_Z', k=26),
+  'CTRL_R': {'k': 18},
+  'CTRL_X': {'k': 24},
+  'CTRL_Y': {'k': 25},
+  'CTRL_Z': {'k': 26},
 
-  # 'F1': Key(n='F1', k=59),
-  # 'F2': Key(n='F2', k=60),
-  # 'F3': Key(n='F3', k=61),
-  # 'F4': Key(n='F4', k=62),
-  # 'F5': Key(n='F5', k=63),
-  # 'F6': Key(n='F6', k=64),
-  # 'F7': Key(n='F7', k=65),
-  # 'F8': Key(n='F8', k=66),
-  # 'F9': Key(n='F9', k=67),
-  # 'F10': Key(n='F10', k=68),
-  # 'F11': Key(n='F11', k=133),
-  # 'F12': Key(n='F12', k=134),
+  'CUR_UP': {'k': '\x1b[A'},
+  'CUR_DOWN': {'k': '\x1b[B'},
+  'CUR_RIGHT': {'k': '\x1b[C'},
+  'CUR_LEFT': {'k': '\x1b[D'},
 
-  # 'INS': Key(n='INS', k=82),
-  # 'DEL': Key(n='DEL', k=83),
-  # 'HOME': Key(n='HOME', k=71),
-  # 'END': Key(n='END', k=79),
-  # 'PGUP': Key(n='PGUP', k=73),
-  # 'PGDN': Key(n='PGDN', k=81),
-  # 'LEFT': Key(n='LEFT', k=75),
-  # 'RIGHT': Key(n='RIGHT', k=77),
-  # 'UP': Key(n='UP', k=72),
-  # 'DOWN': Key(n='DOWN', k=80),
+  'SHIFT_CUR_UP': {'k': '\x1b[1;2A'},
+  'SHIFT_CUR_DOWN': {'k': '\x1b[1;2B'},
+  'SHIFT_CUR_RIGHT': {'k': '\x1b[1;2C'},
+  'SHIFT_CUR_LEFT': {'k': '\x1b[1;2D'},
 
-  # 'KP_INS': Key(n='KP_INS', k=82),
-  # 'KP_DEL': Key(n='KP_DEL', k=83),
-  # 'KP_HOME': Key(n='KP_HOME', k=71),
-  # 'KP_END': Key(n='KP_END', k=79),
-  # 'KP_PGUP': Key(n='KP_PGUP', k=73),
-  # 'KP_PGDN': Key(n='KP_PGDN', k=81),
-  # 'KP_LEFT': Key(n='KP_LEFT', k=75),
-  # 'KP_RIGHT': Key(n='KP_RIGHT', k=77),
-  # 'KP_UP': Key(n='KP_UP', k=72),
-  # 'KP_DOWN': Key(n='KP_DOWN', k=80),
+  'CTRL_CUR_UP': {'k': '\x1b[1;5A'},
+  'CTRL_CUR_DOWN': {'k': '\x1b[1;5B'},
+  'CTRL_CUR_RIGHT': {'k': '\x1b[1;5C'},
+  'CTRL_CUR_LEFT': {'k': '\x1b[1;5D'},
 
-  # 'CTRL_KP_INS': Key(n='CTRL_KP_INS', k=146),
-  # 'CTRL_KP_DEL': Key(n='CTRL_KP_DEL', k=147),
-  # 'CTRL_KP_HOME': Key(n='CTRL_KP_HOME', k=119),
-  # 'CTRL_KP_END': Key(n='CTRL_KP_END', k=117),
-  # 'CTRL_KP_PGUP': Key(n='CTRL_KP_PGUP', k=132),
-  # 'CTRL_KP_PGDN': Key(n='CTRL_KP_PGDN', k=118),
-  # 'CTRL_KP_LEFT': Key(n='CTRL_KP_LEFT', k=115),
-  # 'CTRL_KP_RIGHT': Key(n='CTRL_KP_RIGHT', k=116),
-  # 'CTRL_KP_UP': Key(n='CTRL_KP_UP', k=141),
-  # 'CTRL_KP_DOWN': Key(n='CTRL_KP_DOWN', k=145),
+  'F1': {'k': '\x1bOP'},
+  'F2': {'k': '\x1bOQ'},
+  'F3': {'k': '\x1bOR'},
+  'F4': {'k': '\x1bOS'},
+  'F5': {'k': '\x1b[15~'},
+  'F6': {'k': '\x1b[17~'},
+  'F7': {'k': '\x1b[18~'},
+  'F8': {'k': '\x1b[19~'},
+  'F9': {'k': '\x1b[20~'},
+  'F10': {'k': '\x1b[21~'},
+  'F11': {'k': '\x1b[23~'},
+  'F12': {'k': '\x1b[24~'},
+
+  'SHIFT_F1': {'k': '\x1bO1;2P'},
+  'SHIFT_F2': {'k': '\x1bO1;2Q'},
+  'SHIFT_F3': {'k': '\x1bO1;2R'},
+  'SHIFT_F4': {'k': '\x1bO1;2S'},
+  'SHIFT_F5': {'k': '\x1b[15;2~'},
+  'SHIFT_F6': {'k': '\x1b[17;2~'},
+  'SHIFT_F7': {'k': '\x1b[18;2~'},
+  'SHIFT_F8': {'k': '\x1b[19;2~'},
+  'SHIFT_F9': {'k': '\x1b[20;2~'},
+  'SHIFT_F10': {'k': '\x1b[21;2~'},
+  'SHIFT_F11': {'k': '\x1b[23;2~'},
+  'SHIFT_F12': {'k': '\x1b[24;2~'},
+
+  'ALT_F1': {'k': '\x1bO1;3P'},
+  'ALT_F2': {'k': '\x1bO1;3Q'},
+  'ALT_F3': {'k': '\x1bO1;3R'},
+  'ALT_F4': {'k': '\x1bO1;3S'},
+  'ALT_F5': {'k': '\x1b[15;3~'},
+  'ALT_F6': {'k': '\x1b[17;3~'},
+  'ALT_F7': {'k': '\x1b[18;3~'},
+  'ALT_F8': {'k': '\x1b[19;3~'},
+  'ALT_F9': {'k': '\x1b[20;3~'},
+  'ALT_F10': {'k': '\x1b[21;3~'},
+  'ALT_F11': {'k': '\x1b[23;3~'},
+  'ALT_F12': {'k': '\x1b[24;3~'},
+
+  'CTRL_F1': {'k': '\x1bO1;5P'},
+  'CTRL_F2': {'k': '\x1bO1;5Q'},
+  'CTRL_F3': {'k': '\x1bO1;5R'},
+  'CTRL_F4': {'k': '\x1bO1;5S'},
+  'CTRL_F5': {'k': '\x1b[15;5~'},
+  'CTRL_F6': {'k': '\x1b[17;5~'},
+  'CTRL_F7': {'k': '\x1b[18;5~'},
+  'CTRL_F8': {'k': '\x1b[19;5~'},
+  'CTRL_F9': {'k': '\x1b[20;5~'},
+  'CTRL_F10': {'k': '\x1b[21;5~'},
+  'CTRL_F11': {'k': '\x1b[23;5~'},
+  'CTRL_F12': {'k': '\x1b[24;5~'},
+
+  'CTRL_SHIFT_F1': {'k': '\x1bO1;6P'},
+  'CTRL_SHIFT_F2': {'k': '\x1bO1;6Q'},
+  'CTRL_SHIFT_F3': {'k': '\x1bO1;6R'},
+  'CTRL_SHIFT_F4': {'k': '\x1bO1;6S'},
+  'CTRL_SHIFT_F5': {'k': '\x1b[15;6~'},
+  'CTRL_SHIFT_F6': {'k': '\x1b[17;6~'},
+  'CTRL_SHIFT_F7': {'k': '\x1b[18;6~'},
+  'CTRL_SHIFT_F8': {'k': '\x1b[19;6~'},
+  'CTRL_SHIFT_F9': {'k': '\x1b[20;6~'},
+  'CTRL_SHIFT_F10': {'k': '\x1b[21;6~'},
+  'CTRL_SHIFT_F11': {'k': '\x1b[23;6~'},
+  'CTRL_SHIFT_F12': {'k': '\x1b[24;6~'},
+
+
+  'INS': {'k': '\x1b[2~'},
+  'DEL': {'k': '\x1b[3~'},
+  'HOME': {'k': '\x1bOH'},
+  'END': {'k': '\x1bOF'},
+  'PGUP': {'k': '\x1b[5~'},
+  'PGDN': {'k': '\x1b[6~'},
+
+  'SHIFT_INS': {'k': '\x1b[2;2~'},
+  'SHIFT_DEL': {'k': '\x1b[3;2~'},
+  'SHIFT_HOME': {'k': '\x1bO1;2H'},
+  'SHIFT_END': {'k': '\x1bO1;2F'},
+  'SHIFT_PGUP': {'k': '\x1b[5;2~'},
+  'SHIFT_PGDN': {'k': '\x1b[6;2~'},
+
+  'CTRL_INS': {'k': '\x1b[2;5~'},
+  'CTRL_DEL': {'k': '\x1b[3;5~'},
+  'CTRL_HOME': {'k': '\x1bO1;5H'},
+  'CTRL_END': {'k': '\x1bO1;5F'},
+  'CTRL_PGUP': {'k': '\x1b[5;5~'},
+  'CTRL_PGDN': {'k': '\x1b[6;5~'},
+
+  'CTRL_SHIFT_INS': {'k': '\x1b[2;6~'},
+  'CTRL_SHIFT_DEL': {'k': '\x1b[3;6~'},
+  'CTRL_SHIFT_HOME': {'k': '\x1bO1;6H'},
+  'CTRL_SHIFT_END': {'k': '\x1bO1;6F'},
+  'CTRL_SHIFT_PGUP': {'k': '\x1b[5;6~'},
+  'CTRL_SHIFT_PGDN': {'k': '\x1b[6;6~'},
+
+  'KP_HOME': {'k': '\x1b[1~'},
+  'KP_END': {'k': '\x1b[4~'},
+  'KP_PGUP': {'k': '\x1b[5~'},
+  # 'KP_PGDN': {'k': '\x1b[6~'},
+  'KP_CENTER': {'k': '\x1b[E'},
 }

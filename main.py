@@ -630,8 +630,23 @@ def setupMenu():
     {'k':'º',            'n':'Repeat last GCode command',               'h':repeatLastGCodeCommand},
     {'k':'rR',           'n':'Reset work coordinate (*)',               'h':resetSubmenu},
     {'k':'pP',           'n':'Probe (*)',                               'h':probeSubmenu},
-    {'k':'mM',           'n':'Macro (*)',                               'h':macroSubmenu},
     {'k':'tT',           'n':'Tests (*)',                               'h':testsSubmenu},
+
+    {'SECTION':1, 'n':'Macro'},
+    {'k':'mM',           'n':'Macro (*)',                               'h':macroSubmenu},
+    {'INFO':1, 'k':'<F1..F12>', 'n':'Run preconfigured macro'},
+    {'HIDDEN':1, 'k':'F1', 'n':'Preconfigured macro', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'HIDDEN':1, 'k':'F2', 'n':'Preconfigured macro', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'HIDDEN':1, 'k':'F3', 'n':'Preconfigured macro', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'HIDDEN':1, 'k':'F4', 'n':'Preconfigured macro', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'HIDDEN':1, 'k':'F5', 'n':'Preconfigured macro', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'HIDDEN':1, 'k':'F6', 'n':'Preconfigured macro', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'HIDDEN':1, 'k':'F7', 'n':'Preconfigured macro', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'HIDDEN':1, 'k':'F8', 'n':'Preconfigured macro', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'HIDDEN':1, 'k':'F9', 'n':'Preconfigured macro', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'HIDDEN':1, 'k':'F10', 'n':'Preconfigured macro', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'HIDDEN':1, 'k':'F11', 'n':'Preconfigured macro', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'HIDDEN':1, 'k':'F12', 'n':'Preconfigured macro', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
 
     {'SECTION':1, 'n':'Jog'},
     {'INFO':1, 'k':'<numpad>',         'n':'XY jog (including diagonals)'},
@@ -714,11 +729,6 @@ def main():
     if not mnu.process():
       break
 
-  ui.log('Closing grbl connection...')
-  mch.stop()
-
-  ui.log('Closing program...')
-
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def execTestCode():
@@ -740,6 +750,11 @@ if __name__ == '__main__':
   try:
     main()
   finally:
-    pass
-  #  ui.log('Press any key to exit...')
-  #  kb.getch()
+    ui.log('Closing grbl connection...')
+    mch.stop()
+
+    ui.log('Stopping keyboard hook...')
+    kb.stop()
+
+    ui.log('Closing program...')
+

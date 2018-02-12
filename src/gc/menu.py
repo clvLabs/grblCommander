@@ -139,6 +139,8 @@ class Menu(object):
                   v = opt.xha[k]
                   if k == 'inChar':
                     opt.ha[v] = key.c
+                  elif k == 'inName':
+                    opt.ha[v] = key.n
 
               # Regular handler arguments
               if opt.ha:
@@ -150,7 +152,7 @@ class Menu(object):
             break
 
     if not processed:
-      ui.keyPressMessage('Unknown command {:s} ({:d})'.format(key.c, key.k), key.k, key.c)
+      ui.keyPressMessage('Unknown command {:s}'.format(key.n), key.k, key.c)
     else:
       if self.settings['readyMsg']:
         self.settings['readyMsg']()
