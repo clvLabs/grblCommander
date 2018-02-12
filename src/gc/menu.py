@@ -126,7 +126,7 @@ class Menu(object):
       if self.isNormal(opt) or self.isHidden(opt):
         if opt.k:
           if key._in(opt.k):
-            ui.keyPressMessage('{:} - {:}'.format(opt.kd, opt.n), key.k, key.c)
+            ui.keyPressMessage('{:} - {:}'.format(opt.kd, opt.n))
 
             if type(opt.h) is Menu:
               opt.h.submenu()        # Run handler as submenu
@@ -152,7 +152,7 @@ class Menu(object):
             break
 
     if not processed:
-      ui.keyPressMessage('Unknown command {:s}'.format(key.n), key.k, key.c)
+      ui.keyPressMessage('Unknown command {:s}'.format(key.n))
     else:
       if self.settings['readyMsg']:
         self.settings['readyMsg']()

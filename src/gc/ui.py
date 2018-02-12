@@ -156,7 +156,7 @@ def readyMsg(extraInfo=None):
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-def keyPressMessage(message, key, char):
+def keyPressMessage(message):
   # log('\n{:}\n{:}\n'.format(gMSG_SEPARATOR, message)
   log('{:}\n{:}\n'.format(gMSG_SEPARATOR, message)
     , c='ui.keyPressMsg', v='WARNING')

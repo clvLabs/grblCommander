@@ -196,22 +196,22 @@ def processJoystickInput():
   if joy.status['extraU']:
     if joy.status['x+']:
       gXYJog = ut.genericValueChanger(gXYJog, +1, 1, 100, loop=True, valueName='xyJog')
-      ui.keyPressMessage('Change jog distance (XY) (+1) ({:})'.format(gXYJog), 0, '')
+      ui.keyPressMessage('Change jog distance (XY) (+1) ({:})'.format(gXYJog))
 
     elif joy.status['x-']:
       gXYJog = ut.genericValueChanger(gXYJog, -1, 1, 100, loop=True, valueName='xyJog')
-      ui.keyPressMessage('Change jog distance (XY) (-1) ({:})'.format(gXYJog), 0, '')
+      ui.keyPressMessage('Change jog distance (XY) (-1) ({:})'.format(gXYJog))
 
     elif joy.status['y+']:
       gXYJog = ut.genericValueChanger(gXYJog, +10, 1, 100, loop=True, valueName='xyJog')
-      ui.keyPressMessage('Change jog distance (XY) (+10) ({:})'.format(gXYJog), 0, '')
+      ui.keyPressMessage('Change jog distance (XY) (+10) ({:})'.format(gXYJog))
 
     elif joy.status['y-']:
       gXYJog = ut.genericValueChanger(gXYJog, -10, 1, 100, loop=True, valueName='xyJog')
-      ui.keyPressMessage('Change jog distance (XY) (-10) ({:})'.format(gXYJog), 0, '')
+      ui.keyPressMessage('Change jog distance (XY) (-10) ({:})'.format(gXYJog))
 
     elif joy.status['z+']:
-      ui.keyPressMessage('Go to machine home Z', 0, '')
+      ui.keyPressMessage('Go to machine home Z')
       mch.goToMachineHome_Z()
 
     else:
@@ -221,22 +221,22 @@ def processJoystickInput():
   elif joy.status['extraD']:
     if joy.status['x+']:
       gZJog = ut.genericValueChanger(gZJog, +1, 1, 20, loop=True, valueName='zJog')
-      ui.keyPressMessage('Change jog distance (Z) (+1) ({:})'.format(gZJog), 0, '')
+      ui.keyPressMessage('Change jog distance (Z) (+1) ({:})'.format(gZJog))
 
     elif joy.status['x-']:
       gZJog = ut.genericValueChanger(gZJog, -1, 1, 20, loop=True, valueName='zJog')
-      ui.keyPressMessage('Change jog distance (Z) (-1) ({:})'.format(gZJog), 0, '')
+      ui.keyPressMessage('Change jog distance (Z) (-1) ({:})'.format(gZJog))
 
     elif joy.status['y+']:
       gZJog = ut.genericValueChanger(gZJog, +10, 1, 20, loop=True, valueName='zJog')
-      ui.keyPressMessage('Change jog distance (Z) (+10)] ({:})'.format(gZJog), 0, '')
+      ui.keyPressMessage('Change jog distance (Z) (+10)] ({:})'.format(gZJog))
 
     elif joy.status['y-']:
       gZJog = ut.genericValueChanger(gZJog, -10, 1, 20, loop=True, valueName='zJog')
-      ui.keyPressMessage('Change jog distance (Z) (-10)] ({:})'.format(gZJog), 0, '')
+      ui.keyPressMessage('Change jog distance (Z) (-10)] ({:})'.format(gZJog))
 
     elif joy.status['z+']:
-      ui.keyPressMessage('Go to machine home', 0, '')
+      ui.keyPressMessage('Go to machine home')
       mch.goToMachineHome()
 
     else:
@@ -244,43 +244,43 @@ def processJoystickInput():
 
   # Normal actions
   elif joy.status['y-'] and joy.status['x-']:
-    ui.keyPressMessage('JoyJog - [DL] ({:} {:})'.format(gXYJog, unitsDesc), 0, '')
+    ui.keyPressMessage('JoyJog - [DL] ({:} {:})'.format(gXYJog, unitsDesc))
     mch.moveRelative(x=gXYJog*-1,y=gXYJog*-1)
 
   elif joy.status['y-'] and joy.status['x+']:
-    ui.keyPressMessage('JoyJog - [DR] ({:} {:})'.format(gXYJog, unitsDesc), 0, '')
+    ui.keyPressMessage('JoyJog - [DR] ({:} {:})'.format(gXYJog, unitsDesc))
     mch.moveRelative(x=gXYJog,y=gXYJog*-1)
 
   elif joy.status['y+'] and joy.status['x-']:
-    ui.keyPressMessage('JoyJog - [UL] ({:} {:})'.format(gXYJog, unitsDesc), 0, '')
+    ui.keyPressMessage('JoyJog - [UL] ({:} {:})'.format(gXYJog, unitsDesc))
     mch.moveRelative(x=gXYJog*-1,y=gXYJog)
 
   elif joy.status['y+'] and joy.status['x+']:
-    ui.keyPressMessage('JoyJog - [UR] ({:} {:})'.format(gXYJog, unitsDesc), 0, '')
+    ui.keyPressMessage('JoyJog - [UR] ({:} {:})'.format(gXYJog, unitsDesc))
     mch.moveRelative(x=gXYJog,y=gXYJog)
 
   elif joy.status['y-']:
-    ui.keyPressMessage('JoyJog - [D] ({:} {:})'.format(gXYJog, unitsDesc), 0, '')
+    ui.keyPressMessage('JoyJog - [D] ({:} {:})'.format(gXYJog, unitsDesc))
     mch.moveRelative(y=gXYJog*-1)
 
   elif joy.status['y+']:
-    ui.keyPressMessage('JoyJog - [U] ({:} {:})'.format(gXYJog, unitsDesc), 0, '')
+    ui.keyPressMessage('JoyJog - [U] ({:} {:})'.format(gXYJog, unitsDesc))
     mch.moveRelative(y=gXYJog)
 
   elif joy.status['x-']:
-    ui.keyPressMessage('JoyJog - [L] ({:} {:})'.format(gXYJog, unitsDesc), 0, '')
+    ui.keyPressMessage('JoyJog - [L] ({:} {:})'.format(gXYJog, unitsDesc))
     mch.moveRelative(x=gXYJog*-1)
 
   elif joy.status['x+']:
-    ui.keyPressMessage('JoyJog - [R] ({:} {:})'.format(gXYJog, unitsDesc), 0, '')
+    ui.keyPressMessage('JoyJog - [R] ({:} {:})'.format(gXYJog, unitsDesc))
     mch.moveRelative(x=gXYJog)
 
   elif joy.status['z+']:
-    ui.keyPressMessage('JoyJog (Z) up ({:} {:})'.format(gZJog, unitsDesc), 0, '')
+    ui.keyPressMessage('JoyJog (Z) up ({:} {:})'.format(gZJog, unitsDesc))
     mch.moveRelative(x=0,y=0,z=gZJog)
 
   elif joy.status['z-']:
-    ui.keyPressMessage('JoyJog (Z) down ({:} {:})'.format(gZJog, unitsDesc), 0, '')
+    ui.keyPressMessage('JoyJog (Z) down ({:} {:})'.format(gZJog, unitsDesc))
     mch.moveRelative(x=0,y=0,z=gZJog*-1)
 
   else:
@@ -695,10 +695,7 @@ def setupMenu():
     {'INFO':1, 'k':'<extraD><x>',      'n':'Change jog distance (Z) (+-1)'},
     {'INFO':1, 'k':'<extraD><y>',      'n':'Change jog distance (Z) (+-10)'},
 
-
   ])
-
-  #   ui.keyPressMessage('9 - Jog - [UR] ({:} {:})'.format(gXYJog, ps['units']['desc']), key, char)
 
   mnu.setSettings({
     'readyMsg': readyMsg,
