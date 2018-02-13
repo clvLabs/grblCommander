@@ -665,7 +665,7 @@ def setupMenu():
     {'k':'0',            'n':'Go home (*)',                             'h':goHomeSubmenu},
     {'k':'.',            'n':'Absolute move to table position (*)',     'h':absoluteTablePositionSubmenu},
     {'k':'gGfFxXyYzZ$',  'n':'Send raw GCode command',                  'h':sendRawGCodeCommand, 'xha':{'inChar':'char'}},
-    {'k':' ',            'n':'Send raw GCode command (start EMPTY)',    'h':sendRawGCodeCommand},
+    {'k':'SPACE',        'n':'Send raw GCode command (start EMPTY)',    'h':sendRawGCodeCommand},
     {'k':'lL',           'n':'Send raw GCode command (FORCE RELATIVE)', 'h':sendRawGCodeCommandRELATIVE},
     {'k':'º',            'n':'Repeat last GCode command',               'h':repeatLastGCodeCommand},
     {'k':'rR',           'n':'Reset work coordinate (*)',               'h':resetSubmenu},

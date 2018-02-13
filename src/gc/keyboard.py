@@ -286,7 +286,12 @@ class Keyboard:
 
     if not key:
       if cmd:
-        key = Key(n='UNKNOWN: <ESC>[{:}]'.format(cmd[1:]), k=cmd)
+        arrStr = '['
+        for c in cmd:
+          arrStr += '{:}, '.format(ord(c))
+        arrStr += ']'
+
+        key = Key(n='UNKNOWN_KEY: <ESC>{:} ({:})'.format(cmd[1:], arrStr), k=cmd)
       else:
         key = Key(c=char, k=charVal)
 
@@ -360,9 +365,16 @@ class Keyboard:
 # Key list
 
 KEY_LIST = {
+  'TAB': {'k': 9},
   'ENTER': {'k': 10},
   'CR': {'k': 13},
   'ESC': {'k': 27},
+  'SPACE': {'k': 32},
+  'BS': {'k': 127},
+
+  'SHIFT_TAB': {'k': '\x1b[Z'},
+  'ALT_ENTER': {'k': '\x1b\x0a'},
+  'ALT_BS': {'k': '\x1b\x7f'},
 
   'CTRL_R': {'k': 18},
   'CTRL_X': {'k': 24},
