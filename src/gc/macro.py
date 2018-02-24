@@ -238,7 +238,7 @@ class Macro:
           if cmdName.lower() == 'pause':
             self.ui.inputMsg('Paused, press <ENTER> to continue / <ESC> to exit ...')
             key = self.kb.noKey
-            while key.n not in ['CR', 'LF', 'ESC']:
+            while key.n not in ['ENTER', 'ESC']:
               key = self.kb.getKey()
 
             if key.n == 'ESC':
