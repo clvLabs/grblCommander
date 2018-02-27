@@ -562,6 +562,10 @@ def NOT_IMPLEMENTED():
 def setupMenu():
   ps = mch.status['parserState']
   unitsDesc = ps['units']['desc']
+  mcrHk = mcrCfg['hotKeys']
+
+  def getHk(hk):
+    return mcrHk[hk] if mcrHk[hk] else 'NONE'
 
   absoluteXYAxisLimitsSubmenu = mnu.subMenu([
     {'k':'2',   'n':'ONE AXIS ONLY - Absolute move to axis limits - [D]',  'h':absoluteXYAxisLimits, 'ha':{'d':'D'}},
@@ -620,20 +624,20 @@ def setupMenu():
   ])
 
   resetSubmenu = mnu.subMenu([
-    {'SECTION':1, 'n':'Reset to current position'},
-    {'k':'xX',   'n':'X',    'h':mch.resetWCO,      'ha':{'x':'curr'}},
-    {'k':'yY',   'n':'Y',    'h':mch.resetWCO,      'ha':{'y':'curr'}},
-    {'k':'zZ',   'n':'Z',    'h':mch.resetWCO,      'ha':{'z':'curr'}},
-    {'k':'wW',   'n':'XY',   'h':mch.resetWCO,      'ha':{'x':'curr', 'y':'curr'}},
-    {'k':'aA',   'n':'XYZ',  'h':mch.resetWCO,      'ha':{'x':'curr', 'y':'curr', 'z':'curr'}},
+    {'S':1, 'n':'Reset to current position'},
+    {'k':'xX',   'n':'X',    'h':mch.resetWCO, 'ha':{'x':'curr'}},
+    {'k':'yY',   'n':'Y',    'h':mch.resetWCO, 'ha':{'y':'curr'}},
+    {'k':'zZ',   'n':'Z',    'h':mch.resetWCO, 'ha':{'z':'curr'}},
+    {'k':'wW',   'n':'XY',   'h':mch.resetWCO, 'ha':{'x':'curr', 'y':'curr'}},
+    {'k':'aA',   'n':'XYZ',  'h':mch.resetWCO, 'ha':{'x':'curr', 'y':'curr', 'z':'curr'}},
 
-    {'SECTION':1, 'n':'Reset to machine limits'},
+    {'S':1, 'n':'Reset to machine limits'},
     {'k':'-',    'n':'XY to machine home',                  'h':mch.resetWCO, 'ha':{'x':'home', 'y':'home'}},
     {'k':'+',    'n':'XY to max machine travel',            'h':mch.resetWCO, 'ha':{'x':'away', 'y':'away'}},
     {'k':'/',    'n':'XYZ to machine home',                 'h':mch.resetWCO, 'ha':{'x':'home', 'y':'home', 'z':'home'}},
     {'k':'*',    'n':'XY to max machine travel, Z to home', 'h':mch.resetWCO, 'ha':{'x':'away', 'y':'away', 'z':'home'}},
 
-    {'SECTION':1, 'n':'Misc.'},
+    {'S':1, 'n':'Misc.'},
     {'k':'pP',   'n':'Reset Z to current PRB:Z',          'h':resetZToCurrProbeZ},
     {'k':'mM',   'n':'Manual [XYZ] reset',                'h':manualXYZReset},
     {'k':'gG',   'n':'Get GCode command for current WCO', 'h':getWCOResetCommand},
@@ -646,14 +650,14 @@ def setupMenu():
   ])
 
   mnu.setOptions([
-    {'SECTION':1, 'n':'General commands'},
+    {'S':1, 'n':'General commands'},
     {'k':'qQ',           'n':'Quit',                         'h':mnu.quit},
     {'k':'CTRL_R',       'n':'Reset serial connection',      'h':resetSerialConnection},
     {'k':'CTRL_X',       'n':'grbl soft reset',              'h':mch.softReset},
     {'k':'=',            'n':'Lock grblCommander',           'h':lockGrblCommander},
     {'k':'cC',           'n':'Clear screen',                 'h':ui.clearScreen},
 
-    {'SECTION':1, 'n':'Info'},
+    {'S':1, 'n':'I'},
     {'k':'hH',           'n':'Show help',                    'h':mnu.showOptions},
     {'k':['ENTER', '?'], 'n':'Force status re-query',        'h':mch.viewMachineStatus},
     {'k':'s',            'n':'Show current status (short)',  'h':showMachineStatus},
@@ -663,7 +667,7 @@ def setupMenu():
     {'k':'v',            'n':'Set verbose level -',          'h':changeVerboseLevel, 'ha':{'inc':-1}},
     {'k':'V',            'n':'Set verbose level +',          'h':changeVerboseLevel, 'ha':{'inc':+1}},
 
-    {'SECTION':1, 'n':'Machine control'},
+    {'S':1, 'n':'Machine control'},
     {'k':'0',            'n':'Go home (*)',                             'h':goHomeSubmenu},
     {'k':'.',            'n':'Absolute move to table position (*)',     'h':absoluteTablePositionSubmenu},
     {'k':'gGfFxXyYzZ$',  'n':'Send raw GCode command',                  'h':sendRawGCodeCommand, 'xha':{'inChar':'char'}},
@@ -674,27 +678,27 @@ def setupMenu():
     {'k':'pP',           'n':'Probe (*)',                               'h':probeSubmenu},
     {'k':'tT',           'n':'Tests (*)',                               'h':testsSubmenu},
 
-    {'SECTION':1, 'n':'Macro'},
+    {'S':1, 'n':'Macro'},
     {'k':'mM',           'n':'Macro (*)',                               'h':macroSubmenu},
-    {'INFO':1, 'k':'<F1..F12>', 'n':'Run preconfigured macro'},
-    {'HIDDEN':1, 'k':'F1', 'n':'Preconfigured macro ({:})', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}, 'np': [mcrCfg['hotKeys']['F1'] if mcrCfg['hotKeys']['F1'] else 'NONE']},
-    {'HIDDEN':1, 'k':'F2', 'n':'Preconfigured macro ({:})', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}, 'np': [mcrCfg['hotKeys']['F2'] if mcrCfg['hotKeys']['F2'] else 'NONE']},
-    {'HIDDEN':1, 'k':'F3', 'n':'Preconfigured macro ({:})', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}, 'np': [mcrCfg['hotKeys']['F3'] if mcrCfg['hotKeys']['F3'] else 'NONE']},
-    {'HIDDEN':1, 'k':'F4', 'n':'Preconfigured macro ({:})', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}, 'np': [mcrCfg['hotKeys']['F4'] if mcrCfg['hotKeys']['F4'] else 'NONE']},
-    {'HIDDEN':1, 'k':'F5', 'n':'Preconfigured macro ({:})', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}, 'np': [mcrCfg['hotKeys']['F5'] if mcrCfg['hotKeys']['F5'] else 'NONE']},
-    {'HIDDEN':1, 'k':'F6', 'n':'Preconfigured macro ({:})', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}, 'np': [mcrCfg['hotKeys']['F6'] if mcrCfg['hotKeys']['F6'] else 'NONE']},
-    {'HIDDEN':1, 'k':'F7', 'n':'Preconfigured macro ({:})', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}, 'np': [mcrCfg['hotKeys']['F7'] if mcrCfg['hotKeys']['F7'] else 'NONE']},
-    {'HIDDEN':1, 'k':'F8', 'n':'Preconfigured macro ({:})', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}, 'np': [mcrCfg['hotKeys']['F8'] if mcrCfg['hotKeys']['F8'] else 'NONE']},
-    {'HIDDEN':1, 'k':'F9', 'n':'Preconfigured macro ({:})', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}, 'np': [mcrCfg['hotKeys']['F9'] if mcrCfg['hotKeys']['F9'] else 'NONE']},
-    {'HIDDEN':1, 'k':'F10', 'n':'Preconfigured macro ({:})', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}, 'np': [mcrCfg['hotKeys']['F10'] if mcrCfg['hotKeys']['F10'] else 'NONE']},
-    {'HIDDEN':1, 'k':'F11', 'n':'Preconfigured macro ({:})', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}, 'np': [mcrCfg['hotKeys']['F11'] if mcrCfg['hotKeys']['F11'] else 'NONE']},
-    {'HIDDEN':1, 'k':'F12', 'n':'Preconfigured macro ({:})', 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}, 'np': [mcrCfg['hotKeys']['F12'] if mcrCfg['hotKeys']['F12'] else 'NONE']},
+    {'I':1, 'k':'<F1..F12>', 'n':'Run preconfigured macro'},
+    {'H':1, 'k':'F1' , 'n':'Macro ({:})', 'np': [lambda: getHk('F1' )], 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'H':1, 'k':'F2' , 'n':'Macro ({:})', 'np': [lambda: getHk('F2' )], 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'H':1, 'k':'F3' , 'n':'Macro ({:})', 'np': [lambda: getHk('F3' )], 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'H':1, 'k':'F4' , 'n':'Macro ({:})', 'np': [lambda: getHk('F4' )], 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'H':1, 'k':'F5' , 'n':'Macro ({:})', 'np': [lambda: getHk('F5' )], 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'H':1, 'k':'F6' , 'n':'Macro ({:})', 'np': [lambda: getHk('F6' )], 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'H':1, 'k':'F7' , 'n':'Macro ({:})', 'np': [lambda: getHk('F7' )], 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'H':1, 'k':'F8' , 'n':'Macro ({:})', 'np': [lambda: getHk('F8' )], 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'H':1, 'k':'F9' , 'n':'Macro ({:})', 'np': [lambda: getHk('F9' )], 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'H':1, 'k':'F10', 'n':'Macro ({:})', 'np': [lambda: getHk('F10')], 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'H':1, 'k':'F11', 'n':'Macro ({:})', 'np': [lambda: getHk('F11')], 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
+    {'H':1, 'k':'F12', 'n':'Macro ({:})', 'np': [lambda: getHk('F12')], 'h':mcr.runHotKeyMacro, 'xha':{'inName':'hotKey'}},
 
-    {'SECTION':1, 'n':'Jog'},
-    {'INFO':1, 'k':'<numpad>',             'n':'XY jog ({:}{:}) (including diagonals)', 'np': [lambda: gXYJog, unitsDesc]},
-    {'INFO':1, 'k':'<cursor>',             'n':'XY jog ({:}{:})', 'np': [lambda: gXYJog, unitsDesc]},
-    {'INFO':1, 'k':'<SHIFT><cursor>',      'n':'XY jog ({:}{:} - half distance)', 'np': [lambda: gXYJog/2, unitsDesc]},
-    {'INFO':1, 'k':'<CTRL>+<cursor>',      'n':'XY jog ({:}{:} - double distance)', 'np': [lambda: gXYJog*2, unitsDesc]},
+    {'S':1, 'n':'Jog'},
+    {'I':1, 'k':'<numpad>',             'n':'XY jog ({:}{:}) (including diagonals)', 'np': [lambda: gXYJog, unitsDesc]},
+    {'I':1, 'k':'<cursor>',             'n':'XY jog ({:}{:})',                       'np': [lambda: gXYJog, unitsDesc]},
+    {'I':1, 'k':'<SHIFT><cursor>',      'n':'XY jog ({:}{:} - half distance)',       'np': [lambda: gXYJog/2, unitsDesc]},
+    {'I':1, 'k':'<CTRL>+<cursor>',      'n':'XY jog ({:}{:} - double distance)',     'np': [lambda: gXYJog*2, unitsDesc]},
 
     {'k':'-',  'n':'z jog [U] ({:}{:})', 'np': [lambda: gZJog, unitsDesc], 'h':jogZ,  'ha':{'d':'U'}},
     {'k':'+',  'n':'z jog [D] ({:}{:})', 'np': [lambda: gZJog, unitsDesc], 'h':jogZ,  'ha':{'d':'D'}},
@@ -702,42 +706,42 @@ def setupMenu():
     {'k':'/',  'n':'Set XY jog distance',  'h':setXYJogDistance},
     {'k':'*',  'n':'Set Z jog distance',   'h':setZJogDistance},
 
-    {'HIDDEN':1, 'k':'1',   'n':'Jog - [DL] ({:}{:})', 'np': [lambda: gXYJog, unitsDesc],   'h':jogXY, 'ha':{'d':'DL'}},
-    {'HIDDEN':1, 'k':'2',   'n':'Jog - [D] ({:}{:})', 'np': [lambda: gXYJog, unitsDesc],    'h':jogXY, 'ha':{'d':'D'}},
-    {'HIDDEN':1, 'k':'3',   'n':'Jog - [DR] ({:}{:})', 'np': [lambda: gXYJog, unitsDesc],   'h':jogXY, 'ha':{'d':'DR'}},
-    {'HIDDEN':1, 'k':'4',   'n':'Jog - [L] ({:}{:})', 'np': [lambda: gXYJog, unitsDesc],    'h':jogXY, 'ha':{'d':'L'}},
-    {'HIDDEN':1, 'k':'6',   'n':'Jog - [R] ({:}{:})', 'np': [lambda: gXYJog, unitsDesc],    'h':jogXY, 'ha':{'d':'R'}},
-    {'HIDDEN':1, 'k':'7',   'n':'Jog - [UL] ({:}{:})', 'np': [lambda: gXYJog, unitsDesc],   'h':jogXY, 'ha':{'d':'UL'}},
-    {'HIDDEN':1, 'k':'8',   'n':'Jog - [U] ({:}{:})', 'np': [lambda: gXYJog, unitsDesc],    'h':jogXY, 'ha':{'d':'U'}},
-    {'HIDDEN':1, 'k':'9',   'n':'Jog - [UR] ({:}{:})', 'np': [lambda: gXYJog, unitsDesc],   'h':jogXY, 'ha':{'d':'UR'}},
+    {'H':1, 'k':'1',   'n':'Jog - [DL] ({:}{:})', 'np': [lambda: gXYJog, unitsDesc], 'h':jogXY, 'ha':{'d':'DL'}},
+    {'H':1, 'k':'2',   'n':'Jog - [D]  ({:}{:})', 'np': [lambda: gXYJog, unitsDesc], 'h':jogXY, 'ha':{'d':'D'}},
+    {'H':1, 'k':'3',   'n':'Jog - [DR] ({:}{:})', 'np': [lambda: gXYJog, unitsDesc], 'h':jogXY, 'ha':{'d':'DR'}},
+    {'H':1, 'k':'4',   'n':'Jog - [L]  ({:}{:})', 'np': [lambda: gXYJog, unitsDesc], 'h':jogXY, 'ha':{'d':'L'}},
+    {'H':1, 'k':'6',   'n':'Jog - [R]  ({:}{:})', 'np': [lambda: gXYJog, unitsDesc], 'h':jogXY, 'ha':{'d':'R'}},
+    {'H':1, 'k':'7',   'n':'Jog - [UL] ({:}{:})', 'np': [lambda: gXYJog, unitsDesc], 'h':jogXY, 'ha':{'d':'UL'}},
+    {'H':1, 'k':'8',   'n':'Jog - [U]  ({:}{:})', 'np': [lambda: gXYJog, unitsDesc], 'h':jogXY, 'ha':{'d':'U'}},
+    {'H':1, 'k':'9',   'n':'Jog - [UR] ({:}{:})', 'np': [lambda: gXYJog, unitsDesc], 'h':jogXY, 'ha':{'d':'UR'}},
 
-    {'HIDDEN':1, 'k':'CUR_U',   'n':'Jog - [U] ({:}{:})', 'np': [lambda: gXYJog, unitsDesc],   'h':jogXY, 'ha':{'d':'U'}},
-    {'HIDDEN':1, 'k':'CUR_D',   'n':'Jog - [D] ({:}{:})', 'np': [lambda: gXYJog, unitsDesc],   'h':jogXY, 'ha':{'d':'D'}},
-    {'HIDDEN':1, 'k':'CUR_L',   'n':'Jog - [L] ({:}{:})', 'np': [lambda: gXYJog, unitsDesc],   'h':jogXY, 'ha':{'d':'L'}},
-    {'HIDDEN':1, 'k':'CUR_R',   'n':'Jog - [R] ({:}{:})', 'np': [lambda: gXYJog, unitsDesc],   'h':jogXY, 'ha':{'d':'R'}},
+    {'H':1, 'k':'CUR_U',   'n':'Jog - [U] ({:}{:})', 'np': [lambda: gXYJog, unitsDesc],   'h':jogXY, 'ha':{'d':'U'}},
+    {'H':1, 'k':'CUR_D',   'n':'Jog - [D] ({:}{:})', 'np': [lambda: gXYJog, unitsDesc],   'h':jogXY, 'ha':{'d':'D'}},
+    {'H':1, 'k':'CUR_L',   'n':'Jog - [L] ({:}{:})', 'np': [lambda: gXYJog, unitsDesc],   'h':jogXY, 'ha':{'d':'L'}},
+    {'H':1, 'k':'CUR_R',   'n':'Jog - [R] ({:}{:})', 'np': [lambda: gXYJog, unitsDesc],   'h':jogXY, 'ha':{'d':'R'}},
 
-    {'HIDDEN':1, 'k':'SHIFT_CUR_U',   'n':'Jog - [U]/2 ({:}{:})', 'np': [lambda: gXYJog/2, unitsDesc],  'h':jogXY, 'ha':{'d':'U', 'tx': lambda x: x/2 }},
-    {'HIDDEN':1, 'k':'SHIFT_CUR_D',   'n':'Jog - [D]/2 ({:}{:})', 'np': [lambda: gXYJog/2, unitsDesc],  'h':jogXY, 'ha':{'d':'D', 'tx': lambda x: x/2 }},
-    {'HIDDEN':1, 'k':'SHIFT_CUR_L',   'n':'Jog - [L]/2 ({:}{:})', 'np': [lambda: gXYJog/2, unitsDesc],  'h':jogXY, 'ha':{'d':'L', 'tx': lambda x: x/2 }},
-    {'HIDDEN':1, 'k':'SHIFT_CUR_R',   'n':'Jog - [R]/2 ({:}{:})', 'np': [lambda: gXYJog/2, unitsDesc],  'h':jogXY, 'ha':{'d':'R', 'tx': lambda x: x/2 }},
+    {'H':1, 'k':'SHIFT_CUR_U',   'n':'Jog - [U]/2 ({:}{:})', 'np': [lambda: gXYJog/2, unitsDesc],  'h':jogXY, 'ha':{'d':'U', 'tx': lambda x: x/2 }},
+    {'H':1, 'k':'SHIFT_CUR_D',   'n':'Jog - [D]/2 ({:}{:})', 'np': [lambda: gXYJog/2, unitsDesc],  'h':jogXY, 'ha':{'d':'D', 'tx': lambda x: x/2 }},
+    {'H':1, 'k':'SHIFT_CUR_L',   'n':'Jog - [L]/2 ({:}{:})', 'np': [lambda: gXYJog/2, unitsDesc],  'h':jogXY, 'ha':{'d':'L', 'tx': lambda x: x/2 }},
+    {'H':1, 'k':'SHIFT_CUR_R',   'n':'Jog - [R]/2 ({:}{:})', 'np': [lambda: gXYJog/2, unitsDesc],  'h':jogXY, 'ha':{'d':'R', 'tx': lambda x: x/2 }},
 
-    {'HIDDEN':1, 'k':'CTRL_CUR_U',   'n':'Jog - [U]*2 ({:}{:})', 'np': [lambda: gXYJog*2, unitsDesc], 'h':jogXY, 'ha':{'d':'U', 'tx': lambda x: x*2 }},
-    {'HIDDEN':1, 'k':'CTRL_CUR_D',   'n':'Jog - [D]*2 ({:}{:})', 'np': [lambda: gXYJog*2, unitsDesc], 'h':jogXY, 'ha':{'d':'D', 'tx': lambda x: x*2 }},
-    {'HIDDEN':1, 'k':'CTRL_CUR_L',   'n':'Jog - [L]*2 ({:}{:})', 'np': [lambda: gXYJog*2, unitsDesc], 'h':jogXY, 'ha':{'d':'L', 'tx': lambda x: x*2 }},
-    {'HIDDEN':1, 'k':'CTRL_CUR_R',   'n':'Jog - [R]*2 ({:}{:})', 'np': [lambda: gXYJog*2, unitsDesc], 'h':jogXY, 'ha':{'d':'R', 'tx': lambda x: x*2 }},
+    {'H':1, 'k':'CTRL_CUR_U',   'n':'Jog - [U]*2 ({:}{:})', 'np': [lambda: gXYJog*2, unitsDesc], 'h':jogXY, 'ha':{'d':'U', 'tx': lambda x: x*2 }},
+    {'H':1, 'k':'CTRL_CUR_D',   'n':'Jog - [D]*2 ({:}{:})', 'np': [lambda: gXYJog*2, unitsDesc], 'h':jogXY, 'ha':{'d':'D', 'tx': lambda x: x*2 }},
+    {'H':1, 'k':'CTRL_CUR_L',   'n':'Jog - [L]*2 ({:}{:})', 'np': [lambda: gXYJog*2, unitsDesc], 'h':jogXY, 'ha':{'d':'L', 'tx': lambda x: x*2 }},
+    {'H':1, 'k':'CTRL_CUR_R',   'n':'Jog - [R]*2 ({:}{:})', 'np': [lambda: gXYJog*2, unitsDesc], 'h':jogXY, 'ha':{'d':'R', 'tx': lambda x: x*2 }},
 
-    {'SECTION':1, 'n':'Joystick'},
+    {'S':1, 'n':'Joystick'},
     {'k':'j',   'n':'Enable/disable joystick',     'h':toggleJoystickEnable},
     {'k':'J',   'n':'Restart joystick connection', 'h':restartJoystickConnection},
 
-    {'INFO':1, 'k':'<xy>',             'n':'XY jog (including diagonals)'},
-    {'INFO':1, 'k':'<z>-/+',           'n':'Z jog (up/down)'},
-    {'INFO':1, 'k':'<extraU><z+>',     'n':'Go to machine home Z'},
-    {'INFO':1, 'k':'<extraD><z+>',     'n':'Go to machine home'},
-    {'INFO':1, 'k':'<extraU><x>',      'n':'Change jog distance (XY) (+-1)'},
-    {'INFO':1, 'k':'<extraU><y>',      'n':'Change jog distance (XY) (+-10)'},
-    {'INFO':1, 'k':'<extraD><x>',      'n':'Change jog distance (Z) (+-1)'},
-    {'INFO':1, 'k':'<extraD><y>',      'n':'Change jog distance (Z) (+-10)'},
+    {'I':1, 'k':'<xy>',             'n':'XY jog (including diagonals)'},
+    {'I':1, 'k':'<z>-/+',           'n':'Z jog (up/down)'},
+    {'I':1, 'k':'<extraU><z+>',     'n':'Go to machine home Z'},
+    {'I':1, 'k':'<extraD><z+>',     'n':'Go to machine home'},
+    {'I':1, 'k':'<extraU><x>',      'n':'Change jog distance (XY) (+-1)'},
+    {'I':1, 'k':'<extraU><y>',      'n':'Change jog distance (XY) (+-10)'},
+    {'I':1, 'k':'<extraD><x>',      'n':'Change jog distance (Z) (+-1)'},
+    {'I':1, 'k':'<extraD><y>',      'n':'Change jog distance (Z) (+-10)'},
 
   ])
 

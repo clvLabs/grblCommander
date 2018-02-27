@@ -16,7 +16,7 @@ import types
 class Option:
 
   def __init__(self, n=None, k=None, c=None, h=None, ha=None, xha=None, np=None, \
-              SECTION=None, INFO=None, HIDDEN=None):
+              S=None, I=None, H=None):
     self.n = n        # name
     self.k = k        # key
     self.c = c        # char
@@ -26,9 +26,9 @@ class Option:
     self.np = np      # EXTRA handler args (**kwargs)
 
     # Special keywords
-    self.SECTION = SECTION
-    self.INFO = INFO
-    self.HIDDEN = HIDDEN
+    self.S = S        # Section
+    self.I = I        # Info
+    self.H = H        # Hidden
 
     self.kd = self.keyDisplay(k)   # key (display version)
 
@@ -124,13 +124,13 @@ class Menu(object):
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   def isSection(self, opt):
-    return opt.SECTION
+    return opt.S
 
   def isInfo(self, opt):
-    return opt.INFO
+    return opt.I
 
   def isHidden(self, opt):
-    return opt.HIDDEN
+    return opt.H
 
   def isNormal(self, opt):
     return True \
