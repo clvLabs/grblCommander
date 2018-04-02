@@ -165,9 +165,11 @@ class Menu(object):
 
               # Regular handler arguments
               if opt.ha:
-                opt.h(**opt.ha)   # Run handler with arguments
+                if opt.h:
+                  opt.h(**opt.ha)   # Run handler with arguments
               else:
-                opt.h()              # Run handler without arguments
+                if opt.h:
+                  opt.h()              # Run handler without arguments
 
             processed = True
             break
