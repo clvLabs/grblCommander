@@ -657,7 +657,7 @@ def setupMenu():
     {'k':'=',            'n':'Lock grblCommander',           'h':lockGrblCommander},
     {'k':'cC',           'n':'Clear screen',                 'h':ui.clearScreen},
 
-    {'S':1, 'n':'I'},
+    {'S':1, 'n':'Info'},
     {'k':'hH',           'n':'Show help',                    'h':mnu.showOptions},
     {'k':['ENTER', '?'], 'n':'Force status re-query',        'h':mch.viewMachineStatus},
     {'k':'s',            'n':'Show current status (short)',  'h':showMachineStatus},
